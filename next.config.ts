@@ -5,11 +5,12 @@ const csp = [
   // Inline config/theme bootstrap + fallback map-data CDNs used only if /geo/*.json is missing.
   // TradingView widgets and Google Programmable Search load their own scripts/frames.
   "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://s3.tradingview.com https://cse.google.com https://*.google.com https://*.googleapis.com https://*.gstatic.com",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.google.com https://*.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://www.google.com https://*.gstatic.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
   "frame-src https://*.tradingview.com https://www.tradingview-widget.com https://cse.google.com https://*.google.com",
-  "connect-src 'self' https://*.google.com https://*.googleapis.com",
+  "connect-src 'self' https://*.google.com https://*.googleapis.com https://en.wikipedia.org https://tiles.maps.eox.at https://cdn.jsdelivr.net",
+  "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

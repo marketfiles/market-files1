@@ -2,7 +2,7 @@
   "name": "market-files",
   "version": "1.0.0",
   "private": true,
-  "description": "Market Files — Markets • Money • History",
+  "description": "Market Files \u2014 Markets \u2022 Money \u2022 History",
   "scripts": {
     "predev": "node scripts/build-geo.mjs",
     "dev": "next dev",
@@ -11,9 +11,10 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test:smoke": "playwright test",
     "db:migrate": "node scripts/migrate.mjs",
-    "db:seed": "node scripts/seed.mjs"
+    "db:seed": "node scripts/seed.mjs",
+    "test:smoke": "playwright test",
+    "test": "npm run test:smoke"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.133.0",
@@ -23,14 +24,16 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "topojson-client": "^3.1.0",
     "typescript": "^5.6.0",
     "us-atlas": "^3.0.1",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "@playwright/test": "1.56.0"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  }
 }

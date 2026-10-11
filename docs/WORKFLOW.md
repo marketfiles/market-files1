@@ -1,19 +1,30 @@
-# Market Files Stage 0 workflow
+# Market Files — development workflow
 
-This branch establishes the safety/verification workflow only. It must not change the production site design or behavior.
+Every change follows the same path. Nothing is ever pushed directly to `main`.
+
+1. **Branch** — work happens on a development branch (for example `stage-0/safety-ci`).
+2. **Checks** — GitHub Actions runs three checks on the pull request:
+   - **Typecheck** — `npm ci` + `npm run typecheck`
+   - **Build** — `npm ci` + `npm run build`
+   - **Smoke tests** — production build + structural browser tests (`tests/smoke`)
+3. **Preview** — Vercel builds a private Preview Deployment for the branch (Vercel Authentication).
+4. **Review** — the owner opens the pull request, confirms the three checks are green, opens the
+   Vercel preview link and inspects the site.
+5. **Merge** — only the owner merges into `main`. Vercel then deploys production (MarketFiles.com).
 
 ## Rules
-- Never push Phase 1 work directly to `main`.
-- Work in a branch and open a pull request.
-- GitHub Actions must pass before merge.
-- Review the Vercel Preview before merge.
-- Do not merge if the globe, country view, live prices, TradingView, dashboard, tools, navigation, or responsive layout regress.
+- Never push to, force-push or delete `main`.
+- One major stage per branch / pull request.
+- No unrelated design changes. Preserve Market Files branding and the protected systems
+  (price pipeline, globe and country view, TradingView mounting, security headers, /files,
+  /day, sitemap, robots, newsletter API logic, admin authentication).
 
-## Stage 0
-1. Create a deterministic `package-lock.json`.
-2. Add read-only CI for typecheck, build, and smoke tests.
-3. Verify a Vercel Preview deployment.
-4. Protect `main` after the required check names exist.
-5. Stop before Stage 1.
+## Repository layout
+The repository root must contain `app/`, `components/`, `lib/` (with `lib/market/`),
+`content/`, `scripts/`, `tools/`, `public/`, `db/`, `tests/` and `.github/` as folders.
+Never upload files individually through GitHub's file picker: it drops the folders, and files
+with the same name (`page.tsx`, `route.ts`) overwrite each other.
 
-The temporary lockfile bootstrap workflow is removed before Stage 0 is considered complete.
+## Preview environment
+Preview builds have no database, newsletter or admin credentials, so they are read-only:
+they cannot write Time Machine records or create newsletter subscribers.

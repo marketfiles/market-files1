@@ -24,7 +24,7 @@ Everything below is free. You get a live site at `https://<project-name>.vercel.
 1. Unzip, create a GitHub repository, and upload the contents of the `mf` folder.
 2. Sign in to Vercel with GitHub → Add New → Project → pick the repository → Deploy. You now have a live URL.
 3. (Free, 5 minutes) Get keys and add them in Vercel → Settings → Environment Variables, then Redeploy:
-   - `FINNHUB_API_KEY` and `FRED_API_KEY` (free sign-ups) with `MARKET_DATA=live`
+   - Optional: `FINNHUB_API_KEY` and `FRED_API_KEY` (free sign-ups). The site shows real prices without them.
    - `GOOGLE_CSE_ID`: at programmablesearchengine.google.com create a search engine, turn on "Search the entire web", copy the Search engine ID
    - `SITE_URL` = your Vercel address
 4. Optional later: Supabase (`DATABASE_URL`, then `npm run db:migrate` and `npm run db:seed`), Beehiiv, your own domain (~$10–20/yr),
@@ -58,7 +58,7 @@ Everything below is free. You get a live site at `https://<project-name>.vercel.
 | **Futures** (CME, CBOT, NYMEX, COMEX, ICE, Cboe) | **TradingView widgets** (free) | Tabs by sector with prices, % change and line charts; click any contract for its own chart; "Open in TradingView" links everywhere. Optional: your own licensed feed via `FUTURES_FEED_URL`. |
 
 Anything without a live source shows **—**. The site never mixes demo numbers into live data.
-Set `MARKET_DATA=simulated` to run the demo board locally without keys.
+The site never shows simulated prices. If a source is down, that instrument shows “—”. Open `/api/quotes` on your site to see which sources are answering (the `status` block).
 
 ### Futures data
 Exchange futures prices (CME Group, ICE, Cboe) require a data license to display publicly, including delayed data.
@@ -81,7 +81,7 @@ pick it up automatically. TradingView links on every contract work immediately.
    npm run db:seed      # loads the Market Time Machine inventory
    ```
 3. **Deploy** — push this folder to GitHub, import it in Vercel, and add every variable from `.env.example`
-   (Project → Settings → Environment Variables). Set `SITE_URL` to your domain and `MARKET_DATA=live`.
+   (Project → Settings → Environment Variables). Set `SITE_URL` to your domain.
 4. **Domain** — add it in Vercel → Domains and follow the DNS instructions.
 5. **Editor** — set `ADMIN_PASSWORD` and a long random `ADMIN_SECRET`, visit `/admin`, sign in, and the ✦ Editor button appears.
 6. **Search engines** — submit `https://YOUR-DOMAIN/sitemap.xml` in Google Search Console.
@@ -118,3 +118,31 @@ database and newsletter). Commit and push; Vercel redeploys.
 - The Claude model names live in environment variables, so upgrading models needs no code change.
 - This build was prepared without network access, so it has not been through `npm install`/`next build` yet.
   Run `npm run build` once locally or on Vercel; if TypeScript flags anything, it will be small and local.
+
+
+## Live data sources (no keys needed)
+| Data | Source |
+|---|---|
+| Indices, sector funds, futures, commodities, dollar index, stocks | Yahoo Finance chart data (unofficial; fine for launch — move to a licensed feed before heavy commercial use) |
+| U.S. Treasury yields | U.S. Treasury daily par yield curve |
+| Currencies | Yahoo, with ECB reference rates (Frankfurter) as backup |
+| Crypto | CoinGecko |
+| Headlines | Google News RSS (`/api/news`) |
+| Futures charts / heatmaps | TradingView widgets |
+| Non-U.S. 10-year yields | FRED (needs the free `FRED_API_KEY`; otherwise “—”) |
+| Gaps | Finnhub ETF proxies, if `FINNHUB_API_KEY` is set |
+
+**Crypto from CoinMarketCap:** add the free `COINMARKETCAP_API_KEY` (coinmarketcap.com/api, Basic plan) in Vercel and crypto prices come from CoinMarketCap (refreshed every 5 minutes to stay inside the free quota). Without it, CoinGecko is used.
+
+## New in this release (fronts, dossier, biggest stories, welcome)
+- **Section fronts** (Markets, Global, Crypto, Companies, History) use `/api/news?section=…`: real headlines from publisher RSS feeds (CNBC, MarketWatch, Yahoo Finance, BBC, The Guardian, CoinDesk, Cointelegraph, Decrypt) plus Google News, with the publisher's own photo. Every story links to the publisher. Cached 10 minutes.
+- **History photos**: each Market Files file shows the lead image of its exact Wikipedia article (free licences only), credited on the file page.
+- **Place dossier**: clicking a country, capital, state or financial center opens a full-screen profile: Wikipedia photos and overview, World Bank key numbers (`/api/country?iso=XX`, free, no key, cached 24h), live markets, exchange clock, files and timeline.
+- **The biggest stories** band on the landing page (`/api/top`): the most widely covered financial story of the day, the week and the month, measured by how many different outlets in Google News covered it. Each slot shows a different story. Cached 30 minutes.
+- **Welcome / goodbye**: a short first-visit welcome note, a "welcome back" note with real price changes since the last visit, and a once-per-visit goodbye card on desktop.
+No new keys or settings are needed.
+
+## Heat map, Tools and Dashboard
+- **Sector heat map slideshow** (home page, below the globe): all 11 S&P 500 sectors, about 104 major companies, colored by today's change, with top gainers and losers. Prices come from `/api/quotes?set=companies` (Yahoo Finance, delayed; no key).
+- **Tools** (`#/tools`): compound interest, retirement gap, mortgage, debt payoff and inflation calculators. The inflation history uses FRED CPI (set the free `FRED_API_KEY` to turn it on).
+- **Live Dashboard** (`#/dashboard`): indices, commodities, crypto, rates, currencies, sector bars, today's highlights written from live numbers, the TradingView economic calendar and total crypto market cap chart.
