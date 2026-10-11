@@ -20,7 +20,8 @@ async function cached(key: string, ttlMs: number, fn: () => Promise<Quote[]>): P
     return { data: hit?.data ?? [], status: { ok: false, count: hit?.data.length ?? 0, note } };
   }
 }
-const UA = 'Mozilla/5.0 (compatible; MarketFiles/1.0; +https://x.com/TheMarketFiles)';
+// A mainstream browser UA: Yahoo Finance turns away unknown bot agents calling from cloud servers.
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const getText = async (url: string, headers: Record<string, string> = {}) => {
   const r = await fetch(url, { headers: { 'user-agent': UA, ...headers }, cache: 'no-store', signal: AbortSignal.timeout(9000) });
   if (!r.ok) throw new Error(`${r.status} ${url.split('?')[0]}`);

@@ -17,7 +17,55 @@ function mountTVFutures(){$$('#tv-fut,#tv-fut-page').forEach(el=>{if(el.childEle
 function mountHeatmaps(){const a=$('#tv-hm-stk');if(a&&!a.childElementCount&&tvVisible(a))mountTV('stock-heatmap',a,{exchanges:[],dataSource:'SPX500',grouping:'sector',blockSize:'market_cap_basic',blockColor:'change',hasTopBar:false,isDataSetEnabled:false,isZoomEnabled:true,hasSymbolTooltip:true,width:'100%',height:'100%'});
   const b=$('#tv-hm-cr');if(b&&!b.childElementCount&&tvVisible(b))mountTV('crypto-coins-heatmap',b,{dataSource:'Crypto',blockSize:'market_cap_calc',blockColor:'change',hasTopBar:false,isDataSetEnabled:false,isZoomEnabled:true,hasSymbolTooltip:true,isMonoSize:false,width:'100%',height:'100%'})}
 function mountTVMain(){const el=$('#tv-main');if(el&&!el.childElementCount&&tvVisible(el))mountTVSymbol(el,INSTR.find(x=>x.id===CHART))}
-function mountTVSymbol(el,q){mountTV('symbol-overview',el,{symbols:[[q.name,(TV[q.id]||'AMEX:'+q.id)+'|1D']],chartOnly:false,width:'100%',height:'100%',autosize:true,showVolume:false,chartType:'area',lineWidth:2,scaleMode:'Normal',fontSize:'10',valuesTracking:'1',changeMode:'price-and-percent',dateRanges:['1d|1','1m|30','3m|60','12m|1D','60m|1W','all|1M']})}
+/* ---------- Market Files charts ----------
+   TradingView blocks major index, Treasury and CME symbols inside embedded widgets ("only available on
+   TradingView"), so symbol charts are drawn here from /api/chart (real, delayed prices) and always follow the
+   site theme. Every chart keeps a link out to TradingView for anyone who wants the full platform. */
+const MFC_R=[['1D','1d'],['5D','5d'],['1M','1mo'],['6M','6mo'],['1Y','1y'],['5Y','5y']],MFC_C={};
+function mountTVSymbol(el,q){if(!el||!q)return;mfChart(el,q,(el.dataset.rng&&el.dataset.qid===q.id)?el.dataset.rng:'1d')}
+async function mfChart(el,q,rng){el.dataset.rng=rng;el.dataset.qid=q.id;
+  el.innerHTML=`<div class="mfc"><div class="mfc-top"><div class="mfc-r" role="group" aria-label="Chart range">${MFC_R.map(([l,r])=>`<button type="button" data-r="${r}" aria-pressed="${r===rng}">${l}</button>`).join('')}</div><a class="mfc-tv mono" href="${tvUrl(q.id)}" target="_blank" rel="noopener">TradingView ↗</a></div><div class="mfc-plot"><div class="mfc-msg mono"><i class="mfc-sp"></i>Loading chart</div></div><div class="mfc-ft mono"><span class="mfc-chg"></span><span class="mfc-src"></span></div></div>`;
+  el.querySelectorAll('[data-r]').forEach(b=>b.onclick=e=>{e.preventDefault();mfChart(el,q,b.dataset.r)});
+  const k=q.id+'|'+rng;let j=MFC_C[k];
+  if(!j||Date.now()-j._at>(rng==='1d'||rng==='5d'?60e3:600e3)){try{const r=await fetch(`/api/chart?id=${encodeURIComponent(q.id)}&range=${rng}`);j=r.ok?await r.json():null}catch(e){j=null}if(j&&j.points&&j.points.length>1){j._at=Date.now();MFC_C[k]=j}}
+  if(!el.isConnected||el.dataset.rng!==rng||el.dataset.qid!==q.id)return;
+  const plot=el.querySelector('.mfc-plot');
+  if(!j||!j.points||j.points.length<2){plot.innerHTML=`<div class="mfc-msg mono">No chart data for ${esc(q.name)} right now. <a href="${tvUrl(q.id)}" target="_blank" rel="noopener">View on TradingView ↗</a></div>`;return}
+  el.querySelector('.mfc-src').textContent=j.source||'';
+  const draw=()=>mfcDraw(plot,el,j,q,rng);draw();
+  if('ResizeObserver' in window){if(el._ro)el._ro.disconnect();let w=plot.clientWidth;el._ro=new ResizeObserver(()=>{if(Math.abs(plot.clientWidth-w)>4){w=plot.clientWidth;draw()}});el._ro.observe(plot)}}
+function mfcFmt(v,q){const a=Math.abs(v),dp=q&&isFinite(q.dp)?q.dp:(a>=1000?0:a>=10?2:a>=1?3:5);return v.toLocaleString('en-US',{minimumFractionDigits:Math.min(dp,a>=1000?2:dp),maximumFractionDigits:a>=1000?2:dp})}
+function mfcTime(t,rng){const d=new Date(t*1000),o={timeZone:'America/New_York'};
+  if(rng==='1d')return d.toLocaleTimeString('en-US',{...o,hour:'numeric',minute:'2-digit'});
+  if(rng==='5d')return d.toLocaleDateString('en-US',{...o,weekday:'short'})+' '+d.toLocaleTimeString('en-US',{...o,hour:'numeric'});
+  if(rng==='5y')return d.toLocaleDateString('en-US',{...o,month:'short',year:'numeric'});
+  return d.toLocaleDateString('en-US',{...o,month:'short',day:'numeric'})}
+function mfcDraw(plot,el,j,q,rng){const P=j.points,W=Math.max(240,plot.clientWidth||600),H=Math.max(140,plot.clientHeight||260),R=58,B=22,T=10;
+  const vs=P.map(p=>p[1]),base=(rng==='1d'&&isFinite(j.prev))?j.prev:vs[0],last=vs[vs.length-1],up=last>=base;
+  let lo=Math.min(...vs,rng==='1d'&&isFinite(j.prev)?j.prev:Infinity),hi=Math.max(...vs,rng==='1d'&&isFinite(j.prev)?j.prev:-Infinity);if(hi===lo){hi+=1;lo-=1}const pad=(hi-lo)*.08;lo-=pad;hi+=pad;
+  const x=i=>(i/(P.length-1))*(W-R),y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const line=P.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join('');
+  const st=(hi-lo)/4,ticks=[0,1,2,3,4].map(i=>lo+st*i+st*0.0);
+  const xf=W<460?[0,.5,1]:[0,.25,.5,.75,1],xl=xf.map(f=>Math.round(f*(P.length-1)));
+  const col=up?'var(--up)':'var(--dn)',gid='mfg'+Math.random().toString(36).slice(2,8);
+  plot.innerHTML=`<svg class="mfc-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(q.name)} price chart, ${rng}" style="color:${col}">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".28"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
+    ${ticks.map(v=>`<line x1="0" x2="${W-R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="mfc-g"/><text x="${W-R+8}" y="${(y(v)+4).toFixed(1)}" class="mfc-t">${mfcFmt(v,q)}</text>`).join('')}
+    ${xl.map((i,n)=>`<text x="${x(i).toFixed(1)}" y="${H-6}" class="mfc-t" text-anchor="${n===0?'start':n===xl.length-1?'end':'middle'}">${mfcTime(P[i][0],rng)}</text>`).join('')}
+    ${rng==='1d'&&isFinite(j.prev)?`<line x1="0" x2="${W-R}" y1="${y(j.prev).toFixed(1)}" y2="${y(j.prev).toFixed(1)}" class="mfc-prev"/>`:''}
+    <path d="${line}L${x(P.length-1).toFixed(1)},${H-B}L0,${H-B}Z" fill="url(#${gid})"/>
+    <path d="${line}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${x(P.length-1).toFixed(1)}" cy="${y(last).toFixed(1)}" r="3.5" fill="currentColor"/>
+    <g class="mfc-hv" style="display:none"><line class="mfc-hl" y1="${T}" y2="${H-B}"/><circle r="4" fill="currentColor" stroke="var(--bg)" stroke-width="2"/></g>
+    <rect x="0" y="0" width="${W-R}" height="${H}" fill="transparent" class="mfc-hit"/></svg><div class="mfc-tip mono" hidden></div>`;
+  const pct=(last-base)/base*100,ch=el.querySelector('.mfc-chg');if(ch){ch.textContent=`${pct>=0?'▲ +':'▼ '}${pct.toFixed(2)}% · ${MFC_R.find(r=>r[1]===rng)[0]}${rng==='1d'?' vs prior close':''}`;ch.className='mfc-chg '+(pct>=0?'up':'dn')}
+  const svg=plot.querySelector('svg'),hv=svg.querySelector('.mfc-hv'),tip=plot.querySelector('.mfc-tip');
+  const move=e=>{const r=svg.getBoundingClientRect(),px=(e.clientX-r.left)*(W/r.width),i=Math.max(0,Math.min(P.length-1,Math.round(px/(W-R)*(P.length-1)))),cx=x(i),cy=y(P[i][1]);
+    hv.style.display='';hv.querySelector('line').setAttribute('x1',cx);hv.querySelector('line').setAttribute('x2',cx);const c=hv.querySelector('circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);
+    tip.hidden=false;tip.innerHTML=`<b>${mfcFmt(P[i][1],q)}</b><span>${mfcTime(P[i][0],rng==='1d'||rng==='5d'?rng:'1mo')}${rng==='5y'||rng==='1y'?' '+new Date(P[i][0]*1000).getFullYear():''}</span>`;
+    const tx=cx*(r.width/W);tip.style.left=Math.min(Math.max(tx,50),r.width-50)+'px'};
+  const out=()=>{hv.style.display='none';tip.hidden=true};
+  svg.addEventListener('pointermove',move);svg.addEventListener('pointerdown',move);svg.addEventListener('pointerleave',out)}
 
 /* ---------- Research: Claude when configured, otherwise free Google ---------- */
 let GCSE_P=null,GCSE_N=0;
@@ -42,9 +90,10 @@ function mountCryptoTV(){const el=$('#tv-cr');if(!el||!tvVisible(el))return;if(C
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-cc]');if(b){CC=b.dataset.cc;mountCryptoTV()}});
 
 /* ---------- home ticker tape (TradingView) ---------- */
-function mountTVTape(){const el=$('#tv-tape');if(!el||el.childElementCount||!tvVisible(el))return;
-  const ids=['SPX','COMP','INDU','XAU','CL','EURUSD','BTC','ETH','US10Y'];
-  mountTV('ticker-tape',el,{symbols:ids.filter(i=>TV[i]).map(i=>({proName:TV[i],title:(INSTR.find(x=>x.id===i)||{}).name||i})),showSymbolLogo:false,displayMode:'adaptive'})}
+/* ---------- home ticker tape ----------
+   Retired: TradingView blocks index and Treasury symbols in embeds (they rendered as white error boxes).
+   Live prices on the home page come from the Market Files tiles above it. */
+function mountTVTape(){}
 
 /* ---------- Satellite view (opt-in; MapLibre GL globe, Sentinel-2 cloudless imagery by EOX) ----------
    Loads only when a viewer taps "Satellite". Any failure leaves the standard globe in place. */

@@ -60,8 +60,8 @@ js = rep(js, "const xUrl=h=>`https://x.com/${h}`;", "const xUrl=h=>`https://x.co
 for fn in ('function aiPanel(){', 'async function askAI(q){', 'function wireAIPanel(q,auto){', 'async function gpAsk(focus,free){'):
     name = fn.split('(')[0].split()[-1]
     js = rep(js, fn, fn.replace(name + '(', name + 'Claude('))
-js = rep(js, '${stripTiles(DESK_INST.futures)}<div style="height:28px"></div>', '${window.MF_TV?tvFuturesBlock(true):stripTiles(DESK_INST.futures)}<div style="height:28px"></div>')
-js = rep(js, '<table class="crt fut-t">', '<table class="crt fut-t${window.MF_TV?\' tv\':\'\'}">')
+js = rep(js, '${stripTiles(DESK_INST.futures)}<div style="height:28px"></div>', '${window.MF_TV_FUT?tvFuturesBlock(true):stripTiles(DESK_INST.futures)}<div style="height:28px"></div>')
+js = rep(js, '<table class="crt fut-t">', '<table class="crt fut-t${window.MF_TV_FUT?\' tv\':\'\'}">')
 js = rep(js, '<div class="side-c">${lineChart(ser,q.prev)}', '<div class="side-c">${window.MF_TV?\'<div class="tvw tvw-sm" id="tv-sym"></div>\':lineChart(ser,q.prev)}')
 js = rep(js, "const d=$('#inst');if(!d.open)d.showModal()}", "const d=$('#inst');if(!d.open)d.showModal();if(window.MF_TV)mountTVSymbol($('#tv-sym'),q)}")
 for a_,b_ in [('Research “${esc(q)}” with Market Files AI','Research “${esc(q)}”'),('Research with Market Files AI','Research further'),('✦ MARKET FILES AI · ECONOMIC & FINANCIAL HISTORY','✦ RESEARCH · ECONOMIC & FINANCIAL HISTORY'),('✦ Ask Market Files AI','✦ Research'),('Ask Market Files AI','Research on Google'),('with Market Files AI','on Google'),('Market Files AI research','research'),('Market Files AI','Market Files research')]: js = js.replace(a_, b_)
