@@ -2597,6 +2597,7 @@ $('#ck-i').onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();CKI=Math.min
 $('#ck-l').onclick=e=>{const b=e.target.closest('.ck-i');if(!b)return;if(b.tagName==='A'){$('#cmdk').close();return}runCk(+b.dataset.i)};
 $('#cmdk').addEventListener('click',e=>{if(e.target.id==='cmdk')$('#cmdk').close()});Feed.start();
 let CC_MOUNTED='';
+const MFC_R=[['1D','1d'],['5D','5d'],['1M','1mo'],['6M','6mo'],['1Y','1y'],['5Y','5y']],MFC_C={};
 route();
 
 /* =========================================================================
@@ -2622,7 +2623,6 @@ function mountTVMain(){const el=$('#tv-main');if(el&&!el.childElementCount&&tvVi
    TradingView blocks major index, Treasury and CME symbols inside embedded widgets ("only available on
    TradingView"), so symbol charts are drawn here from /api/chart (real, delayed prices) and always follow the
    site theme. Every chart keeps a link out to TradingView for anyone who wants the full platform. */
-const MFC_R=[['1D','1d'],['5D','5d'],['1M','1mo'],['6M','6mo'],['1Y','1y'],['5Y','5y']],MFC_C={};
 function mountTVSymbol(el,q){if(!el||!q)return;mfChart(el,q,(el.dataset.rng&&el.dataset.qid===q.id)?el.dataset.rng:'1d')}
 async function mfChart(el,q,rng){el.dataset.rng=rng;el.dataset.qid=q.id;
   el.innerHTML=`<div class="mfc"><div class="mfc-top"><div class="mfc-r" role="group" aria-label="Chart range">${MFC_R.map(([l,r])=>`<button type="button" data-r="${r}" aria-pressed="${r===rng}">${l}</button>`).join('')}</div><a class="mfc-tv mono" href="${tvUrl(q.id)}" target="_blank" rel="noopener">TradingView ↗</a></div><div class="mfc-plot"><div class="mfc-msg mono"><i class="mfc-sp"></i>Loading chart</div></div><div class="mfc-ft mono"><span class="mfc-chg"></span><span class="mfc-src"></span></div></div>`;
