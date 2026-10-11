@@ -1,20 +1,26 @@
 name: Bootstrap lockfile
 
 on:
+  push:
+    branches:
+      - stage-0/safety-ci
+    paths:
+      - package.json
+      - package-lock.json
+      - .github/workflows/bootstrap-lockfile.yml
   pull_request:
     branches: [main]
     paths:
       - package.json
       - package-lock.json
       - .github/workflows/bootstrap-lockfile.yml
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   lockfile:
-    if: github.event.pull_request.head.ref == 'stage-0/safety-ci'
+    if: github.ref == 'refs/heads/stage-0/safety-ci' || github.event.pull_request.head.ref == 'stage-0/safety-ci'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
