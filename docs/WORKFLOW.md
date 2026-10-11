@@ -28,3 +28,7 @@ with the same name (`page.tsx`, `route.ts`) overwrite each other.
 ## Preview environment
 Preview builds have no database, newsletter or admin credentials, so they are read-only:
 they cannot write Time Machine records or create newsletter subscribers.
+
+## Where to edit
+See [DEVELOPING.md](../DEVELOPING.md). The **Build** check also verifies that the generated files
+match `experience/source/market-files.html`.

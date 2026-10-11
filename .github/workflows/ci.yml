@@ -45,6 +45,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Generated files match the design source
+        run: npm run experience:check
       - run: npm ci
       - run: npm run build
 
