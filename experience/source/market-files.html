@@ -1243,8 +1243,13 @@ html.dos-open,html.hello-open{overflow:hidden}
 .tb-day h2{font-size:clamp(24px,2.3vw,31px);line-height:1.15}
 .tb-c a:hover h2{text-decoration:underline;text-decoration-color:rgba(245,196,81,.6);text-underline-offset:4px;text-decoration-thickness:1px}
 .tb-meta{font-size:10.5px;color:var(--tx3);margin-top:7px;letter-spacing:.03em}
+.tb-ph{margin:0 0 12px;position:relative;height:170px;overflow:hidden;border:1px solid rgba(245,196,81,.28);background:radial-gradient(90% 90% at 50% 100%,rgba(245,196,81,.14),#08090d 70%)}
+.tb-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s,transform .7s}.tb-ph img.ok{opacity:1}
+.tb-ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.4));pointer-events:none}
+.tb-c a:hover .tb-ph img{transform:scale(1.04)}
+.tb-day .tb-ph{height:210px}
 .tb-none{color:var(--tx3)!important;font-size:17px!important}
-@media(max-width:900px){.tb{padding:10px 0 8px}.tb-m{margin-bottom:4px}.tb-date{display:none}.tb-g{grid-template-columns:1fr}.tb-c{padding:8px 0!important}.tb-c+.tb-c{border-left:0;border-top:1px solid var(--line)}.tb-c h2{font-size:16.5px;-webkit-line-clamp:2}.tb-day h2{font-size:21px;-webkit-line-clamp:3}.tb-k{margin-bottom:3px}.tb-c:not(.tb-day) .tb-meta{display:none}}
+@media(max-width:900px){.tb{padding:10px 0 8px}.tb-m{margin-bottom:4px}.tb-date{display:none}.tb-g{grid-template-columns:1fr}.tb-c{padding:8px 0!important}.tb-c+.tb-c{border-left:0;border-top:1px solid var(--line)}.tb-c h2{font-size:16.5px;-webkit-line-clamp:2}.tb-day h2{font-size:21px;-webkit-line-clamp:3}.tb-k{margin-bottom:3px}.tb-c:not(.tb-day) .tb-meta{display:none}.tb-c:not(.tb-day) a{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;align-items:center}.tb-c:not(.tb-day) .tb-ph{margin:0;height:84px}.tb-day .tb-ph{height:auto;aspect-ratio:16/9}}
 .mf-toast .mono.dim{font-size:11px;line-height:1.5}
 
 /* ===== v7: heat-map slideshow, tools, dashboard ===== */
@@ -3583,12 +3588,38 @@ const longDate=()=>new Date().toLocaleDateString('en-US',{weekday:'long',month:'
 /* ---------- the biggest stories: today, this week, this month (most widely covered, via /api/top) ---------- */
 let TOPS=null;const TB_K={day:'TODAY’S BIGGEST STORY',week:'THIS WEEK',month:'THIS MONTH'};
 function topBand(){return `<section class="tb" id="tb" aria-label="The biggest stories"><div class="wrap"><div class="tb-m"><span class="mono tb-brand">THE BIGGEST STORIES</span><span class="mono tb-date">${longDate()}</span></div><div class="tb-g" id="tb-g">${['day','week','month'].map(k=>tbCard(k,TOPS&&TOPS[k],!TOPS)).join('')}</div></div></section>`}
+/* Top stories: every card gets a photo matched to what the story is about. A known-good curated photo shows
+   at once; topics without one are upgraded to the lead image of the matching reference article. */
+const TB_TOPICS=[
+  [/\b(fed|federal reserve|powell|rate cuts?|rate hikes?|interest rates?|fomc)\b/i,['global',4]],
+  [/\b(tariffs?|trade war|trade deal|imports?|exports?|shipping|supply chain)\b/i,null,'Container ship'],
+  [/\b(oil|opec|crude|brent|wti|gasoline)\b/i,null,'Oil platform'],
+  [/\b(gold|bullion)\b/i,['global',5]],
+  [/\b(bitcoin|crypto|ethereum|ether|stablecoin|coinbase|blockchain)\b/i,['crypto',0]],
+  [/\b(treasur(y|ies)|bonds?|yields?|debt ceiling|deficit)\b/i,null,'United States Treasury security'],
+  [/\b(inflation|cpi|consumer prices|pce)\b/i,null,'Inflation'],
+  [/\b(jobs|payrolls?|unemployment|labor market|hiring|layoffs?)\b/i,null,'Employment'],
+  [/\b(ecb|eurozone|euro|lagarde|europe|european)\b/i,['global',0]],
+  [/\b(bank of england|pound|sterling|britain|u\.k\.|uk|london)\b/i,['global',1]],
+  [/\b(japan|yen|nikkei|boj|tokyo)\b/i,['global',2]],
+  [/\b(china|chinese|beijing|yuan|hong kong|hang seng)\b/i,['global',3]],
+  [/\b(white house|trump|biden|president|congress|senate|election|shutdown|supreme court)\b/i,null,'United States Capitol'],
+  [/\b(earnings|ipo|nasdaq|nvidia|apple|microsoft|tesla|amazon|alphabet|google|meta|chips?|semiconductors?|ai)\b/i,['companies',0]],
+];
+function tbPhoto(it,k){const t=it.title||'',seed={day:0,week:1,month:2}[k]||0;const hit=TB_TOPICS.find(r=>r[0].test(t));
+  const [pool,idx]=hit&&hit[1]?hit[1]:['markets',seed];const wq=hit&&hit[2]?hit[2]:'';
+  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${pimg(pool,idx,k==='day'?1100:640,false)}</figure>`}
+async function tbUpgrade(){const figs=$$('.tb-ph[data-tbw]:not([data-tbd])');if(!figs.length||!LIVE_SITE)return;
+  figs.forEach(f=>f.dataset.tbd=1);
+  await Promise.all(figs.map(async f=>{const r=await wikiSearch(f.dataset.tbw,1);if(!r||!r.img||!f.isConnected)return;
+    const im=new Image();im.className='pimg';im.referrerPolicy='no-referrer';im.decoding='async';im.alt=r.title;
+    im.onload=()=>{if(!f.isConnected)return;f.querySelectorAll('img').forEach(x=>x.remove());f.appendChild(im);requestAnimationFrame(()=>im.classList.add('ok'))};im.src=r.img}))}
 function tbCard(k,it,loading){if(!it)return `<article class="tb-c tb-${k}"><p class="tb-k mono">${TB_K[k]}</p>${loading?'<span class="sk-l"></span><span class="sk-l s"></span>':`<h2 class="tb-none">${LIVE_SITE?'Headline unavailable right now.':'The live headline appears here on the live site.'}</h2>`}</article>`;
   const meta=it.count>1?`Covered by ${it.count} outlets${it.sources&&it.sources.length?' · '+it.sources.slice(0,3).map(esc).join(', '):''}`:esc(it.source||'');
-  return `<article class="tb-c tb-${k}"><a href="${esc(it.link)}" target="_blank" rel="noopener"><p class="tb-k mono">${TB_K[k]}</p><h2>${esc(it.title)}</h2><p class="tb-meta mono">${meta}${it.when?` · ${ago(it.when)}`:''}</p></a></article>`}
+  return `<article class="tb-c tb-${k}"><a href="${esc(it.link)}" target="_blank" rel="noopener">${tbPhoto(it,k)}<div class="tb-tx"><p class="tb-k mono">${TB_K[k]}</p><h2>${esc(it.title)}</h2><p class="tb-meta mono">${meta}${it.when?` · ${ago(it.when)}`:''}</p></div></a></article>`}
 async function wireTop(){const g=$('#tb-g');if(!g)return;let data=TOPS&&Date.now()-TOPS.at<600000?TOPS:null;
   if(!data){try{const r=await fetch('/api/top');if(r.ok){const j=await r.json();if(j&&(j.day||j.week||j.month))data=TOPS={...j,at:Date.now()}}}catch(e){}}
-  const g2=$('#tb-g');if(!g2)return;g2.innerHTML=['day','week','month'].map(k=>tbCard(k,data&&data[k],false)).join('')}
+  const g2=$('#tb-g');if(!g2)return;g2.innerHTML=['day','week','month'].map(k=>tbCard(k,data&&data[k],false)).join('');tbUpgrade()}
 function frontHead(sec){const f=FRONTS[sec];const s=session('eq');
   return heroHead(sec,`<span>${longDate()}</span><span class="sess ${s.c}"><i></i>${s.t}</span><span class="fr-ed">${sec==='history'?'@MarketFilesThen':'@TheMarketFiles'}</span>`,f.t,f.d)}
 function frontHTML(sec){const f=FRONTS[sec];const ids=f.tiles.filter(id=>INSTR.some(q=>q.id===id));if(ids.length>4&&ids.length%2)ids.pop();

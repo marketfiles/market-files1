@@ -1213,8 +1213,13 @@ html.dos-open,html.hello-open{overflow:hidden}
 .tb-day h2{font-size:clamp(24px,2.3vw,31px);line-height:1.15}
 .tb-c a:hover h2{text-decoration:underline;text-decoration-color:rgba(245,196,81,.6);text-underline-offset:4px;text-decoration-thickness:1px}
 .tb-meta{font-size:10.5px;color:var(--tx3);margin-top:7px;letter-spacing:.03em}
+.tb-ph{margin:0 0 12px;position:relative;height:170px;overflow:hidden;border:1px solid rgba(245,196,81,.28);background:radial-gradient(90% 90% at 50% 100%,rgba(245,196,81,.14),#08090d 70%)}
+.tb-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s,transform .7s}.tb-ph img.ok{opacity:1}
+.tb-ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.4));pointer-events:none}
+.tb-c a:hover .tb-ph img{transform:scale(1.04)}
+.tb-day .tb-ph{height:210px}
 .tb-none{color:var(--tx3)!important;font-size:17px!important}
-@media(max-width:900px){.tb{padding:10px 0 8px}.tb-m{margin-bottom:4px}.tb-date{display:none}.tb-g{grid-template-columns:1fr}.tb-c{padding:8px 0!important}.tb-c+.tb-c{border-left:0;border-top:1px solid var(--line)}.tb-c h2{font-size:16.5px;-webkit-line-clamp:2}.tb-day h2{font-size:21px;-webkit-line-clamp:3}.tb-k{margin-bottom:3px}.tb-c:not(.tb-day) .tb-meta{display:none}}
+@media(max-width:900px){.tb{padding:10px 0 8px}.tb-m{margin-bottom:4px}.tb-date{display:none}.tb-g{grid-template-columns:1fr}.tb-c{padding:8px 0!important}.tb-c+.tb-c{border-left:0;border-top:1px solid var(--line)}.tb-c h2{font-size:16.5px;-webkit-line-clamp:2}.tb-day h2{font-size:21px;-webkit-line-clamp:3}.tb-k{margin-bottom:3px}.tb-c:not(.tb-day) .tb-meta{display:none}.tb-c:not(.tb-day) a{display:grid;grid-template-columns:112px minmax(0,1fr);gap:12px;align-items:center}.tb-c:not(.tb-day) .tb-ph{margin:0;height:84px}.tb-day .tb-ph{height:auto;aspect-ratio:16/9}}
 .mf-toast .mono.dim{font-size:11px;line-height:1.5}
 
 /* ===== v7: heat-map slideshow, tools, dashboard ===== */

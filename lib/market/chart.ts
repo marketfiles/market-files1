@@ -29,7 +29,7 @@ const CNBC: Record<string, string> = {
   BTC: 'BTC.CM=', ETH: 'ETH.CM=',
   UKX: '.FTSE', DAX: '.GDAXI', CAC: '.FCHI', SX5E: '.STOXX50E', NKY: '.N225', HSI: '.HSI', SHCOMP: '.SSEC', SENSEX: '.BSESN', AS51: '.AXJO', TSX: '.GSPTSE', IBOV: '.BVSP',
 };
-const cnbcSymbol = (id: string) => CNBC[id] || (/^[A-Z.]{1,6}$/.test(id) && !YAHOO_EXTRA[id] ? id : '');
+const cnbcSymbol = (id: string) => CNBC[id] || (/^[A-Z.]{1,6}$/.test(id) && !YAHOO_EXTRA[id] && !['SOL','XRP','BNB','DOGE','ADA','LINK'].includes(id) ? id : '');
 
 const YI: Record<Range, string> = { '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', '1y': '1d', '5y': '1wk' };
 async function yahoo(id: string, range: Range): Promise<Chart | null> {
@@ -50,26 +50,41 @@ async function yahoo(id: string, range: Range): Promise<Chart | null> {
   return null;
 }
 
-const CR: Record<Range, string> = { '1d': '1D', '5d': '5D', '1mo': '1M', '6mo': '6M', '1y': '1Y', '5y': '5Y' };
+// CNBC bars: /harmony/app/bars/{symbol}/{interval}/{from}/{to}/adjusted/EST5EDT.json (times in New York time)
+const CI: Record<Range, [string, number][]> = { '1d': [['5M', 6]], '5d': [['15M', 9], ['5M', 9]], '1mo': [['1H', 35], ['1D', 35]], '6mo': [['1D', 190]], '1y': [['1D', 370]], '5y': [['1W', 1830], ['1D', 1830]] };
+const etStamp = (d: Date) => { const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(d); const g = (t: string) => p.find((x) => x.type === t)?.value || '00'; return `${g('year')}${g('month')}${g('day')}${g('hour')}${g('minute')}${g('second')}`; };
+type Bar = { tradeTimeinMills?: string | number; tradeTime?: string; close?: string | number };
 async function cnbc(id: string, range: Range): Promise<Chart | null> {
   const sym = cnbcSymbol(id); if (!sym) return null;
-  try {
-    const r = await fetch(`https://ts-api.cnbc.com/harmony/app/charts/${CR[range]}.json?symbol=${encodeURIComponent(sym)}`, { headers: H, cache: 'no-store', signal: AbortSignal.timeout(8000) });
-    if (!r.ok) return null;
-    const j = await r.json();
-    const bars: { tradeTimeinMills?: string | number; close?: string | number }[] = j?.barData?.priceBars || [];
-    const points = bars.map((b) => [Math.round(+(b.tradeTimeinMills ?? 0) / 1000), +(b.close ?? NaN)] as [number, number]).filter((p) => p[0] > 0 && isFinite(p[1]) && p[1] > 0);
-    if (points.length < 2) return null;
-    const pc = +(j?.barData?.previousClose ?? j?.previousClose ?? NaN);
-    return { id, range, prev: range === '1d' && isFinite(pc) && pc > 0 ? pc : null, points, source: `CNBC · ${sym} · delayed` };
-  } catch { return null; }
+  for (const [iv, days] of CI[range]) {
+    try {
+      const to = new Date(), from = new Date(Date.now() - days * 864e5);
+      const r = await fetch(`https://ts-api.cnbc.com/harmony/app/bars/${encodeURIComponent(sym)}/${iv}/${etStamp(from)}/${etStamp(to)}/adjusted/EST5EDT.json`, { headers: H, cache: 'no-store', signal: AbortSignal.timeout(8000) });
+      if (!r.ok) continue;
+      const j = await r.json();
+      const bars: Bar[] = j?.barData?.priceBars || [];
+      let pts = bars.map((b) => [Math.round(+(b.tradeTimeinMills ?? 0) / 1000), +String(b.close ?? '').replace(/,/g, ''), String(b.tradeTime || '').slice(0, 8)] as [number, number, string])
+        .filter((p) => p[0] > 0 && isFinite(p[1]) && p[1] > 0).sort((a, b) => a[0] - b[0]);
+      if (pts.length < 2) continue;
+      let prev: number | null = null;
+      if (range === '1d') {
+        const day = (p: [number, number, string]) => p[2] || new Date(p[0] * 1000).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+        const last = day(pts[pts.length - 1]); const before = pts.filter((p) => day(p) !== last);
+        prev = before.length ? before[before.length - 1][1] : null;
+        pts = pts.filter((p) => day(p) === last);
+        if (pts.length < 2) continue;
+      }
+      return { id, range, prev, points: pts.map((p) => [p[0], p[1]] as [number, number]), source: `CNBC · ${sym} · delayed` };
+    } catch { /* next interval */ }
+  }
+  return null;
 }
 
 const cache = new Map<string, { at: number; c: Chart | null }>();
 export async function getChart(id: string, range: Range): Promise<Chart | null> {
   const k = `${id}|${range}`, ttl = range === '1d' || range === '5d' ? 60_000 : 30 * 60_000, hit = cache.get(k);
   if (hit && Date.now() - hit.at < ttl) return hit.c;
-  const c = (await yahoo(id, range)) || (await cnbc(id, range));
+  const c = (await cnbc(id, range)) || (await yahoo(id, range));
   if (c || !hit) cache.set(k, { at: Date.now(), c });
   if (cache.size > 1500) cache.clear();
   return c ?? hit?.c ?? null;
