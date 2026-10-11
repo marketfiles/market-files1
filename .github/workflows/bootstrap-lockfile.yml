@@ -1,44 +1,13 @@
-name: Bootstrap lockfile
+name: Bootstrap lockfile (retired)
 
 on:
-  push:
-    branches:
-      - stage-0/safety-ci
-    paths:
-      - package.json
-      - package-lock.json
-      - .github/workflows/bootstrap-lockfile.yml
-  pull_request:
-    branches: [main]
-    paths:
-      - package.json
-      - package-lock.json
-      - .github/workflows/bootstrap-lockfile.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  lockfile:
-    if: github.ref == 'refs/heads/stage-0/safety-ci' || github.event.pull_request.head.ref == 'stage-0/safety-ci'
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: stage-0/safety-ci
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Generate package-lock.json
-        run: npm install --package-lock-only --ignore-scripts
-      - name: Commit lockfile if changed
-        run: |
-          if [ -z "$(git status --porcelain -- package-lock.json)" ]; then
-            echo "package-lock.json is already current"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore: bootstrap package lock"
-          git push origin HEAD:stage-0/safety-ci
+      - run: echo "Lockfile bootstrap is retired. package-lock.json is now committed and normal CI is read-only."
