@@ -2563,6 +2563,7 @@ $('#ck-i').oninput=()=>{CKI=0;renderCk()};
 $('#ck-i').onkeydown=e=>{if(e.key==='ArrowDown'){e.preventDefault();CKI=Math.min(CK.length-1,CKI+1);renderCk()}else if(e.key==='ArrowUp'){e.preventDefault();CKI=Math.max(0,CKI-1);renderCk()}else if(e.key==='Enter'){e.preventDefault();runCk(CKI)}};
 $('#ck-l').onclick=e=>{const b=e.target.closest('.ck-i');if(!b)return;if(b.tagName==='A'){$('#cmdk').close();return}runCk(+b.dataset.i)};
 $('#cmdk').addEventListener('click',e=>{if(e.target.id==='cmdk')$('#cmdk').close()});Feed.start();
+let CC_MOUNTED='';
 route();
 
 /* =========================================================================
@@ -2603,7 +2604,6 @@ function wireAIPanel(q,auto){if(aiOn())return wireAIPanelClaude(q,auto);const a=
 async function gpAsk(focus,free){if(aiOn())return gpAskClaude(focus,free);const label=($('#gp')||{dataset:{}}).dataset.label||'';location.hash=aiHref(free?`${label} ${free}`:`${label} ${focus} history`)}
 
 /* ---------- crypto chart (TradingView) ---------- */
-let CC_MOUNTED='';
 function mountCryptoTV(){const el=$('#tv-cr');if(!el||!tvVisible(el))return;if(CC_MOUNTED===CC&&el.childElementCount)return;CC_MOUNTED=CC;mountTVSymbol(el,INSTR.find(x=>x.id===CC));
   $$('[data-cc]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.cc===CC)))}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-cc]');if(b){CC=b.dataset.cc;mountCryptoTV()}});
