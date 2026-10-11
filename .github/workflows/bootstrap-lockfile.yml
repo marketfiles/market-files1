@@ -1,9 +1,12 @@
 name: Bootstrap lockfile
 
 on:
-  push:
-    branches:
-      - stage-0/safety-ci
+  pull_request:
+    branches: [main]
+    paths:
+      - package.json
+      - package-lock.json
+      - .github/workflows/bootstrap-lockfile.yml
   workflow_dispatch:
 
 permissions:
@@ -11,7 +14,7 @@ permissions:
 
 jobs:
   lockfile:
-    if: github.ref == 'refs/heads/stage-0/safety-ci'
+    if: github.event.pull_request.head.ref == 'stage-0/safety-ci'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,9 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - name: Generate or refresh package-lock.json
+      - name: Generate package-lock.json
         run: npm install --package-lock-only --ignore-scripts
       - name: Commit lockfile if changed
         run: |
