@@ -19,7 +19,7 @@ permissions:
 env:
   NEXT_TELEMETRY_DISABLED: '1'
   # Build-time placeholder only; real values live in Vercel. No secrets are used in CI.
-  SITE_URL: https://marketfiles.com
+  SITE_URL: https://themarketfiles.com
 
 jobs:
   typecheck:
