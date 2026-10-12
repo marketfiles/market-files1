@@ -941,7 +941,7 @@ function yieldCurve(){const T=[['US2Y','2Y'],['US5Y','5Y'],['US10Y','10Y'],['US3
   return `<svg viewBox="0 0 600 210" class="ycsvg" aria-label="U.S. Treasury yield curve, simulated"><path d="${line('prev')}" fill="none" stroke="#7A869A" stroke-dasharray="4 5"/><path d="${line('v')}" fill="none" stroke="#4C8DFF" stroke-width="2.5"/>${T.map((t,i)=>`<circle cx="${X(i)}" cy="${Y(t.q.v)}" r="5" fill="#4C8DFF"/><text x="${X(i)}" y="${+Y(t.q.v)-12}" text-anchor="middle" style="fill:var(--tx)" font-family="IBM Plex Mono,monospace" font-size="15">${t.q.v.toFixed(2)}%</text><text x="${X(i)}" y="202" text-anchor="middle" fill="#7A869A" font-family="IBM Plex Mono,monospace" font-size="14">${t.l}</text>`).join('')}</svg><div class="ch-lg mono"><span><i class="lg-solid"></i> Now</span><span><i class="dash"></i> Prior close</span><span>2s10s ${((INSTR.find(x=>x.id==='US10Y').v-INSTR.find(x=>x.id==='US2Y').v)*100).toFixed(0)}bp</span></div>`}
 const qs=ids=>ids.map(id=>INSTR.find(x=>x.id===id)).filter(Boolean);
 const TV={ES1:'CME_MINI:ES1!',NQ1:'CME_MINI:NQ1!',YM1:'CBOT_MINI:YM1!',RTY1:'CME_MINI:RTY1!',ZT1:'CBOT:ZT1!',ZN1:'CBOT:ZN1!',ZB1:'CBOT:ZB1!',CL1:'NYMEX:CL1!',BZ1:'NYMEX:BZ1!',NG1:'NYMEX:NG1!',RB1:'NYMEX:RB1!',GC1:'COMEX:GC1!',SI1:'COMEX:SI1!',HG1:'COMEX:HG1!',PL1:'NYMEX:PL1!',ZC1:'CBOT:ZC1!',ZS1:'CBOT:ZS1!',ZW1:'CBOT:ZW1!',LE1:'CME:LE1!',KC1:'ICEUS:KC1!',SB1:'ICEUS:SB1!','6E1':'CME:6E1!','6J1':'CME:6J1!','6B1':'CME:6B1!',BTC1:'CME:BTC1!',ETH1:'CME:ETH1!',VX1:'CBOE:VX1!',SPX:'SP:SPX',COMP:'NASDAQ:IXIC',INDU:'DJ:DJI',RUT:'TVC:RUT',VIX:'CBOE:VIX',US2Y:'TVC:US02Y',US5Y:'TVC:US05Y',US10Y:'TVC:US10Y',US30Y:'TVC:US30Y',XAU:'TVC:GOLD',XAG:'TVC:SILVER',CL:'TVC:USOIL',HG:'COMEX:HG1!',EURUSD:'FX:EURUSD',USDJPY:'FX:USDJPY',GBPUSD:'FX:GBPUSD',DXY:'TVC:DXY',USDCNY:'FX_IDC:USDCNY',USDCHF:'FX:USDCHF',AUDUSD:'FX:AUDUSD',BTC:'BITSTAMP:BTCUSD',ETH:'BITSTAMP:ETHUSD',SOL:'COINBASE:SOLUSD',XRP:'BITSTAMP:XRPUSD',BNB:'BINANCE:BNBUSDT',DOGE:'BINANCE:DOGEUSDT',ADA:'COINBASE:ADAUSD',LINK:'COINBASE:LINKUSD',UKX:'TVC:UKX',DAX:'XETR:DAX',CAC:'EURONEXT:PX1',SX5E:'TVC:SX5E',NKY:'TVC:NI225',HSI:'TVC:HSI',SHCOMP:'SSE:000001',SENSEX:'BSE:SENSEX',AS51:'ASX:XJO',TSX:'TSX:TSX',IBOV:'BMFBOVESPA:IBOV',DE10Y:'TVC:DE10Y',GB10Y:'TVC:GB10Y',JP10Y:'TVC:JP10Y',FR10Y:'TVC:FR10Y',IT10Y:'TVC:IT10Y'};
-const tvUrl=id=>`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(TV[id]||'AMEX:'+id)}`;
+const tvUrl=id=>TV[id]?`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(TV[id])}`:`https://www.tradingview.com/symbols/${encodeURIComponent(String(id).replace('.','-'))}/`;
 const CMC={BTC:'bitcoin',ETH:'ethereum',XRP:'xrp',BNB:'bnb',SOL:'solana',DOGE:'dogecoin',ADA:'cardano',LINK:'chainlink'};
 const cmcUrl=id=>`https://coinmarketcap.com/currencies/${CMC[id]}/`;
 const CRC={BTC:'#F2A03D',ETH:'#8E7CF7',XRP:'#4C8DFF',BNB:'#C9A55C',SOL:'#2FBF77',DOGE:'#B8A26A',ADA:'#3E6BD8',LINK:'#6F8BFF'};
@@ -1527,7 +1527,7 @@ function openInst(id){const q=INSTR.find(x=>x.id===id);if(!q)return;const c=chg(
   <div class="side-v" data-id="${q.id}"><span class="mono" data-f="v">${q.g==='cr'?'$':''}${fmtV(q)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div>
   <div class="side-c">${window.MF_TV?'<div class="tvw tvw-sm" id="tv-sym"></div>':lineChart(ser,q.prev)}${window.MF_TV?'':`<div class="ch-ax mono"><span>${q.intra?'9:30':'Earlier'}</span><span>${q.intra?'16:00 ET':'Now'}</span></div>`}</div>
   <dl class="side-s"><dt>Prior close</dt><dd class="mono">${q.na?'—':q.prev.toLocaleString('en-US',{maximumFractionDigits:q.dp})}</dd><dt>Range</dt><dd class="mono">${q.na?'—':Math.min(...ser).toLocaleString('en-US',{maximumFractionDigits:q.dp})+' – '+Math.max(...ser).toLocaleString('en-US',{maximumFractionDigits:q.dp})}</dd><dt>Session</dt><dd><span class="sess ${s.c}"><i></i>${s.t}</span></dd>${q.sup?`<dt>Market cap</dt><dd class="mono" data-mc="${q.id}">${fmtCap(mcap(q))}</dd>`:''}<dt>Data</dt><dd class="mono">${Feed.name}</dd></dl>
-  <div class="side-a"><a class="btn btn-p" href="${tvUrl(q.id)}" target="_blank" rel="noopener">Open in TradingView ↗</a>${CMC[q.id]?`<a class="btn" href="${cmcUrl(q.id)}" target="_blank" rel="noopener">CoinMarketCap ↗</a>`:''}<a class="btn" href="${aiHref(`What drives ${q.name} and what is its history?`)}" data-x>✦ Research</a></div>
+  <div class="side-a"><a class="btn btn-p" href="#/research/${encodeURIComponent(q.id)}" data-x>Latest news &amp; research →</a><a class="btn" href="${tvUrl(q.id)}" target="_blank" rel="noopener">Open in TradingView ↗</a>${CMC[q.id]?`<a class="btn" href="${cmcUrl(q.id)}" target="_blank" rel="noopener">CoinMarketCap ↗</a>`:''}<a class="btn" href="${aiHref(`What drives ${q.name} and what is its history?`)}" data-x>✦ Research</a></div>
   <div class="side-r"><h3 class="mono">FROM THE MARKET FILES</h3>${rel.length?rel.map(a=>`<a href="#/file/${a.slug}" data-x><span class="mono">${a.type==='hist'?a.y:'NOW'}</span>${esc(a.head)}</a>`).join(''):`<p class="dim">No files tagged to ${esc(q.name)} yet. <a href="#/search?q=${encodeURIComponent(q.name)}" data-x>Search the archive</a>.</p>`}</div>`;
   const d=$('#inst');if(!d.open)d.showModal();if(window.MF_TV)mountTVSymbol($('#tv-sym'),q)}
 
@@ -2105,7 +2105,8 @@ function knowledgePanel(q){q=q.trim();if(!q)return '';const dq=parseDateQ(q);
   const lk=libKey(q);if(lk){const t=LIB[lk],lq=qs(t.live)[0],c=lq?chg(lq):null,first=t.pts[0],last=t.pts[t.pts.length-1];return `<div class="kp" data-holo><p class="mono dim">MARKET FILES LIBRARY · ${t.kind.toUpperCase()}</p><h2>${esc(t.title)}</h2>${lq?`<div data-id="${lq.id}" class="kp-q"><span class="mono" data-f="v">${fmtV(lq)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div>`:''}<p class="kp-sub">${esc(t.intro)}</p><h3 class="mono">SINCE ${t.since}</h3><a class="kp-l" href="#/day/${first[0]}"><span class="mono">${first[0].slice(0,4)}</span> ${first[3]||''}${first[1].toLocaleString('en-US')} · ${esc(first[2])}</a><a class="kp-l" href="#/day/${last[0]}"><span class="mono">${last[0].slice(0,4)}</span> ${last[3]||''}${last[1].toLocaleString('en-US')} · ${esc(last[2])}</a><a class="btn btn-p" href="#/library/${lk}">Open the full history →</a></div>`}
   if(dq&&dq.y&&validDay(dq.y,dq.m,dq.d)){const ev=dayMatches(dq.y,dq.m,dq.d);return `<div class="kp" data-holo><p class="mono dim">DAY FILE</p><h2>${MONTHS[dq.m-1]} ${dq.d}, ${dq.y}</h2><p class="kp-sub">${WD[utc(dq.y,dq.m,dq.d).getUTCDay()]} · ${ev.length} event${ev.length===1?'':'s'} on this exact day</p>${ev.slice(0,4).map(e=>`<a class="kp-l" href="#/day/${e.date}">${esc(e.head)}</a>`).join('')}<a class="btn btn-p" href="#/day/${isoOf(dq.y,dq.m,dq.d)}">Open day file →</a></div>`}
   if(/^\d{3,4}$/.test(q)){const y=+q,ev=YEV.filter(e=>e.y===y);return `<div class="kp" data-holo><p class="mono dim">YEAR</p><h2 class="kp-yr">${y}</h2><p class="kp-sub">${ev.length} event${ev.length===1?'':'s'} filed · ${(ERAS.find(e=>y>=e.from&&y<=e.to)||{label:'Before 1600'}).label}</p>${ev.slice(0,5).map(e=>`<a class="kp-l" href="${e.m?'#/day/'+e.date:'#/file/'+e.link}">${e.m?`<span class="mono">${MONTHS[e.m-1].slice(0,3)} ${e.d}</span> `:''}${esc(e.head)}</a>`).join('')}<a class="btn btn-p" href="#/on-this-date/year/${y}">All of ${y} →</a></div>`}
-  const qi=findInst(q);if(qi){const c=chg(qi);return `<div class="kp" data-holo><p class="mono dim">LIVE MARKET · ${qi.id}</p><h2>${esc(qi.name)}</h2><div data-id="${qi.id}" class="kp-q"><span class="mono" data-f="v">${fmtV(qi)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div>${spark(qi)}<p class="kp-sub">Data: ${Feed.name}</p><div class="kp-a"><button class="btn btn-p" data-openinst="${qi.id}">Details</button><a class="btn" href="${tvUrl(qi.id)}" target="_blank" rel="noopener">TradingView ↗</a>${CMC[qi.id]?`<a class="btn" href="${cmcUrl(qi.id)}" target="_blank" rel="noopener">CoinMarketCap ↗</a>`:''}</div></div>`}
+  const qi=findInst(q);if(qi){const c=chg(qi);return `<div class="kp" data-holo><p class="mono dim">LIVE MARKET · ${qi.id}</p><h2>${esc(qi.name)}</h2><div data-id="${qi.id}" class="kp-q"><span class="mono" data-f="v">${fmtV(qi)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div>${spark(qi)}<p class="kp-sub">Data: ${Feed.name}</p><div class="kp-a"><a class="btn btn-p" href="#/research/${encodeURIComponent(qi.id)}">Latest news &amp; research →</a><button class="btn" data-openinst="${qi.id}">Details</button><a class="btn" href="${tvUrl(qi.id)}" target="_blank" rel="noopener">TradingView ↗</a>${CMC[qi.id]?`<a class="btn" href="${cmcUrl(qi.id)}" target="_blank" rel="noopener">CoinMarketCap ↗</a>`:''}</div></div>`}
+  if(/^\$?[A-Za-z]{1,5}(\.[A-Za-z])?$/.test(q)&&!ent().get(q.toLowerCase())){const t=q.replace('$','').toUpperCase();return `<div class="kp" data-holo><p class="mono dim">TICKER · ${esc(t)}</p><h2>${esc(t)}</h2><p class="kp-sub">Live price, chart and the latest headlines for ${esc(t)}.</p><div class="kp-a"><a class="btn btn-p" href="#/research/${encodeURIComponent(t)}">Research ${esc(t)} →</a><a class="btn" href="${tvUrl(t)}" target="_blank" rel="noopener">TradingView ↗</a></div></div>`}
   const e=ent().get(q.toLowerCase())||[...ent().values()].find(x=>x.name.toLowerCase().startsWith(q.toLowerCase())&&q.length>=4);
   if(e){const files=[...e.files].map(s=>BY[s]).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date));const kd=files.flatMap(a=>a.keyDates.map(k=>[k[0],k[1],a.slug])).sort((a,b)=>a[0].localeCompare(b[0])).slice(0,5);
     return `<div class="kp" data-holo><p class="mono dim">${e.type.toUpperCase()}</p><h2>${esc(e.name)}</h2><p class="kp-sub">${files.length} Market Files record${files.length===1?'':'s'} · ${files[0].y}–${files[files.length-1].y}</p><h3 class="mono">KEY DATES</h3>${kd.map(k=>`<a class="kp-l" href="${/^\d{4}-\d\d-\d\d$/.test(k[0])?'#/day/'+k[0]:'#/file/'+k[2]}"><span class="mono">${fmtISO(k[0])}</span> ${esc(k[1])}</a>`).join('')}<h3 class="mono">FILES</h3>${files.slice(0,4).map(a=>`<a class="kp-l" href="#/file/${a.slug}"><span class="mono">${a.y}</span> ${esc(a.head)}</a>`).join('')}<a class="btn" href="${aiHref(`Give a financial history of ${e.name}.`)}">✦ Research</a></div>`}
@@ -2419,7 +2420,7 @@ function heatShow(){return `<section class="hx" id="j-heat" aria-label="S&amp;P 
   <div class="hx-bar" aria-hidden="true"><i id="hx-prog"></i></div>
   <div class="hx-chips" id="hx-chips" role="tablist" aria-label="Sectors"></div>
   <div class="hx-body"><div class="hx-map" id="hx-map" aria-live="polite"></div><aside class="hx-side" id="hx-side"></aside></div>
-  <p class="hx-note mono">Delayed prices · change vs. previous close · bigger companies get bigger tiles · click any company for its chart</p></div></section>`}
+  <p class="hx-note mono">Delayed prices · change vs. previous close · bigger companies get bigger tiles · click any company for its chart and latest news</p></div></section>`}
 function hxChips(){const el=$('#hx-chips');if(!el)return;el.innerHTML=CO_SECT.map(([k,l],i)=>{const p=pctOf(INSTR.find(q=>q.id===SECT_ETF[k]));
   return `<button class="hx-c ${i===HX.i?'on':''}" role="tab" aria-selected="${i===HX.i}" data-hxi="${i}" style="--hc:${heatColor(p)}"><span>${esc(l)}</span><b class="mono">${p==null?'—':(p>=0?'+':'')+p.toFixed(2)+'%'}</b></button>`}).join('')}
 function hxRender(anim){const map=$('#hx-map');if(!map)return;const [k,l]=CO_SECT[HX.i];const etf=INSTR.find(q=>q.id===SECT_ETF[k]);const mem=sectMembers(k);
@@ -2435,20 +2436,65 @@ function hxRender(anim){const map=$('#hx-map');if(!map)return;const [k,l]=CO_SEC
    <div class="hx-l"><h3 class="mono dn">▼ TOP LOSERS</h3>${dn.length?`<ol>${dn.map(li).join('')}</ol>`:`<p class="dim">${live.length?'No decliners in this sector right now.':'Waiting for prices.'}</p>`}</div>
    ${live.length?`<p class="mono dim hx-br">${live.filter(q=>pctOf(q)>0).length} up · ${live.filter(q=>pctOf(q)<0).length} down</p>`:''}`;
   hxChips()}
-function hxGo(n,user){HX.i=(n+CO_SECT.length)%CO_SECT.length;HX.last=Date.now();hxRender(true);if(user)hxProg(true)}
+/* Heat-map square menu: chart on TradingView, or the company's research page with its latest news. */
+function hxPop(id,tile){const s=$('#j-heat');if(!s)return;const q=INSTR.find(x=>x.id===id)||{id,name:id,na:true};const body=s.querySelector('.hx-body');
+  let pop=$('#hx-pop');if(!pop){pop=document.createElement('div');pop.id='hx-pop';pop.className='hx-pop';pop.setAttribute('role','dialog');body.appendChild(pop)}
+  const p=pctOf(q);pop.setAttribute('aria-label',`${q.name} options`);
+  pop.innerHTML=`<div class="hx-pop-h"><div><b>${esc(q.name)}</b><span class="mono">${esc(q.id)}</span></div><button type="button" class="hx-pop-x" aria-label="Close">×</button></div>
+   <p class="hx-pop-v mono">${q.na?'—':fmtV(q)} <span class="${p==null?'':p>=0?'up':'dn'}">${p==null?'':(p>=0?'▲ +':'▼ ')+p.toFixed(2)+'%'}</span></p>
+   <div class="hx-pop-a"><a class="btn btn-p" href="${tvUrl(q.id)}" target="_blank" rel="noopener">Chart on TradingView ↗</a><a class="btn" href="#/research/${encodeURIComponent(q.id)}">See latest news →</a></div>`;
+  pop.hidden=false;HX.pop=id;
+  const br=body.getBoundingClientRect(),tr=tile.getBoundingClientRect(),pw=Math.min(300,br.width-16);pop.style.width=pw+'px';
+  let x=tr.left-br.left+tr.width/2-pw/2;x=Math.max(8,Math.min(x,br.width-pw-8));
+  const below=tr.bottom-br.top+8,ph=pop.offsetHeight||150;const y=below+ph>br.height&&tr.top-br.top-ph-8>0?tr.top-br.top-ph-8:Math.min(below,Math.max(8,br.height-ph-8));
+  pop.style.left=x+'px';pop.style.top=y+'px';const f=pop.querySelector('.btn');if(f)f.focus({preventScroll:true})}
+function hxPopClose(){const p=$('#hx-pop');if(p)p.hidden=true;HX.pop=null}
+function hxGo(n,user){hxPopClose();HX.i=(n+CO_SECT.length)%CO_SECT.length;HX.last=Date.now();hxRender(true);if(user)hxProg(true)}
 function hxProg(reset){const p=$('#hx-prog');if(!p)return;p.style.animation='none';void p.offsetWidth;p.style.animation=HX.paused?'none':'hxprog 8s linear forwards';if(HX.paused)p.style.width='0'}
 function wireHeatShow(){const s=$('#j-heat');if(!s)return;hxRender(false);hxProg(true);
   if(typeof Feed.want==='function')Feed.want('companies');
   s.addEventListener('click',e=>{const b=e.target.closest('[data-hx]');if(b){const v=b.dataset.hx;if(v==='p'){HX.paused=!HX.paused;b.textContent=HX.paused?'▶':'❚❚';b.setAttribute('aria-label',HX.paused?'Play slideshow':'Pause slideshow');hxProg(true)}else hxGo(HX.i+ +v,true);return}
-    const c=e.target.closest('[data-hxi]');if(c){hxGo(+c.dataset.hxi,true);return}});
+    const c=e.target.closest('[data-hxi]');if(c){hxGo(+c.dataset.hxi,true);return}
+    if(e.target.closest('.hx-pop-x')){hxPopClose();return}
+    const t=e.target.closest('.hx-tile[data-id]');if(t){if(HX.pop===t.dataset.id&&!$('#hx-pop').hidden)hxPopClose();else hxPop(t.dataset.id,t);return}
+    if(e.target.closest('.hx-pop a'))hxPopClose()});
+  const outside=e=>{if(HX.pop&&!e.target.closest('#hx-pop')&&!e.target.closest('.hx-tile'))hxPopClose()};document.addEventListener('click',outside);
+  const esc1=e=>{if(e.key==='Escape'&&HX.pop)hxPopClose()};document.addEventListener('keydown',esc1);
+  cleanup.push(()=>{document.removeEventListener('click',outside);document.removeEventListener('keydown',esc1);HX.pop=null});
   s.addEventListener('keydown',e=>{const li=e.target.closest('li[data-id]');if(li&&e.key==='Enter')openInst(li.dataset.id);if(e.key==='ArrowRight')hxGo(HX.i+1,true);if(e.key==='ArrowLeft')hxGo(HX.i-1,true)});
   s.addEventListener('click',e=>{const li=e.target.closest('li[data-id]');if(li)openInst(li.dataset.id)});
   let hover=false;s.addEventListener('pointerenter',()=>{hover=true});s.addEventListener('pointerleave',()=>{hover=false});
-  if(HX.t)clearInterval(HX.t);HX.last=Date.now();HX.t=setInterval(()=>{if(HX.paused||hover||document.hidden||document.querySelector('dialog[open]')){HX.last=Date.now();const p=$('#hx-prog');if(p&&!HX.paused)p.style.animationPlayState='paused';return}
+  if(HX.t)clearInterval(HX.t);HX.last=Date.now();HX.t=setInterval(()=>{if(HX.paused||hover||HX.pop||document.hidden||document.querySelector('dialog[open]')){HX.last=Date.now();const p=$('#hx-prog');if(p&&!HX.paused)p.style.animationPlayState='paused';return}
     const p=$('#hx-prog');if(p)p.style.animationPlayState='running';if(Date.now()-HX.last>=8000){hxGo(HX.i+1,false);hxProg(true)}},250);
   let rz;const ro=new ResizeObserver(()=>{clearTimeout(rz);rz=setTimeout(()=>hxRender(false),120)});ro.observe($('#hx-map'));
   cleanup.push(()=>{clearInterval(HX.t);HX.t=null;ro.disconnect()})}
 Feed.subscribe(()=>{if($('#hx-map'))hxRender(false);if($('#dash'))dashTick()});
+
+/* ---------- Research page: #/research/{TICKER} for any company, stock, crypto or market ---------- */
+const rsId=raw=>decodeURIComponent(raw||'').toUpperCase().replace(/[^A-Z0-9.\-]/g,'').slice(0,12);
+function rsInst(id){return INSTR.find(x=>x.id===id)||{id,name:id,g:'co',na:true,dp:2,series:[],prev:0,v:0,ext:true}}
+function pageResearch(raw){const id=rsId(raw);if(!id)return notFound();const q=rsInst(id);const cr=q.g==='cr',co=q.g==='co';
+  setMeta(`${q.name} (${id}) — Market Files`,`Latest news, live price and chart for ${q.name}.`);
+  const c=q.na?{cls:'flat',arrow:'',txt:'—'}:chg(q);const kws=KW[id]||[q.name.toLowerCase().split(/[ ,.]/)[0]].filter(w=>w&&w.length>2);
+  const rel=kws.length?A.filter(a=>{const h=[a.head,a.deck,...a.assets,...a.countries].join(' ').toLowerCase();return kws.some(k=>h.includes(k))}).slice(0,4):[];
+  const links=[[tvUrl(id),'Chart on TradingView'],co&&!q.ext||co?[`https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${encodeURIComponent(id.replace('.','-'))}&type=10-K&dateb=&owner=include&count=10`,'SEC filings']:null,CMC[id]?[cmcUrl(id),'CoinMarketCap']:null,[gq(`${q.name} ${cr?'crypto':'stock'} news`),'More on Google']].filter(Boolean);
+  return `<div class="wrap page-in rs">
+  <header class="rs-h"><div><p class="mono rs-k">${cr?'CRYPTO':co?'COMPANY':'MARKET'} · RESEARCH</p><h1>${esc(q.name)}</h1><p class="mono dim">${esc(id)}${q.ex?' · '+esc(q.ex):''}${q.sec?' · '+esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1]):''}</p></div>
+   <div class="rs-q" data-id="${id}"><span class="mono" data-f="v">${q.na?'—':fmtV(q)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div></header>
+  <div class="rs-g"><section class="rs-chart" data-holo><div class="tvw rs-tv" id="rs-tv"></div></section>
+   <aside class="rs-side"><h3 class="mono">RESEARCH</h3>${links.map(([u,l])=>`<a class="rs-l" href="${u}" target="_blank" rel="noopener">${esc(l)} <span aria-hidden="true">↗</span></a>`).join('')}<a class="rs-l" href="#/search?q=${encodeURIComponent(q.name)}">Search the Market Files <span aria-hidden="true">→</span></a></aside></div>
+  <section class="rs-news"><h2 class="mono">LATEST NEWS · ${esc(q.name.toUpperCase())}</h2><div id="rs-news" aria-live="polite"><span class="sk-l"></span><span class="sk-l"></span><span class="sk-l s"></span></div></section>
+  ${rel.length?`<section class="rs-files"><h2 class="mono">FROM THE MARKET FILES</h2><div class="rs-fl">${rel.map(a=>`<a href="#/file/${a.slug}"><span class="mono">${a.type==='hist'?a.y:'NOW'}</span>${esc(a.head)}</a>`).join('')}</div></section>`:''}
+  <p class="mono dim rs-note">Prices are delayed; “—” means no data right now. Headlines link to the original publishers.</p></div>`}
+async function afterResearch(raw){const id=rsId(raw);if(!id)return;const q=rsInst(id);
+  if(q.g==='co'&&typeof Feed.want==='function')Feed.want('companies');
+  const tv=$('#rs-tv');if(tv&&typeof mountTVSymbol==='function')mountTVSymbol(tv,q);
+  const box=$('#rs-news');if(!box)return;
+  if(!LIVE_SITE){box.innerHTML='<p class="dim">Latest headlines load on the live site.</p>';return}
+  try{const r=await fetch(`/api/news?q=${encodeURIComponent(q.name)}&t=${encodeURIComponent(id)}&k=${q.g==='cr'?'crypto':'stock'}`);const j=r.ok?await r.json():{items:[]};if(!box.isConnected)return;
+    const it=(j.items||[]).slice(0,14);
+    box.innerHTML=it.length?`<ol class="rs-nl">${it.map(n=>`<li><a href="${esc(n.link)}" target="_blank" rel="noopener"><b>${esc(n.title)}</b><span class="mono">${esc(n.source||'')}${n.when?' · '+ago(n.when):''}</span></a></li>`).join('')}</ol>`:`<p class="dim">No recent headlines found for ${esc(q.name)}. <a href="${gq(q.name+' news')}" target="_blank" rel="noopener">Search Google News ↗</a></p>`}
+  catch(e){if(box.isConnected)box.innerHTML=`<p class="dim">Headlines are unavailable right now. <a href="${gq(q.name+' news')}" target="_blank" rel="noopener">Search Google News ↗</a></p>`}}
 
 /* ---------- Tools: calculators ---------- */
 const money=(v,d=0)=>isFinite(v)?(v<0?'−':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
@@ -2553,6 +2599,7 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   else if(k==='on-this-date'){html=pageOTD(seg);after=()=>{wireOTD(OTDST,true);setDbStatus()}}
   else if(k==='day'){html=pageDay(seg[1]);after=afterDay}
   else if(k==='search'){html=pageSearch(params);after=afterSearch}
+  else if(k==='research'){html=pageResearch(seg[1]);after=()=>afterResearch(seg[1])}
   else if(k==='blog'){html=pageBlog();after=wireBlog}
   else if(k==='library'&&seg[1]){html=pageLibrary(seg[1]);after=()=>afterLibrary(seg[1])}
   else if(k==='library'){html=pageLibraryIndex();after=wireLibIndex}

@@ -104,8 +104,33 @@ async function section(key: string): Promise<Item[]> {
   return items;
 }
 
+/** Headlines about one company, stock or coin (research pages): /api/news?q=NVIDIA&t=NVDA&k=stock|crypto */
+const clean = (v: string | null, n: number) => (v || '').replace(/[^\p{L}\p{N} .&'\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, n);
+async function about(name: string, ticker: string, kind: string): Promise<Item[]> {
+  const ck = `q:${name}|${ticker}|${kind}`; const hit = cache.get(ck);
+  if (hit && Date.now() - hit.at < 600_000) return hit.items;
+  const extra = kind === 'crypto' ? 'crypto OR price' : 'stock OR shares OR earnings';
+  const qs = [`"${name}" (${extra}) when:7d`, ticker && ticker !== name.toUpperCase() ? `"${ticker}" ${kind === 'crypto' ? 'crypto' : 'stock'} when:7d` : ''].filter(Boolean);
+  const lists = await Promise.all(qs.map((q) => gnews(q).catch(() => [] as Item[])));
+  const seen = new Set<string>(); const items: Item[] = [];
+  const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 80);
+  for (let i = 0; items.length < 16 && i < 30; i++) for (const l of lists) {
+    const it = l[i]; if (!it || !onTopic(it)) continue; const k = norm(it.title); if (seen.has(k)) continue; seen.add(k);
+    items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when });
+  }
+  items.sort((x, y) => +new Date(y.when) - +new Date(x.when));
+  if (items.length) { cache.set(ck, { at: Date.now(), items }); if (cache.size > 400) cache.clear(); }
+  return items.length ? items : hit?.items ?? [];
+}
+
 export async function GET(req: Request) {
-  const key = new URL(req.url).searchParams.get('section') || '';
+  const sp = new URL(req.url).searchParams;
+  const name = clean(sp.get('q'), 60);
+  if (name) {
+    try { return json(await about(name, clean(sp.get('t'), 12).toUpperCase(), sp.get('k') === 'crypto' ? 'crypto' : 'stock')); }
+    catch { return json([]); }
+  }
+  const key = sp.get('section') || '';
   if (FEEDS[key]) {
     const hit = cache.get(key);
     if (hit && Date.now() - hit.at < 600_000) return json(hit.items);
