@@ -13,10 +13,13 @@ Nothing important lives outside it.
 | How the source is turned into production files | `tools/build_experience.py` | `npm run experience:build` |
 | Server-rendered pages (`/files`, `/files/[slug]`, `/day/[date]`, `/blog`, `/admin`) | `app/**/page.tsx`, `components/SiteChrome.tsx` | nothing extra |
 | API routes (prices, news, top stories, country data, newsletter, Time Machine) | `app/api/**/route.ts`, `lib/**` | nothing extra |
-| Article and event content | `content/articles.json`, `content/events.json` | nothing extra (see note below) |
+| Articles | `content/articles.json` (the only place articles are edited) | `npm run experience:build` (copies them into the source's generated article region) and commit the result |
+| Time Machine events | `content/events.json` | nothing extra |
 | Security headers | `next.config.ts` (protected) | nothing extra |
 
 ### Never edit these by hand
+
+The region between `ARTICLES:BEGIN` and `ARTICLES:END` inside `experience/source/market-files.html` is also generated, from `content/articles.json`. Change articles there, not in the region. `npm run experience:check` fails if the region is stale.
 
 These three files are **generated** from `experience/source/market-files.html`.
 Each starts with a `GENERATED … DO NOT EDIT` line, and any manual edit is overwritten
@@ -72,8 +75,6 @@ sitemap, robots, newsletter API logic, admin authentication.
 
 ## Known follow-ups (planned stages, not bugs to fix ad hoc)
 
-- Articles currently also exist inside the source file; `content/articles.json` becomes the single
-  source in Stage 4.
 - Main sections use `#/` links; real URLs arrive in Stage 5.
 
 See `docs/WORKFLOW.md` for the branch → checks → preview → merge process.
