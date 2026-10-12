@@ -63,6 +63,7 @@ if _names(_client) != _names(_server):
 
 # ---------- shell: production copy ----------
 shell = re.sub(r'src="data:image/png;base64,[^"]+"', 'src="/logo-72.png"', shell)
+shell = rep(shell, '<span id="tk-src">SIMULATED</span>', '<span id="tk-src">LIVE · DELAYED</span>')
 
 # ---------- css ----------
 
