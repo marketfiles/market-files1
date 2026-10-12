@@ -9,7 +9,7 @@ const csp = [
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: blob: https:",
   "frame-src https://*.tradingview.com https://www.tradingview-widget.com https://cse.google.com https://*.google.com",
-  "connect-src 'self' https://*.google.com https://*.googleapis.com https://en.wikipedia.org https://tiles.maps.eox.at https://cdn.jsdelivr.net",
+  "connect-src 'self' https://*.google.com https://*.googleapis.com https://en.wikipedia.org https://tiles.maps.eox.at https://tiles.openfreemap.org https://cdn.jsdelivr.net",
   "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",

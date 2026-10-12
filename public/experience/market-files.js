@@ -1145,9 +1145,13 @@ function pfScene(f,el){const img=el||$('#pf-img');if(!img)return;let h=0;for(con
     <linearGradient id="pf3r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C7226"/><stop offset="1" stop-color="#3E2C0C"/></linearGradient>
     <linearGradient id="pf3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1C2"/><stop offset="1" stop-color="#C9A55C"/></linearGradient></defs>
     ${plate}<path class="pfs3-g" d="${ground}"/><g class="pfs3-b">${bld}${mark}</g>${medal}</svg>${flag}</div>`}
+/** Hands a place's coordinates to the production-only 3D city view (MapLibre). In the source preview it is absent, so the illustrated scene stays. */
+function cityHook(host,p,cap,alive){if(typeof window.MF_CITY3D!=='function'||!host)return;const ok=(a,b)=>isFinite(a)&&isFinite(b);
+  const ll=p.c&&ok(p.c.lat,p.c.lon)?[p.c.lat,p.c.lon]:p.cap&&ok(p.cap.lat,p.cap.lon)?[p.cap.lat,p.cap.lon]:cap&&ok(cap.lat,cap.lon)?[cap.lat,cap.lon]:p.k&&ok(p.k[1],p.k[2])?[p.k[1],p.k[2]]:null;
+  if(ll)window.MF_CITY3D(host,ll[0],ll[1],alive)}
 async function profileAfter(p,cap,country){const box=$('[data-pf]');if(!box)return;const f=profileInfo(p,cap,country);const gp=$('#gp'),label=gp&&gp.dataset.label;
-  pfScene(f);const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r){pfScene(f);return}
-  const img=$('#pf-img');if(!img)return;pfScene(f,img);const ph=new Image();ph.className='pfs-ph';ph.alt='Photo: '+f.subject;ph.loading='lazy';ph.referrerPolicy='no-referrer';ph.onload=()=>{if($('#pf-img')===img)img.appendChild(ph)};ph.src=r.src;
+  pfScene(f);cityHook($('#pf-img'),p,cap,()=>$('[data-pf]')===box);const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r)return;
+  const img=$('#pf-img');if(!img)return;const ph=new Image();ph.className='pfs-ph';ph.alt='Photo: '+f.subject;ph.loading='lazy';ph.referrerPolicy='no-referrer';ph.onload=()=>{if($('#pf-img')===img)img.appendChild(ph)};ph.src=r.src;
   const cr=$('#pf-credit');if(cr){cr.href=r.url;cr.hidden=false}}
 
 const EURO=['Germany','France','Italy','Spain','Netherlands','Ireland','Greece','Austria','Belgium','Portugal','Finland','Cyprus'];
@@ -2302,6 +2306,7 @@ function openDossier(p){if(!p||p.type==='Continent')return;const tok=++DOS_TOKEN
    <footer class="dos-ft mono"><span>Sources: public reference works (CC BY-SA) · World Bank · live market feeds</span><button class="btn" data-dosx>← Back to the globe</button></footer></div>`;
   document.documentElement.classList.add('dos-open');if(!d.open)d.showModal();d.scrollTop=0;$$('.dos-c1,.dos-c2,.dos-c3',d).forEach(x=>x.scrollTop=0);attachHolo();
   pfSceneInto($('#dos-hero'),f);
+  cityHook($('#dos-hero'),p,cap,()=>tok===DOS_TOKEN);
   if(window.MF_TV&&mk[0]&&typeof mountTVSymbol==='function'){const el=$('#dos-tv');if(el)setTimeout(()=>mountTVSymbol(el,INSTR.find(x=>x.id===mk[0])),60)}
   hydrateWiki(d);
   (async()=>{const r=await wikiSearch(f.query,4);if(tok!==DOS_TOKEN)return;const a=$('#dos-about');
@@ -2734,6 +2739,37 @@ async function satOn(){const st=$('.gh-stage');if(!st||SAT)return;const b=$('#sa
         new maplibregl.Marker({element:d}).setLngLat([c.lon,c.lat]).addTo(map)})});
     if(b){b.setAttribute('aria-pressed','true');b.classList.add('on')}
   }catch(e){satOff()}}
+/* ---------- 3D city view for profile heroes (Sentinel-2 imagery + OpenStreetMap buildings from OpenFreeMap) ----------
+   Lazy and failure-safe: the illustrated scene stays underneath and only fades out once the map has drawn. */
+const C3D=new WeakMap();
+window.MF_CITY3D=async function(host,lat,lon,alive){
+  if(!host||!isFinite(lat)||!isFinite(lon))return;
+  const ok=await loadMapLibre();if(!ok||!host.isConnected||(alive&&!alive()))return;
+  try{
+    const prev=C3D.get(host);if(prev){try{prev.remove()}catch(e){}C3D.delete(host)}
+    const old=host.querySelector(':scope > .c3d');if(old)old.remove();
+    const el=document.createElement('div');el.className='c3d';el.setAttribute('aria-hidden','true');host.appendChild(el);
+    const map=new maplibregl.Map({container:el,center:[lon,lat],zoom:14.4,pitch:62,bearing:-24,interactive:false,fadeDuration:0,attributionControl:{compact:true},
+      style:{version:8,sources:{
+        s2:{type:'raster',tileSize:256,maxzoom:13,attribution:'Sentinel-2 cloudless by <a href="https://s2maps.eu" target="_blank" rel="noopener">EOX</a>',tiles:['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg']},
+        ofm:{type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}},
+      layers:[{id:'bg',type:'background',paint:{'background-color':'#05060a'}},
+        {id:'s2',type:'raster',source:'s2',paint:{'raster-saturation':-.2,'raster-brightness-max':.92}},
+        {id:'b3d',type:'fill-extrusion',source:'ofm','source-layer':'building',minzoom:13,paint:{
+          'fill-extrusion-color':['interpolate',['linear'],['coalesce',['get','render_height'],10],0,'#8d7d58',40,'#c9a55c',120,'#f0cf7a',250,'#fff1c2'],
+          'fill-extrusion-height':['coalesce',['get','render_height'],8],
+          'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
+          'fill-extrusion-opacity':.93}}]}});
+    C3D.set(host,map);
+    let shown=false,dead=false;
+    const kill=()=>{if(dead)return;dead=true;try{map.remove()}catch(e){}C3D.delete(host);el.remove()};
+    map.on('error',()=>{if(!shown&&!map.loaded())kill()});
+    map.once('idle',()=>{if(dead||(alive&&!alive())){kill();return}shown=true;el.classList.add('on');
+      if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+      let b=-24;const spin=()=>{if(dead||!el.isConnected||(alive&&!alive())){kill();return}b+=.035;map.jumpTo({bearing:b});requestAnimationFrame(spin)};requestAnimationFrame(spin)});
+    setTimeout(()=>{if(!shown)kill()},15000);
+  }catch(e){}
+};
 function wireSatellite(){const ctl=$('.gh-ctl');if(!ctl||$('#sat-btn'))return;const b=document.createElement('button');b.id='sat-btn';b.className='ib gz-cap';b.type='button';b.textContent='Satellite';b.setAttribute('aria-pressed','false');b.title='Satellite imagery (Sentinel-2)';
   b.onclick=()=>{SAT?satOff():satOn()};ctl.appendChild(b)}
 document.addEventListener('click',e=>{if(SAT&&e.target.closest&&e.target.closest('[data-gz="0"]'))satOff()});
