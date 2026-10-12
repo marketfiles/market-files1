@@ -1108,6 +1108,7 @@ dialog.ed{width:min(640px,100vw)}
 
 .pfs{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 100%,rgba(245,196,81,.28),#07080c 70%)}.pfs svg{position:absolute;inset:0;width:100%;height:100%}
 .pfs-grid path{stroke:rgba(245,196,81,.18);stroke-width:.5;fill:none}.pfs-w rect{fill:#FFF1C2;opacity:.8}.pfs-w{animation:pfsw 3.5s ease-in-out infinite alternate}@keyframes pfsw{to{opacity:.35}}
+.c3d{position:absolute;inset:0;z-index:1;opacity:0;transition:opacity .9s ease}.c3d.on{opacity:1}.c3d .maplibregl-ctrl-attrib{font-size:10px;background:rgba(5,6,10,.6)}.c3d .maplibregl-ctrl-attrib a{color:#C9A55C}
 .pfs3 svg polygon{stroke:rgba(255,241,194,.35);stroke-width:.4;stroke-linejoin:round}.pfs3-g{stroke:rgba(245,196,81,.22);stroke-width:.5;fill:none}.pfs3-b{filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
 .pfs-med{animation:pfsfl 4.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 8px rgba(245,196,81,.55))}@keyframes pfsfl{to{transform:translateY(-5px)}}
 .pf-img img.pfs-ph,.dos-hi img.pfs-ph{position:absolute;left:12px;bottom:12px;width:30%;height:auto;aspect-ratio:4/3;object-fit:cover;border:1px solid rgba(245,196,81,.7);box-shadow:0 4px 18px rgba(0,0,0,.6);z-index:2;animation:none;transform:none;filter:none}
@@ -2532,9 +2533,13 @@ function pfScene(f,el){const img=el||$('#pf-img');if(!img)return;let h=0;for(con
     <linearGradient id="pf3r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C7226"/><stop offset="1" stop-color="#3E2C0C"/></linearGradient>
     <linearGradient id="pf3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1C2"/><stop offset="1" stop-color="#C9A55C"/></linearGradient></defs>
     ${plate}<path class="pfs3-g" d="${ground}"/><g class="pfs3-b">${bld}${mark}</g>${medal}</svg>${flag}</div>`}
+/** Hands a place's coordinates to the production-only 3D city view (MapLibre). In the source preview it is absent, so the illustrated scene stays. */
+function cityHook(host,p,cap,alive){if(typeof window.MF_CITY3D!=='function'||!host)return;const ok=(a,b)=>isFinite(a)&&isFinite(b);
+  const ll=p.c&&ok(p.c.lat,p.c.lon)?[p.c.lat,p.c.lon]:p.cap&&ok(p.cap.lat,p.cap.lon)?[p.cap.lat,p.cap.lon]:cap&&ok(cap.lat,cap.lon)?[cap.lat,cap.lon]:p.k&&ok(p.k[1],p.k[2])?[p.k[1],p.k[2]]:null;
+  if(ll)window.MF_CITY3D(host,ll[0],ll[1],alive)}
 async function profileAfter(p,cap,country){const box=$('[data-pf]');if(!box)return;const f=profileInfo(p,cap,country);const gp=$('#gp'),label=gp&&gp.dataset.label;
-  pfScene(f);const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r){pfScene(f);return}
-  const img=$('#pf-img');if(!img)return;pfScene(f,img);const ph=new Image();ph.className='pfs-ph';ph.alt='Photo: '+f.subject;ph.loading='lazy';ph.referrerPolicy='no-referrer';ph.onload=()=>{if($('#pf-img')===img)img.appendChild(ph)};ph.src=r.src;
+  pfScene(f);cityHook($('#pf-img'),p,cap,()=>$('[data-pf]')===box);const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r)return;
+  const img=$('#pf-img');if(!img)return;const ph=new Image();ph.className='pfs-ph';ph.alt='Photo: '+f.subject;ph.loading='lazy';ph.referrerPolicy='no-referrer';ph.onload=()=>{if($('#pf-img')===img)img.appendChild(ph)};ph.src=r.src;
   const cr=$('#pf-credit');if(cr){cr.href=r.url;cr.hidden=false}}
 
 const EURO=['Germany','France','Italy','Spain','Netherlands','Ireland','Greece','Austria','Belgium','Portugal','Finland','Cyprus'];
@@ -3689,6 +3694,7 @@ function openDossier(p){if(!p||p.type==='Continent')return;const tok=++DOS_TOKEN
    <footer class="dos-ft mono"><span>Sources: public reference works (CC BY-SA) · World Bank · live market feeds</span><button class="btn" data-dosx>← Back to the globe</button></footer></div>`;
   document.documentElement.classList.add('dos-open');if(!d.open)d.showModal();d.scrollTop=0;$$('.dos-c1,.dos-c2,.dos-c3',d).forEach(x=>x.scrollTop=0);attachHolo();
   pfSceneInto($('#dos-hero'),f);
+  cityHook($('#dos-hero'),p,cap,()=>tok===DOS_TOKEN);
   if(window.MF_TV&&mk[0]&&typeof mountTVSymbol==='function'){const el=$('#dos-tv');if(el)setTimeout(()=>mountTVSymbol(el,INSTR.find(x=>x.id===mk[0])),60)}
   hydrateWiki(d);
   (async()=>{const r=await wikiSearch(f.query,4);if(tok!==DOS_TOKEN)return;const a=$('#dos-about');

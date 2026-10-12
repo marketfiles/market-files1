@@ -114,6 +114,37 @@ async function satOn(){const st=$('.gh-stage');if(!st||SAT)return;const b=$('#sa
         new maplibregl.Marker({element:d}).setLngLat([c.lon,c.lat]).addTo(map)})});
     if(b){b.setAttribute('aria-pressed','true');b.classList.add('on')}
   }catch(e){satOff()}}
+/* ---------- 3D city view for profile heroes (Sentinel-2 imagery + OpenStreetMap buildings from OpenFreeMap) ----------
+   Lazy and failure-safe: the illustrated scene stays underneath and only fades out once the map has drawn. */
+const C3D=new WeakMap();
+window.MF_CITY3D=async function(host,lat,lon,alive){
+  if(!host||!isFinite(lat)||!isFinite(lon))return;
+  const ok=await loadMapLibre();if(!ok||!host.isConnected||(alive&&!alive()))return;
+  try{
+    const prev=C3D.get(host);if(prev){try{prev.remove()}catch(e){}C3D.delete(host)}
+    const old=host.querySelector(':scope > .c3d');if(old)old.remove();
+    const el=document.createElement('div');el.className='c3d';el.setAttribute('aria-hidden','true');host.appendChild(el);
+    const map=new maplibregl.Map({container:el,center:[lon,lat],zoom:14.4,pitch:62,bearing:-24,interactive:false,fadeDuration:0,attributionControl:{compact:true},
+      style:{version:8,sources:{
+        s2:{type:'raster',tileSize:256,maxzoom:13,attribution:'Sentinel-2 cloudless by <a href="https://s2maps.eu" target="_blank" rel="noopener">EOX</a>',tiles:['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg']},
+        ofm:{type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}},
+      layers:[{id:'bg',type:'background',paint:{'background-color':'#05060a'}},
+        {id:'s2',type:'raster',source:'s2',paint:{'raster-saturation':-.2,'raster-brightness-max':.92}},
+        {id:'b3d',type:'fill-extrusion',source:'ofm','source-layer':'building',minzoom:13,paint:{
+          'fill-extrusion-color':['interpolate',['linear'],['coalesce',['get','render_height'],10],0,'#8d7d58',40,'#c9a55c',120,'#f0cf7a',250,'#fff1c2'],
+          'fill-extrusion-height':['coalesce',['get','render_height'],8],
+          'fill-extrusion-base':['coalesce',['get','render_min_height'],0],
+          'fill-extrusion-opacity':.93}}]}});
+    C3D.set(host,map);
+    let shown=false,dead=false;
+    const kill=()=>{if(dead)return;dead=true;try{map.remove()}catch(e){}C3D.delete(host);el.remove()};
+    map.on('error',()=>{if(!shown&&!map.loaded())kill()});
+    map.once('idle',()=>{if(dead||(alive&&!alive())){kill();return}shown=true;el.classList.add('on');
+      if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+      let b=-24;const spin=()=>{if(dead||!el.isConnected||(alive&&!alive())){kill();return}b+=.035;map.jumpTo({bearing:b});requestAnimationFrame(spin)};requestAnimationFrame(spin)});
+    setTimeout(()=>{if(!shown)kill()},15000);
+  }catch(e){}
+};
 function wireSatellite(){const ctl=$('.gh-ctl');if(!ctl||$('#sat-btn'))return;const b=document.createElement('button');b.id='sat-btn';b.className='ib gz-cap';b.type='button';b.textContent='Satellite';b.setAttribute('aria-pressed','false');b.title='Satellite imagery (Sentinel-2)';
   b.onclick=()=>{SAT?satOff():satOn()};ctl.appendChild(b)}
 document.addEventListener('click',e=>{if(SAT&&e.target.closest&&e.target.closest('[data-gz="0"]'))satOff()});
