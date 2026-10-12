@@ -49,13 +49,15 @@ const gnews = (q: string) => rss(`https://news.google.com/rss/search?q=${encodeU
 
 const cnbc = (id: string) => `https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=${id}`;
 // cap: most stories one publisher may contribute to a section, so a frequent publisher cannot fill the page.
-const FEEDS: Record<string, { feeds: [string, string][]; google: string; cap?: number; block?: RegExp }> = {
+const FEEDS: Record<string, { feeds: [string, string][]; google: string | string[]; cap?: number; block?: RegExp }> = {
   // Market-moving news only: markets, the economy, central banks, trade and geopolitics. No personal-finance advice columns.
   markets: { feeds: [[cnbc('100003114'), 'CNBC'], [cnbc('20910258'), 'CNBC'], [cnbc('10000664'), 'CNBC'], ['https://feeds.content.dowjones.io/public/rss/mw_marketpulse', 'MarketWatch'], ['https://feeds.content.dowjones.io/public/rss/mw_bulletins', 'MarketWatch'], [cnbc('100727362'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
     google: '(stocks OR "Wall Street" OR "Federal Reserve" OR "Treasury yields" OR tariffs OR "oil prices" OR "trade war" OR sanctions OR inflation) when:1d' },
   global: { feeds: [[cnbc('100727362'), 'CNBC'], ['https://feeds.bbci.co.uk/news/business/rss.xml', 'BBC News'], ['https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC News'], ['https://www.theguardian.com/business/economics/rss', 'The Guardian'], [cnbc('20910258'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
     google: '("central bank" OR "global economy" OR tariffs OR sanctions OR election OR "trade deal" OR OPEC OR currency) when:1d' },
-  crypto: { feeds: [['https://www.coindesk.com/arc/outboundfeeds/rss/', 'CoinDesk'], ['https://cointelegraph.com/rss', 'Cointelegraph'], ['https://decrypt.co/feed', 'Decrypt'], ['https://www.theblock.co/rss.xml', 'The Block'], ['https://cryptoslate.com/feed/', 'CryptoSlate'], ['https://blockworks.com/feed', 'Blockworks']], google: 'bitcoin OR ethereum OR crypto OR ETF OR stablecoin when:1d', cap: 3,
+  crypto: { feeds: [['https://www.coindesk.com/arc/outboundfeeds/rss/', 'CoinDesk'], ['https://cointelegraph.com/rss', 'Cointelegraph'], ['https://decrypt.co/feed', 'Decrypt'], ['https://www.theblock.co/rss.xml', 'The Block'], ['https://cryptoslate.com/feed/', 'CryptoSlate'], ['https://blockworks.com/feed', 'Blockworks'], ['https://blog.kraken.com/feed', 'Kraken']],
+    // Coinbase, Binance and Hyperliquid publish no RSS feed, so exchange news comes through a targeted Google News query.
+    google: ['bitcoin OR ethereum OR crypto OR ETF OR stablecoin when:1d', '(Coinbase OR Binance OR Kraken OR Hyperliquid OR OKX OR Bybit) (listing OR launch OR announces OR outage OR hack OR volume) when:2d'], cap: 3,
     // Price-data sites are not news: keep them out of the story list (their prices are still credited on the price tables).
     block: /coinmarketcap|coingecko|coin market cap/i },
   companies: { feeds: [[cnbc('15839135'), 'CNBC'], [cnbc('10001147'), 'CNBC'], ['https://www.theguardian.com/business/rss', 'The Guardian'], ['https://finance.yahoo.com/news/rssindex', 'Yahoo Finance']], google: 'earnings OR CEO OR merger OR acquisition when:1d' },
@@ -92,7 +94,7 @@ const json = (items: Item[]) => Response.json({ items }, { headers: { 'cache-con
 
 async function section(key: string): Promise<Item[]> {
   const cfg = FEEDS[key];
-  const lists = await Promise.all([...cfg.feeds.map(([u, s]) => rss(u, s).catch(() => [] as Item[])), gnews(cfg.google).catch(() => [] as Item[])]);
+  const lists = await Promise.all([...cfg.feeds.map(([u, s]) => rss(u, s).catch(() => [] as Item[])), ...[cfg.google].flat().map((q) => gnews(q).catch(() => [] as Item[]))]);
   const dayAgo = Date.now() - 48 * 3600_000;
   const seen = new Set<string>(); const items: Item[] = [];
   const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 80);
