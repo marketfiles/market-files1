@@ -54,8 +54,6 @@ async function yahoo(id: string, range: Range): Promise<Chart | null> {
 const CI: Record<Range, [string, number][]> = { '1d': [['5M', 6]], '5d': [['15M', 9], ['5M', 9]], '1mo': [['1H', 35], ['1D', 35]], '6mo': [['1D', 190]], '1y': [['1D', 370]], '5y': [['1W', 1830], ['1D', 1830]] };
 const etStamp = (d: Date) => { const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).formatToParts(d); const g = (t: string) => p.find((x) => x.type === t)?.value || '00'; return `${g('year')}${g('month')}${g('day')}${g('hour')}${g('minute')}${g('second')}`; };
 type Bar = { tradeTimeinMills?: string | number; tradeTime?: string; close?: string | number };
-export const CNBC_DEBUG: string[] = [];
-const dbg = (m: string) => { CNBC_DEBUG.push(m.slice(0, 400)); if (CNBC_DEBUG.length > 12) CNBC_DEBUG.shift(); };
 const dayStamp = (d: Date) => etStamp(d).slice(0, 8) + '000000';
 async function cnbc(id: string, range: Range): Promise<Chart | null> {
   const sym = cnbcSymbol(id); if (!sym) return null;
@@ -64,11 +62,9 @@ async function cnbc(id: string, range: Range): Promise<Chart | null> {
       const url = `https://ts-api.cnbc.com/harmony/app/bars/${encodeURIComponent(sym)}/${iv}/${dayStamp(new Date(Date.now() - days * 864e5))}/${dayStamp(new Date(Date.now() + 864e5))}/adjusted/EST5EDT.json`;
       const r = await fetch(url, { headers: H, cache: 'no-store', signal: AbortSignal.timeout(8000) });
       const txt = await r.text();
-      if (!r.ok) { dbg(`${r.status} ${url} ${txt.slice(0, 120)}`); continue; }
-      let j: any; try { j = JSON.parse(txt); } catch { dbg(`not json ${url} ${txt.slice(0, 120)}`); continue; }
+      if (!r.ok) continue;
+      let j: any; try { j = JSON.parse(txt); } catch { continue; }
       const bars: Bar[] = j?.barData?.priceBars || [];
-      if (bars.length < 2) dbg(`bars=${bars.length} keys=${Object.keys(j || {}).join(',')} ${url} ${txt.slice(0, 200)}`);
-      else dbg(`ok ${bars.length} sample=${JSON.stringify(bars[bars.length - 1]).slice(0, 220)}`);
       let pts = bars.map((b) => [Math.round(+(b.tradeTimeinMills ?? 0) / 1000), +String(b.close ?? '').replace(/,/g, ''), String(b.tradeTime || '').slice(0, 8)] as [number, number, string])
         .filter((p) => p[0] > 0 && isFinite(p[1]) && p[1] > 0).sort((a, b) => a[0] - b[0]);
       if (pts.length < 2) continue;
@@ -81,7 +77,7 @@ async function cnbc(id: string, range: Range): Promise<Chart | null> {
         if (pts.length < 2) continue;
       }
       return { id, range, prev, points: pts.map((p) => [p[0], p[1]] as [number, number]), source: `CNBC · ${sym} · delayed` };
-    } catch (e) { dbg(`err ${String(e).slice(0, 120)}`); }
+    } catch { /* next interval */ }
   }
   return null;
 }
@@ -102,5 +98,5 @@ export async function getChart(id: string, range: Range): Promise<Chart | null> 
 /** For /status: which chart source answers right now. */
 export async function probeChartSources() {
   const [y, c] = await Promise.all([yahoo('SPX', '1d'), cnbc('SPX', '1d')]);
-  return { yahoo: { ok: !!y, points: y?.points.length ?? 0 }, cnbc: { ok: !!c, points: c?.points.length ?? 0, note: CNBC_DEBUG.slice(-4).join(' || ') } };
+  return { yahoo: { ok: !!y, points: y?.points.length ?? 0 }, cnbc: { ok: !!c, points: c?.points.length ?? 0 } };
 }
