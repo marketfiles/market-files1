@@ -83,6 +83,12 @@ test('server-rendered pages respond', async ({ request }) => {
   }
 });
 
+test('sitemap lists the main sections', async ({ request }) => {
+  const xml = await (await request.get('/sitemap.xml')).text();
+  for (const path of ['/markets', '/crypto', '/history', '/companies']) expect(xml, path).toContain(path + '<');
+  expect(xml).not.toMatch(/\/(search|research|timeline)</);
+});
+
 test('API routes respond with JSON', async ({ request }) => {
   // External feeds may be unreachable in CI; we only require a well-formed answer.
   for (const path of ['/api/quotes', '/api/news', '/api/top', '/api/country?iso=JP', '/api/tm']) {
