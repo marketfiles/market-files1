@@ -124,7 +124,7 @@ window.MF_CITY3D=async function(host,lat,lon,alive){
     const prev=C3D.get(host);if(prev){try{prev.remove()}catch(e){}C3D.delete(host)}
     const old=host.querySelector(':scope > .c3d');if(old)old.remove();
     const el=document.createElement('div');el.className='c3d';el.setAttribute('aria-hidden','true');host.appendChild(el);
-    const map=new maplibregl.Map({container:el,center:[lon,lat],zoom:14.4,pitch:62,bearing:-24,interactive:false,fadeDuration:0,attributionControl:{compact:true},
+    const map=new maplibregl.Map({container:el,center:[lon,lat],zoom:14.4,pitch:62,maxPitch:70,bearing:-24,interactive:false,fadeDuration:0,attributionControl:{compact:true},
       style:{version:8,sources:{
         s2:{type:'raster',tileSize:256,maxzoom:13,attribution:'Sentinel-2 cloudless by <a href="https://s2maps.eu" target="_blank" rel="noopener">EOX</a>',tiles:['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg']},
         ofm:{type:'vector',url:'https://tiles.openfreemap.org/planet',attribution:'<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}},
@@ -137,11 +137,12 @@ window.MF_CITY3D=async function(host,lat,lon,alive){
           'fill-extrusion-opacity':.93}}]}});
     C3D.set(host,map);
     let shown=false,dead=false;
+    const dlg=host.closest('dialog');const gone=()=>dead||!el.isConnected||(alive&&!alive())||(dlg&&!dlg.open);
     const kill=()=>{if(dead)return;dead=true;try{map.remove()}catch(e){}C3D.delete(host);el.remove()};
-    map.on('error',()=>{if(!shown&&!map.loaded())kill()});
-    map.once('idle',()=>{if(dead||(alive&&!alive())){kill();return}shown=true;el.classList.add('on');
+    map.on('error',e=>{if(!shown&&!(e&&e.tile))kill()});
+    map.once('idle',()=>{if(gone()){kill();return}shown=true;el.classList.add('on');
       if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-      let b=-24;const spin=()=>{if(dead||!el.isConnected||(alive&&!alive())){kill();return}b+=.035;map.jumpTo({bearing:b});requestAnimationFrame(spin)};requestAnimationFrame(spin)});
+      let b=-24;const spin=()=>{if(gone()){kill();return}b+=.035;map.jumpTo({bearing:b});requestAnimationFrame(spin)};requestAnimationFrame(spin)});
     setTimeout(()=>{if(!shown)kill()},15000);
   }catch(e){}
 };
