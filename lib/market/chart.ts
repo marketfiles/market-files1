@@ -87,13 +87,16 @@ async function cnbc(id: string, range: Range): Promise<Chart | null> {
 }
 
 const cache = new Map<string, { at: number; c: Chart | null }>();
+const MISS_TTL = 20_000; // a failed lookup is retried after 20 seconds, never remembered for long
 export async function getChart(id: string, range: Range): Promise<Chart | null> {
   const k = `${id}|${range}`, ttl = range === '1d' || range === '5d' ? 60_000 : 30 * 60_000, hit = cache.get(k);
-  if (hit && Date.now() - hit.at < ttl) return hit.c;
-  const c = (await cnbc(id, range)) || (await yahoo(id, range));
-  if (c || !hit) cache.set(k, { at: Date.now(), c });
+  if (hit && Date.now() - hit.at < (hit.c ? ttl : MISS_TTL)) return hit.c;
+  // CNBC occasionally drops a request: try it twice before falling back to Yahoo.
+  const c = (await cnbc(id, range)) || (await cnbc(id, range)) || (await yahoo(id, range));
+  if (c) cache.set(k, { at: Date.now(), c });
+  else if (!hit?.c) cache.set(k, { at: Date.now(), c: null });
   if (cache.size > 1500) cache.clear();
-  return c ?? hit?.c ?? null;
+  return c ?? hit?.c ?? null; // keep showing the last good chart if a refresh fails
 }
 
 /** For /status: which chart source answers right now. */
