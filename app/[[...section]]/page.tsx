@@ -1,6 +1,9 @@
 import Script from 'next/script';
-import { SHELL_HTML } from './experience-shell';
+import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import { SHELL_HTML } from '../experience-shell';
 import { siteUrl } from '@/lib/content';
+import { SECTION_TITLES, isSectionPath } from '@/lib/sections';
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -13,7 +16,19 @@ function pfps() {
 
 export const dynamic = 'force-dynamic';
 
-export default function Home() {
+type Props = { params: Promise<{ section?: string[] }> };
+
+/** Home page and the main sections share one interactive page; the client reads the path to choose the view. */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { section } = await params;
+  if (!section?.length) return {};
+  const title = SECTION_TITLES[section[0]];
+  return { ...(title ? { title } : {}), alternates: { canonical: '/' + section.map(encodeURIComponent).join('/') } };
+}
+
+export default async function Home({ params }: Props) {
+  const { section } = await params;
+  if (section?.length && !isSectionPath(section[0])) notFound();
   const config = {
     siteUrl: siteUrl(),
     market: 'live', // production never shows simulated prices

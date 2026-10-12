@@ -36,23 +36,44 @@ test('homepage loads with navigation, globe and biggest-stories band', async ({ 
 });
 
 const SECTIONS: [string, string][] = [
-  ['#/markets', '.fr-t'],
-  ['#/global-finance', '.fr-t'],
-  ['#/crypto', '.fr-t'],
-  ['#/companies', '#co-tbl'],
-  ['#/history', '.fr-t'],
-  ['#/dashboard', '#dash'],
-  ['#/tools', '.calc'],
-  ['#/newsletter', 'input[type="email"]'],
+  ['/markets', '.fr-t'],
+  ['/global-finance', '.fr-t'],
+  ['/crypto', '.fr-t'],
+  ['/companies', '#co-tbl'],
+  ['/history', '.fr-t'],
+  ['/dashboard', '#dash'],
+  ['/tools', '.calc'],
+  ['/newsletter', 'input[type="email"]'],
 ];
-for (const [hash, selector] of SECTIONS) {
-  test(`section ${hash} opens`, async ({ page }) => {
+for (const [path, selector] of SECTIONS) {
+  test(`section ${path} opens at its real URL`, async ({ page }) => {
     const errors = watchErrors(page);
-    await page.goto('/' + hash);
+    await page.goto(path);
     await expect(page.locator(selector).first()).toBeAttached({ timeout: 15_000 });
     expect(errors, errors.join('\n')).toEqual([]);
   });
 }
+
+test('old #/ links redirect to the real URL', async ({ page }) => {
+  await page.goto('/#/markets');
+  await expect(page).toHaveURL(/\/markets$/);
+  await expect(page.locator('.fr-t').first()).toBeAttached({ timeout: 15_000 });
+});
+
+test('nav links use real URLs and the back button returns home', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#nav-links a', { hasText: 'Crypto' }).first().click();
+  await expect(page).toHaveURL(/\/crypto$/);
+  await expect(page.locator('.fr-t').first()).toBeAttached({ timeout: 15_000 });
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.locator('canvas#globe')).toBeVisible();
+});
+
+test('section paths respond 200 and unknown paths 404', async ({ request }) => {
+  for (const path of ['/markets', '/crypto', '/history', '/library/gold']) expect((await request.get(path)).status(), path).toBe(200);
+  expect((await request.get('/not-a-real-page')).status()).toBe(404);
+});
 
 test('server-rendered pages respond', async ({ request }) => {
   for (const path of ['/files', '/files/black-monday-1987', '/day/1987-10-19', '/blog', '/sitemap.xml', '/robots.txt']) {

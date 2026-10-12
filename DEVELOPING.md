@@ -11,6 +11,7 @@ Nothing important lives outside it.
 | Live-price behaviour in production | `tools/livefeed.js` (protected) | `npm run experience:build` |
 | TradingView, Google search and satellite-globe code that only runs in production | `tools/production.js` (protected) | `npm run experience:build` |
 | How the source is turned into production files | `tools/build_experience.py` | `npm run experience:build` |
+| Which sections get real URLs (`/markets`, `/crypto`, …) | `REAL_PATHS` in `experience/source/market-files.html` **and** `SECTION_PATHS` in `lib/sections.ts` (same names, same order; `experience:check` fails if they differ) | `npm run experience:build` |
 | Server-rendered pages (`/files`, `/files/[slug]`, `/day/[date]`, `/blog`, `/admin`) | `app/**/page.tsx`, `components/SiteChrome.tsx` | nothing extra |
 | API routes (prices, news, top stories, country data, newsletter, Time Machine) | `app/api/**/route.ts`, `lib/**` | nothing extra |
 | Articles | `content/articles.json` (the only place articles are edited) | `npm run experience:build` (copies them into the source's generated article region) and commit the result |
@@ -47,6 +48,12 @@ Vercel deployment
 - CI runs `npm run experience:check` in the **Build** check. If someone edits the source without
   regenerating, or edits a generated file by hand, the check fails and names the stale file.
 
+## Real URLs
+
+The main sections live at real paths (`/markets`, `/global-finance`, `/crypto`, `/companies`, `/history`, `/library`, `/archive`, `/dashboard`, `/tools`, `/newsletter`, …). The home page and these sections are served by `app/[[...section]]/page.tsx`, and the client reads the path to choose the view. Old `#/markets`-style links are redirected to the real path. Pages that already have their own URL (`/files`, `/day`, `/blog`) and article/interactive views (`#/file/...`) keep their current URLs. Unknown paths return a 404.
+
+To add a section, add it to `REAL_PATHS` in the source and `SECTION_PATHS` in `lib/sections.ts`.
+
 ## Commands
 
 | Command | What it does |
@@ -75,6 +82,5 @@ sitemap, robots, newsletter API logic, admin authentication.
 
 ## Known follow-ups (planned stages, not bugs to fix ad hoc)
 
-- Main sections use `#/` links; real URLs arrive in Stage 5.
 
 See `docs/WORKFLOW.md` for the branch → checks → preview → merge process.
