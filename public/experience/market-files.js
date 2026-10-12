@@ -1313,6 +1313,7 @@ function openInst(id){const q=INSTR.find(x=>x.id===id);if(!q)return;const c=chg(
   <dl class="side-s"><dt>Prior close</dt><dd class="mono">${q.na?'—':q.prev.toLocaleString('en-US',{maximumFractionDigits:q.dp})}</dd><dt>Range</dt><dd class="mono">${q.na?'—':Math.min(...ser).toLocaleString('en-US',{maximumFractionDigits:q.dp})+' – '+Math.max(...ser).toLocaleString('en-US',{maximumFractionDigits:q.dp})}</dd><dt>Session</dt><dd><span class="sess ${s.c}"><i></i>${s.t}</span></dd>${q.sup?`<dt>Market cap</dt><dd class="mono" data-mc="${q.id}">${fmtCap(mcap(q))}</dd>`:''}<dt>Data</dt><dd class="mono">${Feed.name}</dd></dl>
   <div class="side-a"><a class="btn btn-p" href="#/research/${encodeURIComponent(q.id)}" data-x>Latest news &amp; research →</a><a class="btn" href="${tvUrl(q.id)}" target="_blank" rel="noopener">Open in TradingView ↗</a>${CMC[q.id]?`<a class="btn" href="${cmcUrl(q.id)}" target="_blank" rel="noopener">CoinMarketCap ↗</a>`:''}<a class="btn" href="${aiHref(`What drives ${q.name} and what is its history?`)}" data-x>✦ Research</a></div>
   <div class="side-r"><h3 class="mono">FROM THE MARKET FILES</h3>${rel.length?rel.map(a=>`<a href="#/file/${a.slug}" data-x><span class="mono">${a.type==='hist'?a.y:'NOW'}</span>${esc(a.head)}</a>`).join(''):`<p class="dim">No files tagged to ${esc(q.name)} yet. <a href="#/search?q=${encodeURIComponent(q.name)}" data-x>Search the archive</a>.</p>`}</div>`;
+  if(q.g==='co')coAbout(q);
   const d=$('#inst');if(!d.open)d.showModal();if(window.MF_TV)mountTVSymbol($('#tv-sym'),q)}
 
 /* ---------- command palette ---------- */
@@ -2004,6 +2005,13 @@ async function wikiSearch(q,sent=3){const k=q+'|'+sent;if(k in WS)return WS[k];l
     const j=await (await fetch(u)).json();const p=j.query&&Object.values(j.query.pages)[0];
     if(p)r={title:p.title,extract:(p.extract||'').replace(/\s*\([^()]*\)/,'').trim(),img:p.thumbnail?p.thumbnail.source:null,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_'))}}catch(e){}
   return WS[k]=r}
+
+/* Company 'about' block in the detail panel: Wikipedia photo/logo and a two-sentence summary, shown only when the article's title matches the company. */
+async function coAbout(q){const r=await wikiSearch(q.name+' company',2);const first=q.name.split(/[ .,’']/)[0].toLowerCase();
+  if(!r||!r.extract||!r.title.toLowerCase().includes(first))return;
+  const v=$('#inst-b .side-v'),h=$('#inst-b .side-h');if(!v||!h||v.dataset.id!==q.id||$('#inst-b .co-ab'))return;
+  h.insertAdjacentHTML('afterend',`<div class="co-ab">${r.img?`<img src="${esc(r.img)}" alt="${esc(r.title)}" loading="lazy" referrerpolicy="no-referrer">`:''}<p>${esc(r.extract)}</p><a class="mono" href="${esc(r.url)}" target="_blank" rel="noopener">Wikipedia · ${esc(r.title)} ↗</a></div>`);
+  const im=$('#inst-b .co-ab img');if(im)im.onerror=()=>im.remove()}
 
 /* ---------- section fronts (newspaper layout) ---------- */
 const FRONTS={
