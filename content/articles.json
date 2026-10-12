@@ -93,7 +93,25 @@
    "note": "Illustrative placeholder. Event-specific archival image pending provenance and rights review."
   },
   "alt": "Illustrative plate for: Wall Street reopens after ten days of financial panic",
-  "plate": "exchange"
+  "plate": "exchange",
+  "facts": [
+   [
+    "Closed",
+    "Sep 20, 1873"
+   ],
+   [
+    "Reopened",
+    "Sep 30, 1873"
+   ],
+   [
+    "Days shut",
+    "10"
+   ],
+   [
+    "Contraction",
+    "65 months"
+   ]
+  ]
  },
  {
   "slug": "buttonwood-agreement-1792",

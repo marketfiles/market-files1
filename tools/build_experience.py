@@ -16,6 +16,31 @@ CHECK = '--check' in sys.argv[1:]
 SOURCE = pathlib.Path(args[0]) if args else root / 'experience' / 'source' / 'market-files.html'
 src = SOURCE.read_text()
 
+# ---------- articles: content/articles.json is the single source ----------
+# The source file keeps a generated mirror of the real articles between these markers so it
+# still opens on its own in a browser. Edit content/articles.json, never the region.
+ART_BEGIN = '/* ARTICLES:BEGIN generated from content/articles.json - do not edit here; edit that file, then run: npm run experience:build */'
+ART_END = '/* ARTICLES:END */'
+def articles_region():
+    arts = json.loads((root / 'content' / 'articles.json').read_text())
+    lines = []
+    for a in arts:
+        line = json.dumps({'type': 'hist', **a}, ensure_ascii=False, separators=(',', ':'))
+        assert '</' not in line, 'article contains </ and cannot be embedded in a script: ' + a['slug']
+        lines.append(line + ',')
+    return ART_BEGIN + '\n' + '\n'.join(lines) + '\n' + ART_END
+_m = re.search(re.escape(ART_BEGIN) + r'\n(?:.*?\n)?' + re.escape(ART_END), src, re.S)
+assert _m, 'missing ARTICLES:BEGIN/END markers in the source'
+_synced = src[:_m.start()] + articles_region() + src[_m.end():]
+if _synced != src:
+    if CHECK:
+        print('The article region of experience/source/market-files.html is out of date with content/articles.json.')
+        print('Run: npm run experience:build  (and commit the result)')
+        sys.exit(1)
+    if not args:
+        SOURCE.write_text(_synced)
+    src = _synced
+
 css = re.search(r'<style>(.*?)</style>', src, re.S).group(1)
 body = src.split('<body>', 1)[1]
 shell, rest = body.split('<script>\n/* =====', 1)

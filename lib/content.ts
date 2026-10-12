@@ -10,6 +10,7 @@ export interface Article {
   head: string; deck: string; status: Status; research: boolean; body: [string, string][];
   keyDates: [string, string][]; inst: string[]; people: string[]; assets: string[]; countries: string[];
   crisis: string; sources: SourceRecord[]; img: { status: string; note: string }; alt: string; plate: string;
+  facts?: [string, string][];
 }
 export interface TMEvent {
   id: string; date: string; desk: Exclude<DeskKey, 'hub'>; head: string; status: Exclude<Status, 'sample'>;
