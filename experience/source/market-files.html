@@ -1108,6 +1108,10 @@ dialog.ed{width:min(640px,100vw)}
 
 .pfs{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 100%,rgba(245,196,81,.28),#07080c 70%)}.pfs svg{position:absolute;inset:0;width:100%;height:100%}
 .pfs-grid path{stroke:rgba(245,196,81,.18);stroke-width:.5;fill:none}.pfs-w rect{fill:#FFF1C2;opacity:.8}.pfs-w{animation:pfsw 3.5s ease-in-out infinite alternate}@keyframes pfsw{to{opacity:.35}}
+.pfs3 svg polygon{stroke:rgba(255,241,194,.35);stroke-width:.4;stroke-linejoin:round}.pfs3-g{stroke:rgba(245,196,81,.22);stroke-width:.5;fill:none}.pfs3-b{filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+.pfs-med{animation:pfsfl 4.5s ease-in-out infinite alternate;filter:drop-shadow(0 0 8px rgba(245,196,81,.55))}@keyframes pfsfl{to{transform:translateY(-5px)}}
+.pf-img img.pfs-ph,.dos-hi img.pfs-ph{position:absolute;left:12px;bottom:12px;width:30%;height:auto;aspect-ratio:4/3;object-fit:cover;border:1px solid rgba(245,196,81,.7);box-shadow:0 4px 18px rgba(0,0,0,.6);z-index:2;animation:none;transform:none;filter:none}
+@media(prefers-reduced-motion:reduce){.pfs-med{animation:none}}
 .pfs-flag{position:absolute;top:12px;right:12px;width:44px;border:1px solid rgba(245,196,81,.6);box-shadow:0 0 14px rgba(245,196,81,.35);filter:saturate(.8)}
 .pfs-n{position:absolute;left:14px;top:12px;font:500 24px/1.1 var(--serif);background:linear-gradient(90deg,#F5C451,#FFF1C2,#C9A55C);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:70%}
 .pfs-r{position:absolute;left:14px;top:46px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#F5C451}
@@ -2496,15 +2500,33 @@ function profileBlock(p,cap,country){if(p.type==='Continent')return '';const f=p
     <div class="pf-g"><span class="mono dim gp-k">LEARN MORE ON GOOGLE</span><div class="gp-chips">${gl.map(([q,l])=>`<a class="tag tag-g" href="${gq(q)}" target="_blank" rel="noopener">${esc(l)} ↗</a>`).join('')}</div></div></div>`}
 
 /** Holographic gold skyline used when no photo is available for a place. */
-function pfScene(f,el){const img=el||$('#pf-img');if(!img)return;let h=0;for(const c of f.subject)h=(h*31+c.charCodeAt(0))>>>0;const rnd=()=>(h=(h*1664525+1013904223)>>>0)/4294967296;
-  let x=0,bl='',wi='';while(x<400){const w=14+rnd()*26,ht=40+rnd()*(rnd()>.8?120:70);bl+=`<rect x="${x.toFixed(1)}" y="${(200-ht).toFixed(1)}" width="${(w-2).toFixed(1)}" height="${ht.toFixed(1)}"/>`;
-    for(let yy=200-ht+6;yy<194;yy+=9)for(let xx=x+3;xx<x+w-6;xx+=6)if(rnd()>.55)wi+=`<rect x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" width="2" height="3"/>`;x+=w}
-  if(rnd()>.4)bl+=`<rect x="${(150+rnd()*100).toFixed(0)}" y="30" width="2" height="60"/>`;
+function pfScene(f,el){const img=el||$('#pf-img');if(!img)return;let h=0;for(const c of f.subject+(f.iso||''))h=(h*31+c.charCodeAt(0))>>>0;const rnd=()=>(h=(h*1664525+1013904223)>>>0)/4294967296;
+  /* 3D isometric scene: a block of towers (deterministic per place) with a landmark that says what the place is:
+     capital = domed hall, financial center = tall spire with a rising chart, country/other = flagpole. Currency medal floats above. */
+  const N=7,TW=44,TH=22,CX=200,CY=72,role=f.role||'';const isCap=/capital/i.test(role),isFin=/financial/i.test(role);
+  const cells=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++){const d=Math.hypot(i-3,j-3);let ht=6+rnd()*(30-d*3.2)+(rnd()>.86?26:0);if(d>3.6)ht=2+rnd()*5;cells.push({i,j,ht:Math.max(3,ht),w:.8+rnd()*.14})}
+  const P=(i,j,z)=>[CX+(i-j)*TW/2,CY+(i+j)*TH/2-z];
+  const poly=(pts,fill,op)=>`<polygon points="${pts.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')}" fill="${fill}"${op?` fill-opacity="${op}"`:''}/>`;
+  let ground='';for(let i=0;i<=N;i++){const a1=P(i,0,0),b1=P(i,N,0),a2=P(0,i,0),b2=P(N,i,0);ground+=`M${a1[0].toFixed(1)} ${a1[1].toFixed(1)}L${b1[0].toFixed(1)} ${b1[1].toFixed(1)}M${a2[0].toFixed(1)} ${a2[1].toFixed(1)}L${b2[0].toFixed(1)} ${b2[1].toFixed(1)}`}
+  const plate=poly([P(0,0,0),P(N,0,0),P(N,N,0),P(0,N,0)],'#1a1408',.9);
+  cells.sort((x,y)=>(x.i+x.j)-(y.i+y.j));
+  let bld='';for(const c of cells){if(c.i===3&&c.j===3)continue;const ins=(1-c.w)/2,i0=c.i+ins,i1=c.i+1-ins,j0=c.j+ins,j1=c.j+1-ins,z=c.ht;
+    bld+=poly([P(i0,j1,z),P(i1,j1,z),P(i1,j1,0),P(i0,j1,0)],'url(#pf3l)')+poly([P(i1,j1,z),P(i1,j0,z),P(i1,j0,0),P(i1,j1,0)],'url(#pf3r)')+poly([P(i0,j0,z),P(i1,j0,z),P(i1,j1,z),P(i0,j1,z)],'url(#pf3t)')}
+  let mark='';const cx0=3.5,cy0=3.5;
+  if(isFin){const z=88;mark=poly([P(2.7,4.3,z*.0),P(4.3,4.3,0),P(4.3,4.3,z),P(2.7,4.3,z)],'url(#pf3l)')+poly([P(4.3,4.3,z),P(4.3,2.7,z),P(4.3,2.7,0),P(4.3,4.3,0)],'url(#pf3r)')+poly([P(2.7,2.7,z),P(4.3,2.7,z),P(4.3,4.3,z),P(2.7,4.3,z)],'url(#pf3t)')+`<path d="M${P(3.5,3.5,z)[0]} ${P(3.5,3.5,z)[1]}L${P(3.5,3.5,z+26)[0]} ${P(3.5,3.5,z+26)[1]}" stroke="#FFF1C2" stroke-width="2"/>`}
+  else if(isCap){const z=46;mark=poly([P(2.6,4.4,z),P(4.4,4.4,z),P(4.4,4.4,0),P(2.6,4.4,0)],'url(#pf3l)')+poly([P(4.4,4.4,z),P(4.4,2.6,z),P(4.4,2.6,0),P(4.4,4.4,0)],'url(#pf3r)')+poly([P(2.6,2.6,z),P(4.4,2.6,z),P(4.4,4.4,z),P(2.6,4.4,z)],'url(#pf3t)')+(()=>{const c=P(3.5,3.5,z);return `<ellipse cx="${c[0].toFixed(1)}" cy="${c[1].toFixed(1)}" rx="19" ry="9.5" fill="#FFE8A3" fill-opacity=".9"/><path d="M${(c[0]-19).toFixed(1)} ${c[1].toFixed(1)}A19 22 0 0 1 ${(c[0]+19).toFixed(1)} ${c[1].toFixed(1)}Z" fill="url(#pf3d)"/><path d="M${c[0].toFixed(1)} ${(c[1]-22).toFixed(1)}v-12" stroke="#FFF1C2" stroke-width="2"/>`})()}
+  else{const b=P(3.5,3.5,0),t=P(3.5,3.5,70);mark=`<path d="M${b[0].toFixed(1)} ${b[1].toFixed(1)}L${t[0].toFixed(1)} ${t[1].toFixed(1)}" stroke="#FFF1C2" stroke-width="2.4"/><path d="M${t[0].toFixed(1)} ${t[1].toFixed(1)}l30 7l-30 8z" fill="#F5C451"/>`}
+  const db=f.db,sym=db?(db.sym&&db.sym.length<=2?db.sym:db.code):'',medal=sym?`<g transform="translate(${isFin?318:200} ${isFin?44:28})"><g class="pfs-med"><circle r="21" fill="#2a1f08" stroke="#F5C451" stroke-width="2.5"/><circle r="16.5" fill="none" stroke="#FFE8A3" stroke-opacity=".6"/><text y="6" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-weight="600" font-size="${sym.length>1?13:19}" fill="#FFE8A3">${esc(sym)}</text></g></g>`:'';
   const flag=f.iso&&/^[A-Z]{2}$/.test(f.iso)?`<img class="pfs-flag" src="https://flagcdn.com/w80/${f.iso.toLowerCase()}.png" alt="" onerror="this.remove()">`:'';
-  img.innerHTML=`<div class="pfs"><svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><linearGradient id="pfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE8A3" stop-opacity=".95"/><stop offset="1" stop-color="#7A5A1E" stop-opacity=".55"/></linearGradient></defs><g class="pfs-grid"><path d="M0 150H400M0 110H400M0 70H400M0 30H400M60 0V200M140 0V200M220 0V200M300 0V200M380 0V200"/></g><g fill="url(#pfg)">${bl}</g><g class="pfs-w">${wi}</g></svg>${flag}</div>`}
+  img.innerHTML=`<div class="pfs pfs3"><svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" role="img" aria-label="3D illustration: ${esc(f.subject)}"><defs>
+    <linearGradient id="pf3t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1C2"/><stop offset="1" stop-color="#E8B84A"/></linearGradient>
+    <linearGradient id="pf3l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9A93F"/><stop offset="1" stop-color="#6B4D17"/></linearGradient>
+    <linearGradient id="pf3r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9C7226"/><stop offset="1" stop-color="#3E2C0C"/></linearGradient>
+    <linearGradient id="pf3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF1C2"/><stop offset="1" stop-color="#C9A55C"/></linearGradient></defs>
+    ${plate}<path class="pfs3-g" d="${ground}"/><g class="pfs3-b">${bld}${mark}</g>${medal}</svg>${flag}</div>`}
 async function profileAfter(p,cap,country){const box=$('[data-pf]');if(!box)return;const f=profileInfo(p,cap,country);const gp=$('#gp'),label=gp&&gp.dataset.label;
-  const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r){pfScene(f);return}
-  const img=$('#pf-img');if(!img)return;img.innerHTML=`<img src="${r.src}" alt="${esc(f.subject)}" loading="lazy" referrerpolicy="no-referrer">`;const im=img.querySelector('img');if(im)im.onerror=()=>pfScene(f);
+  pfScene(f);const r=await wikiPhoto(f.query);const cur=$('[data-pf]');if(!cur||cur!==box)return;if(!r){pfScene(f);return}
+  const img=$('#pf-img');if(!img)return;pfScene(f,img);const ph=new Image();ph.className='pfs-ph';ph.alt='Photo: '+f.subject;ph.loading='lazy';ph.referrerPolicy='no-referrer';ph.onload=()=>{if($('#pf-img')===img)img.appendChild(ph)};ph.src=r.src;
   const cr=$('#pf-credit');if(cr){cr.href=r.url;cr.hidden=false}}
 
 const EURO=['Germany','France','Italy','Spain','Netherlands','Ireland','Greece','Austria','Belgium','Portugal','Finland','Cyprus'];
@@ -3586,7 +3608,7 @@ function openDossier(p){if(!p||p.type==='Continent')return;const tok=++DOS_TOKEN
   if(window.MF_TV&&mk[0]&&typeof mountTVSymbol==='function'){const el=$('#dos-tv');if(el)setTimeout(()=>mountTVSymbol(el,INSTR.find(x=>x.id===mk[0])),60)}
   hydrateWiki(d);
   (async()=>{const r=await wikiSearch(f.query,4);if(tok!==DOS_TOKEN)return;const a=$('#dos-about');
-    if(r&&r.img){const h=$('#dos-hero');const im=new Image();im.referrerPolicy='no-referrer';im.alt=f.subject;im.onload=()=>{if(tok!==DOS_TOKEN)return;h.innerHTML='';h.appendChild(im);im.classList.add('ok')};im.src=r.img;const cr=$('#dos-hcr');cr.innerHTML=`Photo: <a href="${r.url}" target="_blank" rel="noopener">${esc(r.title)}</a>`;cr.hidden=false}
+    if(r&&r.img){const h=$('#dos-hero');const im=new Image();im.referrerPolicy='no-referrer';im.alt=f.subject;im.className='pfs-ph';im.onload=()=>{if(tok!==DOS_TOKEN)return;h.appendChild(im)};im.src=r.img;const cr=$('#dos-hcr');cr.innerHTML=`Photo: <a href="${r.url}" target="_blank" rel="noopener">${esc(r.title)}</a>`;cr.hidden=false}
     if(a)a.innerHTML=r&&r.extract?`${esc(r.extract)} <a class="dos-more" href="${r.url}" target="_blank" rel="noopener">Learn more</a>`:`<span class="dim">${LIVE_SITE?'Overview unavailable right now.':'Overview loads on the live site.'}</span> <a class="dos-more" href="${gq(f.subject)}" target="_blank" rel="noopener">Learn more</a>`})();
   (async()=>{const r=await wikiSearch('Economy of '+ecoName,5);if(tok!==DOS_TOKEN)return;const e=$('#dos-econ');if(!e)return;
     e.innerHTML=r&&r.extract?`${esc(r.extract)} <a class="dos-more" href="${r.url}" target="_blank" rel="noopener">Learn more</a>`:`<span class="dim">${LIVE_SITE?'Economic overview unavailable right now.':'Economic overview loads on the live site.'}</span> <a class="dos-more" href="${gq(ecoName+' economy')}" target="_blank" rel="noopener">Learn more</a>`})();
