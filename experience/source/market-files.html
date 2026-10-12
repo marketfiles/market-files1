@@ -431,12 +431,6 @@ mark{background:rgba(76,141,255,.28);color:var(--tx);padding:0 1px}
 /* ---------- modal ---------- */
 dialog{background:var(--bg2);color:var(--tx);border:1px solid var(--line2);padding:0;width:min(440px,calc(100vw - 32px));margin:auto}
 dialog::backdrop{background:rgba(3,5,8,.75);backdrop-filter:blur(3px)}
-.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
-.dlg-h h2{font:600 16px var(--sans)}
-.dlg-b{padding:20px 18px;display:flex;flex-direction:column;gap:12px}
-.dlg-b label{font:500 11px var(--mono);color:var(--tx3);letter-spacing:.06em}
-.dlg-b .inp{width:100%;height:44px}
-.dlg-b small{color:var(--tx3);font-size:12.5px}
 
 .pv{font:11.5px var(--mono);color:var(--tx3);border:1px solid var(--line);padding:8px 12px;display:inline-block;margin-top:12px}
 .page-in{animation:pin .45s cubic-bezier(.2,.7,.2,1)}
@@ -1417,14 +1411,6 @@ html.dos-open,html.hello-open{overflow:hidden}
   <a href="#/search" data-t="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg><span>Search</span></a>
   <button id="tab-menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>Menu</span></button>
 </nav>
-<dialog id="dlg" aria-labelledby="dlg-t">
-  <div class="dlg-h"><h2 id="dlg-t">Sign in to Market Files</h2><button class="ib" data-close aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div>
-  <form class="dlg-b" method="dialog" id="dlg-f">
-    <label for="dlg-e">EMAIL</label><input class="inp" id="dlg-e" type="email" required placeholder="you@firm.com" autocomplete="email">
-    <button class="btn btn-p" style="height:44px;justify-content:center">Send sign-in link</button>
-    <small>Accounts aren’t connected in this preview. The authentication provider plugs in here.</small>
-  </form>
-</dialog>
 
 <dialog id="ed" class="side ed" aria-label="Market Time Machine editor"><div class="holo-bar"></div><div class="side-h"><div><span class="mono dim">MARKET FILES DATABASE</span><h2>Time Machine editor</h2></div><button class="ib" data-edclose aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 5l14 14M19 5 5 19"/></svg></button></div><div id="ed-b" class="ed-body"></div></dialog>
 <dialog id="inst" class="side" aria-label="Instrument details"><div id="inst-b"></div></dialog>
@@ -4005,8 +3991,6 @@ addEventListener('hashchange',route);
 /* global UI */
 $('#tab-menu').onclick=()=>{scrollTo({top:0,behavior:RM?'auto':'smooth'});$('#menu-b').click()};
 $('#menu-b').onclick=()=>{const o=$('#drawer').classList.toggle('open');$('#menu-b').setAttribute('aria-expanded',String(o))};
-const dlg=$('#dlg');const _sb=$('#signin-b');if(_sb)_sb.onclick=()=>dlg.showModal();$$('[data-close]').forEach(b=>b.onclick=()=>dlg.close());
-$('#dlg-f').onsubmit=e=>{e.preventDefault();const s=$('#dlg-f small');s.textContent='Preview only: the sign-in link would be sent here once authentication is connected.';s.style.color='var(--gold)'};
 addEventListener('keydown',e=>{if(e.key==='/'&&!/input|select|textarea/i.test(document.activeElement.tagName)){e.preventDefault();if(!location.hash.startsWith('#/search'))location.hash='#/search';else $('#sf-q')?.focus()}});
 function tickLive(){const s=session('eq');const el=$('#live');el.classList.toggle('on',s.c==='open');$('span',el).textContent=s.c==='open'?'LIVE · NYSE OPEN':s.t==='Pre-market'?'PRE-MARKET':s.t==='After hours'?'AFTER HOURS':'MARKETS CLOSED';
   $$('[data-sess]').forEach(x=>{const k=x.dataset.sess,t=session(k);x.className=`sess ${t.c}`;x.innerHTML=`<i></i>${t.t}`})}
