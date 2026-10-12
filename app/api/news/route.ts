@@ -48,13 +48,18 @@ async function rss(url: string, source?: string): Promise<Item[]> {
 const gnews = (q: string) => rss(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`, '');
 
 const cnbc = (id: string) => `https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=${id}`;
-const FEEDS: Record<string, { feeds: [string, string][]; google: string }> = {
+// cap: most stories one publisher may contribute to a section, so a frequent publisher cannot fill the page.
+const FEEDS: Record<string, { feeds: [string, string][]; google: string | string[]; cap?: number; block?: RegExp }> = {
   // Market-moving news only: markets, the economy, central banks, trade and geopolitics. No personal-finance advice columns.
   markets: { feeds: [[cnbc('100003114'), 'CNBC'], [cnbc('20910258'), 'CNBC'], [cnbc('10000664'), 'CNBC'], ['https://feeds.content.dowjones.io/public/rss/mw_marketpulse', 'MarketWatch'], ['https://feeds.content.dowjones.io/public/rss/mw_bulletins', 'MarketWatch'], [cnbc('100727362'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
     google: '(stocks OR "Wall Street" OR "Federal Reserve" OR "Treasury yields" OR tariffs OR "oil prices" OR "trade war" OR sanctions OR inflation) when:1d' },
   global: { feeds: [[cnbc('100727362'), 'CNBC'], ['https://feeds.bbci.co.uk/news/business/rss.xml', 'BBC News'], ['https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC News'], ['https://www.theguardian.com/business/economics/rss', 'The Guardian'], [cnbc('20910258'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
     google: '("central bank" OR "global economy" OR tariffs OR sanctions OR election OR "trade deal" OR OPEC OR currency) when:1d' },
-  crypto: { feeds: [['https://www.coindesk.com/arc/outboundfeeds/rss/', 'CoinDesk'], ['https://cointelegraph.com/rss', 'Cointelegraph'], ['https://decrypt.co/feed', 'Decrypt']], google: 'bitcoin OR ethereum OR crypto when:1d' },
+  crypto: { feeds: [['https://www.coindesk.com/arc/outboundfeeds/rss/', 'CoinDesk'], ['https://cointelegraph.com/rss', 'Cointelegraph'], ['https://decrypt.co/feed', 'Decrypt'], ['https://www.theblock.co/rss.xml', 'The Block'], ['https://cryptoslate.com/feed/', 'CryptoSlate'], ['https://blockworks.com/feed', 'Blockworks'], ['https://blog.kraken.com/feed', 'Kraken']],
+    // Coinbase, Binance and Hyperliquid publish no RSS feed, so exchange news comes through a targeted Google News query.
+    google: ['bitcoin OR ethereum OR crypto OR ETF OR stablecoin when:1d', '(Coinbase OR Binance OR Kraken OR Hyperliquid OR OKX OR Bybit) (listing OR launch OR announces OR outage OR hack OR volume) when:2d'], cap: 3,
+    // Price-data sites are not news: keep them out of the story list (their prices are still credited on the price tables).
+    block: /coinmarketcap|coingecko|coin market cap/i },
   companies: { feeds: [[cnbc('15839135'), 'CNBC'], [cnbc('10001147'), 'CNBC'], ['https://www.theguardian.com/business/rss', 'The Guardian'], ['https://finance.yahoo.com/news/rssindex', 'Yahoo Finance']], google: 'earnings OR CEO OR merger OR acquisition when:1d' },
 };
 
@@ -89,13 +94,22 @@ const json = (items: Item[]) => Response.json({ items }, { headers: { 'cache-con
 
 async function section(key: string): Promise<Item[]> {
   const cfg = FEEDS[key];
-  const lists = await Promise.all([...cfg.feeds.map(([u, s]) => rss(u, s).catch(() => [] as Item[])), gnews(cfg.google).catch(() => [] as Item[])]);
+  const lists = await Promise.all([...cfg.feeds.map(([u, s]) => rss(u, s).catch(() => [] as Item[])), ...[cfg.google].flat().map((q) => gnews(q).catch(() => [] as Item[]))]);
   const dayAgo = Date.now() - 48 * 3600_000;
   const seen = new Set<string>(); const items: Item[] = [];
   const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 80);
-  for (let i = 0; items.length < 24 && i < 40; i++) for (const l of lists) {
-    const it = l[i]; if (!it || +new Date(it.when) < dayAgo || !onTopic(it)) continue;
-    const k = norm(it.title); if (seen.has(k)) continue; seen.add(k); items.push(it);
+  const srcKey = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const perSource = new Map<string, number>();
+  // Round-robin across feeds. Pass 1 honours the per-publisher cap; if that leaves the page thin, pass 2 fills it without the cap.
+  for (const cap of cfg.cap ? [cfg.cap, Infinity] : [Infinity]) {
+    for (let i = 0; items.length < 24 && i < 40; i++) for (const l of lists) {
+      const it = l[i]; if (!it || +new Date(it.when) < dayAgo || !onTopic(it)) continue;
+      if (cfg.block && (cfg.block.test(it.source || '') || cfg.block.test(it.link))) continue;
+      const k = norm(it.title); if (seen.has(k)) continue;
+      const sk = srcKey(it.source || ''); if (sk && (perSource.get(sk) || 0) >= cap) continue;
+      seen.add(k); items.push(it); if (sk) perSource.set(sk, (perSource.get(sk) || 0) + 1);
+    }
+    if (items.length >= 12) break;
   }
   items.sort((a, b) => +new Date(b.when) - +new Date(a.when));
   // Find photos for the stories that will be shown with an image (direct publisher links only).

@@ -2162,20 +2162,11 @@ function snapshot(){const px={};WATCH.forEach(id=>{const q=INSTR.find(x=>x.id===
 function welcomeBack(prev){setTimeout(()=>{const now=snapshot();const lines=WATCH.filter(id=>prev.px&&prev.px[id]&&now[id]).map(id=>{const q=INSTR.find(x=>x.id===id);const c=(now[id]-prev.px[id])/prev.px[id]*100;return `<li><span>${esc(q.name)}</span><b class="mono ${c>=0?'up':'dn'}">${c>=0?'▲ +':'▼ '}${c.toFixed(2)}%</b></li>`});
   const hrs=Math.round((Date.now()-prev.last)/36e5);const since=hrs<24?`${Math.max(1,hrs)} hour${hrs===1?'':'s'}`:`${Math.round(hrs/24)} day${Math.round(hrs/24)===1?'':'s'}`;
   toast(`<p class="mono mf-tk">WELCOME BACK</p><p class="mf-tt">${greet()}. It’s been ${since}.</p>${lines.length?`<p class="mono dim">Since your last visit</p><ul class="mf-tl">${lines.join('')}</ul>`:''}`,12000)},4500)}
-function goodbye(){if(sessionStorage.getItem('mf_bye'))return;try{sessionStorage.setItem('mf_bye','1')}catch(e){}const nb=nextBell(),te=todayEvent();
-  const el=document.createElement('div');el.className='bye';el.setAttribute('role','dialog');el.setAttribute('aria-label','Thanks for visiting');
-  el.innerHTML=`<div class="bye-in" data-holo><img src="${LOGO72}" alt="" width="40" height="40"><p class="mono mf-tk">THANKS FOR VISITING</p><h3>Until next time.</h3>
-   ${nb?`<p class="bye-l"><span class="mono">NEXT OPENING BELL</span><b>${esc(nb.city)} · in ${durT(nb.mins)}</b></p>`:''}${te?`<p class="bye-l"><span class="mono">ON THIS DAY · ${te.y}</span><a href="${te.link}" data-byex>${esc(te.head)}</a></p>`:''}
-   <div class="gm-act"><a class="btn btn-p" href="https://x.com/TheMarketFiles" target="_blank" rel="noopener">Follow @TheMarketFiles</a><button class="btn" data-byex>Keep exploring</button></div>
-   <p class="mono dim">The Weekly File newsletter is launching soon.</p></div>`;
-  document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add('in'));attachHolo();
-  el.addEventListener('click',e=>{if(e.target===el||e.target.closest('[data-byex]')){el.classList.remove('in');setTimeout(()=>el.remove(),300)}})}
 function hospitality(){const v=HS.get();const now=Date.now();const T0=now;
   if(!v){setTimeout(welcomeFirst,1800)}else if(now-v.last>30*60000)welcomeBack(v);
   const save=()=>{const px=snapshot();const old=HS.get()||{};HS.set({first:old.first||T0,last:Date.now(),visits:(old.visits||0)+(save.n?0:1),px:Object.keys(px).length?px:old.px||{}});save.n=1};
   setTimeout(save,8000);addEventListener('pagehide',save);
-  const title0=()=>document.title;let saved='';document.addEventListener('visibilitychange',()=>{if(document.hidden){save();saved=title0();document.title='See you soon · Market Files'}else if(saved){document.title=saved;saved=''}});
-  if(matchMedia('(pointer:fine)').matches)document.addEventListener('mouseout',e=>{if(!e.relatedTarget&&e.clientY<=0&&Date.now()-T0>25000&&!$('#hello')&&!document.querySelector('dialog[open]'))goodbye()})}
+  const title0=()=>document.title;let saved='';document.addEventListener('visibilitychange',()=>{if(document.hidden){save();saved=title0();document.title='See you soon · Market Files'}else if(saved){document.title=saved;saved=''}});}
 
 setTimeout(()=>{try{hospitality()}catch(e){}},0);
 
