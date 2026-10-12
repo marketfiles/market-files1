@@ -60,11 +60,12 @@ test('old #/ links redirect to the real URL', async ({ page }) => {
   await expect(page.locator('.fr-t').first()).toBeAttached({ timeout: 15_000 });
 });
 
-test('nav links use real URLs and the back button returns home', async ({ page }) => {
+test('nav links use real URLs and the back button returns home', async ({ page, isMobile }) => {
   await page.goto('/');
-  await page.locator('#nav-links a', { hasText: 'Crypto' }).first().click();
-  await expect(page).toHaveURL(/\/crypto$/);
-  await expect(page.locator('.fr-t').first()).toBeAttached({ timeout: 15_000 });
+  // On phones the main nav is inside the menu, so use the bottom tab bar there.
+  const link = isMobile ? page.locator('#tabbar a[data-t="latest"]') : page.locator('#nav-links a', { hasText: 'Crypto' }).first();
+  await link.click();
+  await expect(page).toHaveURL(isMobile ? /\/latest$/ : /\/crypto$/);
   await page.goBack();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator('canvas#globe')).toBeVisible();
