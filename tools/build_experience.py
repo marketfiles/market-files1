@@ -50,6 +50,17 @@ def rep(s, a, b, count=1):
     assert a in s, 'missing: ' + a[:80]
     return s.replace(a, b, count)
 
+# ---------- real-URL sections: client list must match lib/sections.ts ----------
+_client = re.search(r"const REAL_PATHS=\[([^\]]*)\];", src)
+_server = re.search(r"SECTION_PATHS = \[([^\]]*)\] as const;", (root / 'lib' / 'sections.ts').read_text())
+assert _client and _server, 'could not find REAL_PATHS (source) or SECTION_PATHS (lib/sections.ts)'
+_names = lambda m: re.findall(r"'([^']+)'", m.group(1))
+if _names(_client) != _names(_server):
+    print('REAL_PATHS in experience/source/market-files.html does not match SECTION_PATHS in lib/sections.ts.')
+    print('  source:', _names(_client)); print('  server:', _names(_server))
+    print('Make both lists identical (same names, same order).')
+    sys.exit(1)
+
 # ---------- shell: production copy ----------
 shell = re.sub(r'src="data:image/png;base64,[^"]+"', 'src="/logo-72.png"', shell)
 
@@ -64,6 +75,7 @@ js = re.sub(r"const LOGOS240='data:image/png;base64,[^']+';", "const LOGOS240='/
 js = rep(js, "const BY=Object.fromEntries(A.map(a=>[a.slug,a]));", "A.splice(0,A.length,...A.filter(a=>a.status!=='sample'));\nconst BY=Object.fromEntries(A.map(a=>[a.slug,a]));")
 js = rep(js, "const SITE_URL='https://www.themarketfiles.com'; // placeholder domain", "const SITE_URL=(window.MF_CONFIG&&MF_CONFIG.siteUrl)||location.origin;")
 js = rep(js, "const Feed=SimulatedFeed; // ← replace with a live provider implementing the same interface", open(root/'tools/livefeed.js').read())
+js = rep(js, "/^(#\\/?)?$|^#\\/(companies|dashboard)/.test(location.hash)", "/^\\/?$|^\\/(companies|dashboard)/.test(curRaw())")
 js = rep(js, "<span>9:30</span><span>11:00</span><span>12:30</span><span>14:00</span><span>16:00 ET</span>", "${Feed.live?'<span>Earlier</span><span>Now</span>':'<span>9:30</span><span>11:00</span><span>12:30</span><span>14:00</span><span>16:00 ET</span>'}")
 js = re.sub(r'(\w)\.v\*\1\.sup', r'mcap(\1)', js)
 js = rep(js, "const fmtCap=", "const mcap=q=>q.mc??q.v*q.sup;\nconst fmtCap=")

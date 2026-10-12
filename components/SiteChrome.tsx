@@ -2,7 +2,7 @@ import { DESKS } from '@/lib/content';
 
 /** Lightweight header/footer for server-rendered, indexable pages (files, day files). */
 export function SiteHeader() {
-  const nav: [string, string][] = [['Blog', '/blog'], ['Markets', '/#/markets'], ['Futures', '/#/futures'], ['Library', '/#/library'], ['Wall Street', '/#/wall-street'], ['Global Finance', '/#/global-finance'], ['History', '/#/history'], ['Bitcoin', '/#/bitcoin'], ['Blockchain', '/#/blockchain'], ['Archive', '/files'], ['Time Machine', '/#/on-this-date']];
+  const nav: [string, string][] = [['Blog', '/blog'], ['Markets', '/markets'], ['Futures', '/futures'], ['Library', '/library'], ['Wall Street', '/#/wall-street'], ['Global Finance', '/global-finance'], ['History', '/history'], ['Bitcoin', '/bitcoin'], ['Blockchain', '/blockchain'], ['Archive', '/files'], ['Time Machine', '/on-this-date']];
   return (
     <header className="nav" style={{ position: 'sticky' }}>
       <div className="wrap nav-in">
@@ -11,7 +11,7 @@ export function SiteHeader() {
           <span className="logo-t"><b>Market Files</b><small>MARKETS • MONEY • HISTORY</small></span>
         </a>
         <nav aria-label="Primary"><ul className="nav-links">{nav.map(([l, h]) => <li key={h}><a href={h}>{l}</a></li>)}</ul></nav>
-        <div className="nav-r"><a className="btn btn-p" href="/#/search">✦ Search & research</a></div>
+        <div className="nav-r"><a className="btn btn-p" href="/search">✦ Search & research</a></div>
       </div>
     </header>
   );

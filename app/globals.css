@@ -905,7 +905,7 @@ dialog.ed{width:min(640px,100vw)}
 .air-dp button{background:none;border:0;padding:6px 12px;font:600 12px var(--sans);color:var(--tx3);cursor:pointer}
 .air-dp button[aria-checked="true"]{background:linear-gradient(90deg,rgba(76,141,255,.3),rgba(142,124,247,.3));color:var(--tx)}
 @media (max-width:1640px){.nav-r .hide-s{display:none}}
-@media (max-width:760px){.nav-r a.ib[href="#/search"]{display:none}}
+@media (max-width:760px){.nav-r a.ib[href="#/search"],.nav-r a.ib[href="/search"]{display:none}}
 @media (max-width:640px){.air-h{flex-wrap:wrap}.air-dp{order:3;margin:6px 0 0}}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.tk-track{animation:none!important}.tk-view{overflow-x:auto}}

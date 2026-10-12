@@ -450,7 +450,7 @@ const LiveFeed=(()=>{const subs=new Set();let started=false,wantCo=false;
       if(first&&u.label)relabel(q);q.dir=q.v>=old?1:-1;subs.forEach(f=>f(q))})}
   async function poll(set){try{const r=await fetch('/api/quotes'+(set?'?set='+set:''),{cache:'no-store'});if(!r.ok)return;const j=await r.json();apply(j);
     const s=$('#tk-src');if(s)s.textContent=(j.quotes||[]).length?'LIVE · DELAYED':'CONNECTING'}catch(e){}}
-  return{name:'LIVE · DELAYED',live:true,quotes:INSTR,subscribe(f){subs.add(f)},want(k){if(k==='companies'&&!wantCo){wantCo=true;poll('companies');setInterval(()=>{if(/^(#\/?)?$|^#\/(companies|dashboard)/.test(location.hash))poll('companies')},60000)}},
+  return{name:'LIVE · DELAYED',live:true,quotes:INSTR,subscribe(f){subs.add(f)},want(k){if(k==='companies'&&!wantCo){wantCo=true;poll('companies');setInterval(()=>{if(/^\/?$|^\/(companies|dashboard)/.test(curRaw()))poll('companies')},60000)}},
     start(){if(started)return;started=true;poll();setInterval(poll,20000)}}})();
 const Feed=(window.MF_CONFIG&&MF_CONFIG.market==='live')?LiveFeed:SimulatedFeed;
 if(Feed.live)INSTR.forEach(q=>{q.na=true});
@@ -1736,7 +1736,7 @@ let DB=null,USER=null,CAN_EDIT=false,EDITOR=false,TM_DOCS={};
 const mKey=m=>'m'+pad(m);
 function setDbStatus(){const t=TM_SOURCE==='database'?`Database connected · ${TM_LIST.length} inventory events`:TM_SOURCE==='empty'?'Database connected · empty (showing built-in copy)':'Built-in copy · database offline';
   $$('[data-dbstat]').forEach(el=>{el.textContent=t;el.className=`dbstat mono ${TM_SOURCE==='database'?'ok':''}`})}
-function rerenderIfData(){const k=(location.hash.slice(1).split('?')[0].split('/').filter(Boolean)[0])||'';if(['on-this-date','day'].includes(k)){routeKeep=true;const y=scrollY;route();scrollTo(0,y)}else if(!k&&$('#otd-res')){const b=$('[data-om][aria-selected="true"]');if(b)b.click()}}
+function rerenderIfData(){const k=(curRaw().split('?')[0].split('/').filter(Boolean)[0])||'';if(['on-this-date','day'].includes(k)){routeKeep=true;const y=scrollY;route();scrollTo(0,y)}else if(!k&&$('#otd-res')){const b=$('[data-om][aria-selected="true"]');if(b)b.click()}}
 (async()=>{try{
   if(!window.claude||!window.claude.use)return;
   [DB,USER]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
@@ -2370,7 +2370,8 @@ function wireDashboard(){dashTick();if(typeof Feed.want==='function')Feed.want('
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('.sb[data-id]');if(b)openInst(b.dataset.id)})}
 
 function route(){cleanup.forEach(f=>f());cleanup=[];
-  const raw=location.hash.slice(1)||'/';const [path,qs]=raw.split('?');const params=new URLSearchParams(qs||'');const seg=path.split('/').filter(Boolean);const k=seg[0]||'';
+  {const m=location.hash.startsWith('#/')?hashToPath(location.hash):null;if(m)history.replaceState(null,'',m)}LASTNAV=urlKey();
+  const raw=curRaw();const [path,qs]=raw.split('?');const params=new URLSearchParams(qs||'');const seg=path.split('/').filter(Boolean);const k=seg[0]||'';
   let html,after;
   if(!k){setMeta('Market Files — Markets • Money • History','Real-time market intelligence and the history behind it.');html=pageHome();after=afterHome}
   else if(k==='file'){html=pageFile(seg[1]);after=wireArticle}
@@ -2401,12 +2402,37 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   $('#drawer').classList.remove('open');{const xm=$('#x-m');if(xm&&!xm.hidden){xm.hidden=true;$('#x-b').setAttribute('aria-expanded','false')}}$$('#tabbar [data-t]').forEach(a=>a.classList.toggle('on',a.dataset.t===(k==='day'?'on-this-date':k)));$('#menu-b').setAttribute('aria-expanded','false');
   if(!routeKeep){window.scrollTo(0,0);main.focus({preventScroll:true})}routeKeep=false}
 let routeKeep=false;
-addEventListener('hashchange',route);
+/* Real URLs. The main sections live at /markets, /crypto, … ; anything not listed (day pages, blog, files,
+   articles) keeps its current URL. Old #/ links to listed sections are redirected to the real path.
+   Keep REAL_PATHS in sync with lib/sections.ts (npm run experience:check verifies). */
+const REAL_PATHS=['markets','global-finance','crypto','companies','history','library','archive','dashboard','tools','newsletter','futures','on-this-date','search','research','timeline','latest','bitcoin','blockchain'];
+const realKey=p=>(p.split('?')[0].split('/').filter(Boolean)[0])||'';
+const isReal=p=>{const k=realKey(p);return !k||REAL_PATHS.includes(k)};
+const hashToPath=h=>{const r=h.replace(/^#/,'');return r.startsWith('/')&&isReal(r)?r:null};
+const urlKey=()=>location.pathname+location.search+location.hash;
+let LASTNAV='';
+function curRaw(){if(location.hash.startsWith('#/'))return location.hash.slice(1);return isReal(location.pathname)?(location.pathname+location.search):'/'}
+function onNav(){const m=location.hash.startsWith('#/')?hashToPath(location.hash):null;if(m)history.replaceState(null,'',m);if(urlKey()===LASTNAV)return;route()}
+addEventListener('hashchange',onNav);addEventListener('popstate',onNav);
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const a=e.target.closest&&e.target.closest('a[href]');if(!a||(a.target&&a.target!=='_self')||a.hasAttribute('download'))return;
+  const h=a.getAttribute('href');let p=null;
+  if(h.startsWith('#/'))p=hashToPath(h);
+  else if(h.startsWith('/')&&!h.startsWith('//')){try{const u=new URL(a.href);if(u.origin===location.origin&&isReal(u.pathname))p=u.pathname+u.search}catch(_){}}
+  if(p===null)return;
+  e.preventDefault();
+  if(p===location.pathname+location.search&&!location.hash)return;
+  history.pushState(null,'',p);route();dispatchEvent(new Event('hashchange'))});
+/* give crawlers and "open in new tab" the real path instead of #/ */
+const relink=a=>{const p=hashToPath(a.getAttribute('href')||'');if(p!==null)a.setAttribute('href',p)};
+const relinkIn=n=>{if(n.nodeType!==1)return;if(n.matches('a[href^="#/"]'))relink(n);n.querySelectorAll('a[href^="#/"]').forEach(relink)};
+relinkIn(document.body);new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(relinkIn))).observe(document.body,{childList:true,subtree:true});
 
 /* global UI */
 $('#tab-menu').onclick=()=>{scrollTo({top:0,behavior:RM?'auto':'smooth'});$('#menu-b').click()};
 $('#menu-b').onclick=()=>{const o=$('#drawer').classList.toggle('open');$('#menu-b').setAttribute('aria-expanded',String(o))};
-addEventListener('keydown',e=>{if(e.key==='/'&&!/input|select|textarea/i.test(document.activeElement.tagName)){e.preventDefault();if(!location.hash.startsWith('#/search'))location.hash='#/search';else $('#sf-q')?.focus()}});
+addEventListener('keydown',e=>{if(e.key==='/'&&!/input|select|textarea/i.test(document.activeElement.tagName)){e.preventDefault();if(realKey(curRaw())!=='search')location.hash='#/search';else $('#sf-q')?.focus()}});
 function tickLive(){const s=session('eq');const el=$('#live');el.classList.toggle('on',s.c==='open');$('span',el).textContent=s.c==='open'?'LIVE · NYSE OPEN':s.t==='Pre-market'?'PRE-MARKET':s.t==='After hours'?'AFTER HOURS':'MARKETS CLOSED';
   $$('[data-sess]').forEach(x=>{const k=x.dataset.sess,t=session(k);x.className=`sess ${t.c}`;x.innerHTML=`<i></i>${t.t}`})}
 tickLive();setInterval(()=>{tickLive();refreshClocks()},20000);

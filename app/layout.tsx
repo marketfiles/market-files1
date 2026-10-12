@@ -19,7 +19,7 @@ const ORG = {
     { '@type': 'NewsMediaOrganization', '@id': `${siteUrl()}/#org`, name: 'Market Files', slogan: 'Markets • Money • History', url: siteUrl(), logo: `${siteUrl()}/logo-512.png`,
       sameAs: ['TheMarketFiles', 'MarketFilesThen'].map((h) => `https://x.com/${h}`) },
     { '@type': 'WebSite', '@id': `${siteUrl()}/#site`, url: siteUrl(), name: 'Market Files', publisher: { '@id': `${siteUrl()}/#org` },
-      potentialAction: { '@type': 'SearchAction', target: `${siteUrl()}/#/search?q={query}`, 'query-input': 'required name=query' } },
+      potentialAction: { '@type': 'SearchAction', target: `${siteUrl()}/search?q={query}`, 'query-input': 'required name=query' } },
   ],
 };
 const THEME_BOOT = `try{document.documentElement.dataset.theme=localStorage.getItem("mf-theme")||"dark"}catch(e){document.documentElement.dataset.theme="dark"}`;
