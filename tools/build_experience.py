@@ -51,11 +51,9 @@ def rep(s, a, b, count=1):
     return s.replace(a, b, count)
 
 # ---------- shell: production copy ----------
-shell = rep(shell, "Accounts aren’t connected in this preview. The authentication provider plugs in here.", 'Reader accounts are coming soon. Market Files is free to read.')
 shell = re.sub(r'src="data:image/png;base64,[^"]+"', 'src="/logo-72.png"', shell)
 
 # ---------- css ----------
-css += '\n/* production */\n#signin-b{display:none}\n'
 
 # ---------- js ----------
 js = re.sub(r"const LOGO72='data:image/png;base64,[^']+';", "const LOGO72='/logo-72.png';", js)

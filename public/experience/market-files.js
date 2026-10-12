@@ -2406,8 +2406,6 @@ addEventListener('hashchange',route);
 /* global UI */
 $('#tab-menu').onclick=()=>{scrollTo({top:0,behavior:RM?'auto':'smooth'});$('#menu-b').click()};
 $('#menu-b').onclick=()=>{const o=$('#drawer').classList.toggle('open');$('#menu-b').setAttribute('aria-expanded',String(o))};
-const dlg=$('#dlg');const _sb=$('#signin-b');if(_sb)_sb.onclick=()=>dlg.showModal();$$('[data-close]').forEach(b=>b.onclick=()=>dlg.close());
-$('#dlg-f').onsubmit=e=>{e.preventDefault();const s=$('#dlg-f small');s.textContent='Preview only: the sign-in link would be sent here once authentication is connected.';s.style.color='var(--gold)'};
 addEventListener('keydown',e=>{if(e.key==='/'&&!/input|select|textarea/i.test(document.activeElement.tagName)){e.preventDefault();if(!location.hash.startsWith('#/search'))location.hash='#/search';else $('#sf-q')?.focus()}});
 function tickLive(){const s=session('eq');const el=$('#live');el.classList.toggle('on',s.c==='open');$('span',el).textContent=s.c==='open'?'LIVE · NYSE OPEN':s.t==='Pre-market'?'PRE-MARKET':s.t==='After hours'?'AFTER HOURS':'MARKETS CLOSED';
   $$('[data-sess]').forEach(x=>{const k=x.dataset.sess,t=session(k);x.className=`sess ${t.c}`;x.innerHTML=`<i></i>${t.t}`})}
