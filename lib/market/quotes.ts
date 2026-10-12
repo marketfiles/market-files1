@@ -20,7 +20,8 @@ async function cached(key: string, ttlMs: number, fn: () => Promise<Quote[]>): P
     return { data: hit?.data ?? [], status: { ok: false, count: hit?.data.length ?? 0, note } };
   }
 }
-const UA = 'Mozilla/5.0 (compatible; MarketFiles/1.0; +https://x.com/TheMarketFiles)';
+// A mainstream browser UA: Yahoo Finance turns away unknown bot agents calling from cloud servers.
+const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 const getText = async (url: string, headers: Record<string, string> = {}) => {
   const r = await fetch(url, { headers: { 'user-agent': UA, ...headers }, cache: 'no-store', signal: AbortSignal.timeout(9000) });
   if (!r.ok) throw new Error(`${r.status} ${url.split('?')[0]}`);
@@ -55,6 +56,38 @@ async function yahooOne(id: string, sym: string): Promise<Quote | null> {
 async function yahoo(ids: string[]): Promise<Quote[]> {
   const res = await pool(ids.filter((id) => YAHOO[id]), 10, (id) => yahooOne(id, YAHOO[id]));
   return res.filter(Boolean) as Quote[];
+}
+
+/* ---------- CNBC quotes (no key) ----------
+   Yahoo turns away cloud servers ("Too Many Requests"), so CNBC's public quote feed fills every
+   instrument Yahoo did not answer: true index levels, front-month futures, sector ETFs, world indices, stocks. */
+const CNBC_SYM: Record<string, string> = {
+  SPX: '.SPX', COMP: '.IXIC', INDU: '.DJI', RUT: '.RUT', VIX: '.VIX', DXY: '.DXY',
+  XAU: '@GC.1', XAG: '@SI.1', CL: '@CL.1', HG: '@HG.1',
+  ES1: '@SP.1', NQ1: '@ND.1', YM1: '@DJ.1', RTY1: '@TFS.1', ZT1: '@TU.1', ZN1: '@TY.1', ZB1: '@US.1', CL1: '@CL.1', BZ1: '@LCO.1', NG1: '@NG.1', RB1: '@RB.1',
+  GC1: '@GC.1', SI1: '@SI.1', HG1: '@HG.1', PL1: '@PL.1', ZC1: '@C.1', ZS1: '@S.1', ZW1: '@W.1', LE1: '@LC.1', KC1: '@KC.1', SB1: '@SB.1',
+  '6E1': '@EC.1', '6J1': '@JY.1', '6B1': '@BP.1', BTC1: '@BTC.1', ETH1: '@ETH.1', VX1: '@VX.1',
+  UKX: '.FTSE', DAX: '.GDAXI', CAC: '.FCHI', SX5E: '.STOXX50E', NKY: '.N225', HSI: '.HSI', SHCOMP: '.SSEC', SENSEX: '.BSESN', AS51: '.AXJO', TSX: '.GSPTSE', IBOV: '.BVSP',
+};
+const cnbcSym = (id: string) => CNBC_SYM[id] || (/^X[LB][A-Z]{1,2}$/.test(id) || isCompany(id) ? id : '');
+const num = (v: unknown) => { const n = parseFloat(String(v ?? '').replace(/[,%$]/g, '')); return isFinite(n) ? n : NaN; };
+async function cnbcQuotes(ids: string[]): Promise<Quote[]> {
+  const pairs = ids.map((id) => [id, cnbcSym(id)] as const).filter(([, s]) => s);
+  const out: Quote[] = [];
+  for (let i = 0; i < pairs.length; i += 25) {
+    const batch = pairs.slice(i, i + 25);
+    try {
+      const j = await getJSON(`https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?symbols=${encodeURIComponent(batch.map(([, s]) => s).join('|'))}&requestMethod=itv&noform=1&partnerId=2&fund=1&exthrs=1&output=json&events=1`);
+      const rows: Record<string, unknown>[] = j?.FormattedQuoteResult?.FormattedQuote || [];
+      for (const [id, sym] of batch) {
+        const r = rows.find((x) => String(x.symbol).toUpperCase() === sym.toUpperCase()); if (!r) continue;
+        const v = num(r.last); if (!(v > 0)) continue;
+        let prev = num(r.previous_day_closing); if (!(prev > 0)) { const c = num(r.change); prev = isFinite(c) ? v - c : v; }
+        out.push({ id, v, prev, source: `CNBC · ${sym} · delayed`, asOf: new Date().toISOString() });
+      }
+    } catch { /* next batch */ }
+  }
+  return out;
 }
 
 /* ---------- U.S. Treasury yield curve (no key) ---------- */
@@ -175,9 +208,11 @@ const merge = (...lists: Quote[][]) => { const m = new Map<string, Quote>(); for
 export async function getQuotes(set: QuoteSet = 'core') {
   if (set === 'companies') {
     const y = await cached('yahoo-co', 120_000, () => yahoo(COMPANY_TICKERS));
-    const missing = COMPANY_TICKERS.filter((id) => !y.data.some((q) => q.id === id));
+    const noY = COMPANY_TICKERS.filter((id) => !y.data.some((q) => q.id === id));
+    const cn = await cached('cnbc-co', 120_000, () => cnbcQuotes(noY));
+    const missing = noY.filter((id) => !cn.data.some((q) => q.id === id));
     const f = await cached('finnhub-co', 180_000, () => finnhub(missing));
-    return { asOf: new Date().toISOString(), quotes: merge(f.data, y.data), status: { yahoo: y.status, finnhub: { ...f.status, keySet: Boolean(process.env.FINNHUB_API_KEY) } } };
+    return { asOf: new Date().toISOString(), quotes: merge(f.data, cn.data, y.data), status: { yahoo: y.status, cnbc: cn.status, finnhub: { ...f.status, keySet: Boolean(process.env.FINNHUB_API_KEY) } } };
   }
   const [y, t, c, g, fu, fr, cm] = await Promise.all([
     cached('yahoo', 75_000, () => yahoo(CORE_IDS)),
@@ -188,12 +223,13 @@ export async function getQuotes(set: QuoteSet = 'core') {
     cached('fred', 60 * 60_000, fred),
     cached('coinmarketcap', 300_000, coinmarketcap),
   ]);
-  const have = new Set([...y.data, ...t.data, ...c.data, ...fu.data, ...fr.data].map((q) => q.id));
+  const cn = await cached('cnbc', 60_000, () => cnbcQuotes(CORE_IDS.filter((id) => !y.data.some((q) => q.id === id))));
+  const have = new Set([...y.data, ...cn.data, ...t.data, ...c.data, ...fu.data, ...fr.data].map((q) => q.id));
   const fh = await cached('finnhub', 90_000, () => finnhub(CORE_IDS.filter((id) => !have.has(id) && SYMBOLS[id]?.kind === 'finnhub')));
   // Priority (last wins): fx reference < finnhub proxy < FRED < Yahoo < Treasury < CoinGecko < licensed futures feed
-  const quotes = merge(c.data, fh.data, fr.data, y.data, t.data, g.data, cm.data.map((q) => ({ ...q, h: g.data.find((x) => x.id === q.id)?.h })), fu.data);
+  const quotes = merge(c.data, fh.data, fr.data, cn.data, y.data, t.data, g.data, cm.data.map((q) => ({ ...q, h: g.data.find((x) => x.id === q.id)?.h })), fu.data);
   return {
     asOf: new Date().toISOString(), quotes,
-    status: { yahoo: y.status, treasury: t.status, fx: c.status, coingecko: g.status, finnhub: { ...fh.status, keySet: Boolean(process.env.FINNHUB_API_KEY) }, fred: { ...fr.status, keySet: Boolean(process.env.FRED_API_KEY) }, coinmarketcap: { ...cm.status, keySet: Boolean(process.env.COINMARKETCAP_API_KEY) }, futuresFeed: { ...fu.status, keySet: Boolean(process.env.FUTURES_FEED_URL) } },
+    status: { yahoo: y.status, cnbc: cn.status, treasury: t.status, fx: c.status, coingecko: g.status, finnhub: { ...fh.status, keySet: Boolean(process.env.FINNHUB_API_KEY) }, fred: { ...fr.status, keySet: Boolean(process.env.FRED_API_KEY) }, coinmarketcap: { ...cm.status, keySet: Boolean(process.env.COINMARKETCAP_API_KEY) }, futuresFeed: { ...fu.status, keySet: Boolean(process.env.FUTURES_FEED_URL) } },
   };
 }

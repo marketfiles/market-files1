@@ -1,5 +1,8 @@
 # Market Files — production website
 
+> **Developers:** start with [DEVELOPING.md](DEVELOPING.md). The site's editable source is
+> `experience/source/market-files.html`; three files are generated from it and must not be edited by hand.
+
 **Markets • Money • History.** Live markets, futures, a holographic world globe of financial history,
 the Market Time Machine (every date in market history), and Market Files AI research powered by Claude.
 Free to read.

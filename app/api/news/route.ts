@@ -49,11 +49,24 @@ const gnews = (q: string) => rss(`https://news.google.com/rss/search?q=${encodeU
 
 const cnbc = (id: string) => `https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=${id}`;
 const FEEDS: Record<string, { feeds: [string, string][]; google: string }> = {
-  markets: { feeds: [[cnbc('10000664'), 'CNBC'], [cnbc('15839069'), 'CNBC'], ['https://feeds.content.dowjones.io/public/rss/mw_topstories', 'MarketWatch'], ['https://finance.yahoo.com/news/rssindex', 'Yahoo Finance']], google: 'stock market when:1d' },
-  global: { feeds: [['https://feeds.bbci.co.uk/news/business/rss.xml', 'BBC News'], ['https://www.theguardian.com/business/economics/rss', 'The Guardian'], [cnbc('20910258'), 'CNBC'], [cnbc('100727362'), 'CNBC']], google: '"central bank" OR "global economy" OR currency when:1d' },
+  // Market-moving news only: markets, the economy, central banks, trade and geopolitics. No personal-finance advice columns.
+  markets: { feeds: [[cnbc('100003114'), 'CNBC'], [cnbc('20910258'), 'CNBC'], [cnbc('10000664'), 'CNBC'], ['https://feeds.content.dowjones.io/public/rss/mw_marketpulse', 'MarketWatch'], ['https://feeds.content.dowjones.io/public/rss/mw_bulletins', 'MarketWatch'], [cnbc('100727362'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
+    google: '(stocks OR "Wall Street" OR "Federal Reserve" OR "Treasury yields" OR tariffs OR "oil prices" OR "trade war" OR sanctions OR inflation) when:1d' },
+  global: { feeds: [[cnbc('100727362'), 'CNBC'], ['https://feeds.bbci.co.uk/news/business/rss.xml', 'BBC News'], ['https://feeds.bbci.co.uk/news/world/rss.xml', 'BBC News'], ['https://www.theguardian.com/business/economics/rss', 'The Guardian'], [cnbc('20910258'), 'CNBC'], [cnbc('10000113'), 'CNBC']],
+    google: '("central bank" OR "global economy" OR tariffs OR sanctions OR election OR "trade deal" OR OPEC OR currency) when:1d' },
   crypto: { feeds: [['https://www.coindesk.com/arc/outboundfeeds/rss/', 'CoinDesk'], ['https://cointelegraph.com/rss', 'Cointelegraph'], ['https://decrypt.co/feed', 'Decrypt']], google: 'bitcoin OR ethereum OR crypto when:1d' },
   companies: { feeds: [[cnbc('15839135'), 'CNBC'], [cnbc('10001147'), 'CNBC'], ['https://www.theguardian.com/business/rss', 'The Guardian'], ['https://finance.yahoo.com/news/rssindex', 'Yahoo Finance']], google: 'earnings OR CEO OR merger OR acquisition when:1d' },
 };
+
+/** Drops personal-finance advice letters, lifestyle and promo items so sections stay on market-moving news. */
+const OFF_TOPIC = [
+  /^[‘'"“](i|i'm|i’m|my|we|we're|we’re|our|me)\b/i, // advice-column quotes: ‘I have no children’: …
+  /\b(moneyist|dear quentin|help desk|ask an advisor|the big move|retirement hacker|personal finance)\b/i,
+  /\bmy (wife|husband|aunt|uncle|brother|sister|mother|father|mom|dad|son|daughter|kids|children|girlfriend|boyfriend|partner|family|in-laws?|stepchildren|parents|home|house|portfolio|401\(k\)|ira|savings|pension)\b/i,
+  /\b(i|i'm|i’m|i've|i’ve|we're|we’re|should i|can i|do i|am i)\b.*\?\s*$/i,
+  /\b(best (credit cards?|savings|cd rates|mortgage rates|personal loans?)|coupon|promo code|deal of the day|horoscope|recipe)\b/i,
+];
+const onTopic = (i: Item) => !OFF_TOPIC.some((re) => re.test(i.title));
 
 const OG = new Map<string, string>();
 async function ogImage(link: string): Promise<string> {
@@ -80,8 +93,8 @@ async function section(key: string): Promise<Item[]> {
   const dayAgo = Date.now() - 48 * 3600_000;
   const seen = new Set<string>(); const items: Item[] = [];
   const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 80);
-  for (let i = 0; items.length < 24 && i < 30; i++) for (const l of lists) {
-    const it = l[i]; if (!it || +new Date(it.when) < dayAgo) continue;
+  for (let i = 0; items.length < 24 && i < 40; i++) for (const l of lists) {
+    const it = l[i]; if (!it || +new Date(it.when) < dayAgo || !onTopic(it)) continue;
     const k = norm(it.title); if (seen.has(k)) continue; seen.add(k); items.push(it);
   }
   items.sort((a, b) => +new Date(b.when) - +new Date(a.when));
@@ -107,7 +120,7 @@ export async function GET(req: Request) {
   try {
     const lists = await Promise.all(['stock market when:1d', 'economy OR "central bank" OR inflation when:1d', 'bitcoin OR crypto when:1d'].map((q) => gnews(q).catch(() => [] as Item[])));
     const seen = new Set<string>(); const items: Item[] = [];
-    for (let i = 0; items.length < 12 && i < 8; i++) for (const l of lists) { const it = l[i]; if (it && !seen.has(it.title)) { seen.add(it.title); items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when }); } }
+    for (let i = 0; items.length < 12 && i < 12; i++) for (const l of lists) { const it = l[i]; if (it && onTopic(it) && !seen.has(it.title)) { seen.add(it.title); items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when }); } }
     if (items.length) cache.set('top', { at: Date.now(), items });
     return json(items.length ? items : hit?.items ?? []);
   } catch { return json(hit?.items ?? []); }

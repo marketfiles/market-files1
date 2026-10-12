@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "experience:build": "python3 tools/build_experience.py",
+    "experience:check": "python3 tools/build_experience.py --check",
     "db:migrate": "node scripts/migrate.mjs",
     "db:seed": "node scripts/seed.mjs",
     "test:smoke": "playwright test",
