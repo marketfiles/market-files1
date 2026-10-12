@@ -84,7 +84,7 @@ test('server-rendered pages respond', async ({ request }) => {
 
 test('API routes respond with JSON', async ({ request }) => {
   // External feeds may be unreachable in CI; we only require a well-formed answer.
-  for (const path of ['/api/quotes', '/api/news', '/api/top', '/api/country?iso=JP', '/api/tm']) {
+  for (const path of ['/api/quotes', '/api/news', '/api/top', '/api/country?iso=JP', '/api/tm', '/api/dex']) {
     const r = await request.get(path, { timeout: 40_000 });
     expect(r.status(), path).toBeLessThan(500);
     const body = await r.json().catch(() => null);
