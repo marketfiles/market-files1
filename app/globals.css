@@ -358,6 +358,12 @@ html.has-bgg::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events
 .hud-clk{color:var(--tx3);letter-spacing:.14em;font-variant-numeric:tabular-nums}
 @keyframes hudp{to{box-shadow:0 0 0 9px rgba(47,191,119,0)}}
 @media(max-width:760px){.bg-globe{opacity:.5}}
+.hub-rel{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:48px 0 8px;padding-top:22px;border-top:1px solid rgba(245,196,81,.18)}
+.hub-rel>span{margin-right:6px;letter-spacing:.16em;font-size:11px}
+.hub-rel a{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;border:1px solid var(--line2);color:var(--tx2);text-decoration:none;transition:border-color .2s,color .2s,box-shadow .2s}
+.hub-rel a:hover{border-color:#F5C451;color:#F5C451;box-shadow:0 0 18px -6px rgba(245,196,81,.6)}
+.hub-rel a i{font-style:normal;margin-left:4px}
+.se-g-only{margin:18px 0}
 .bg-globe{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
 .has-bgg body{background:transparent}
 .has-bgg #main{position:relative;z-index:1}
