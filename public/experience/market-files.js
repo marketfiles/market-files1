@@ -1316,7 +1316,7 @@ function wireGP(){const gp=$('#gp');if(!gp)return;renderGP();
   gp.addEventListener('submit',e=>{if(e.target.id==='gp-f'){e.preventDefault();const v=$('#gp-i').value.trim();if(v)gpAsk(null,v)}})}
 function globeHero(){return `<section class="gh" id="j-globe"><p class="gh-line mono">Market Files — <b>The #1 source for financial content</b> — past &amp; present</p><div class="wrap gh-in">
   <div class="gh-side"><div class="gh-copy"><div class="gh-brand"><img src="${LOGO240}" alt="Market Files logo" width="64" height="64"><span class="mono">MARKETS • MONEY • HISTORY</span></div>
-    <h1 class="holo">Every market on Earth — and the history behind it.</h1><p>Live markets, centuries of financial history. Spin the globe and click any country, capital, state or gold financial center.</p><div class="gh-cta"><a class="btn btn-p" href="https://x.com/TheMarketFiles" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Follow @TheMarketFiles</a><a class="btn" href="#/newsletter">Get The Weekly File</a><a class="btn" href="#/library">Open the Library</a></div></div>
+    <h1 class="holo">Every market on Earth — and the history behind it.</h1><p>Live markets, centuries of financial history. Spin the globe and click any country, capital, state or gold financial center.</p><div class="gh-cta"><a class="btn btn-p" href="https://x.com/TheMarketFiles" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Follow @TheMarketFiles</a><a class="btn" href="#/library">Open the Library</a></div></div>
     <aside class="gp" id="gp" data-holo aria-live="polite"></aside></div>
   <div class="gh-stage"><canvas id="globe" role="img" aria-label="Interactive globe of world markets. Use the place list to explore by keyboard."></canvas><div class="gtip" id="gtip" hidden></div>
     <div class="gh-ctl"><button class="ib" data-gz="1" aria-label="Zoom in">+</button><button class="ib" data-gz="-1" aria-label="Zoom out">−</button><button class="ib" data-gz="0" aria-label="Reset globe">⟲</button><button class="ib gz-cap on" data-caps aria-pressed="true" aria-label="Show capitals" title="Capitals">★</button></div>
@@ -1342,7 +1342,7 @@ function openInst(id){const q=INSTR.find(x=>x.id===id);if(!q)return;const c=chg(
 /* ---------- command palette ---------- */
 let CK=[],CKI=0;
 function ckItems(q){q=q.trim().toLowerCase();const m=t=>!q||t.toLowerCase().includes(q);const go=h=>()=>location.hash=h;
-  const pages=[...NAV.map(([r,l])=>({t:l,k:'Page',go:go('#/'+r)})),{t:'Time Machine calendar',k:'Page',go:go('#/on-this-date')},{t:'Futures',k:'Page',go:go('#/futures')},{t:'Timeline',k:'Page',go:go('#/timeline')},{t:'On This Date',k:'Page',go:go('#/on-this-date')},{t:'Search',k:'Page',go:go('#/search')},{t:'Newsletter',k:'Page',go:go('#/newsletter')}].filter(x=>m(x.t));
+  const pages=[...NAV.map(([r,l])=>({t:l,k:'Page',go:go('#/'+r)})),{t:'Time Machine calendar',k:'Page',go:go('#/on-this-date')},{t:'Futures',k:'Page',go:go('#/futures')},{t:'Timeline',k:'Page',go:go('#/timeline')},{t:'On This Date',k:'Page',go:go('#/on-this-date')},{t:'Search',k:'Page',go:go('#/search')}].filter(x=>m(x.t));
   const acts=[{t:`Switch to ${document.documentElement.dataset.theme==='dark'?'light':'dark'} theme`,k:'Action',go:toggleTheme}].filter(x=>m(x.t+' theme mode'));
   const ins=INSTR.filter(i=>m(i.name+' '+i.id)).map(i=>({t:i.name,k:i.id,go:()=>openInst(i.id)}));
   const fl=q?A.filter(a=>m(a.head+' '+a.y+' '+a.cat)).map(a=>({t:a.head,k:a.type==='hist'?String(a.y):'Now',go:go('#/file/'+a.slug)})):[];
@@ -1621,7 +1621,7 @@ function pageHome(){
     ${keyTiles()}
     <div class="hl-links">${HOME_LINKS.map(([r,l,d,c])=>`<a class="hl-l" data-holo href="#/${r}" style="--dc:${c}"><b>${l}</b><span>${d}</span><i aria-hidden="true">→</i></a>`).join('')}</div>
     <div class="sysl"><span class="mono" id="sys" aria-live="off"></span><span class="lt mono">LAST TICK <b id="lt">—</b></span></div>
-    <p class="home-fine mono">${Feed.live?'Prices are delayed; “—” means no data right now.':'Preview data is simulated.'} Charts by Market Files · crypto by CoinMarketCap · <a href="#/newsletter">The Weekly File</a> · <a href="https://x.com/TheMarketFiles" target="_blank" rel="noopener">@TheMarketFiles</a> · <a href="https://x.com/MarketFilesThen" target="_blank" rel="noopener">@MarketFilesThen</a></p>
+    <p class="home-fine mono">${Feed.live?'Prices are delayed; “—” means no data right now.':'Preview data is simulated.'} Charts by Market Files · crypto by CoinMarketCap · <a href="https://x.com/TheMarketFiles" target="_blank" rel="noopener">@TheMarketFiles</a> · <a href="https://x.com/MarketFilesThen" target="_blank" rel="noopener">@MarketFilesThen</a></p>
     ${hubsStrip()}
     ${btcBottom()}
   </div></section>`;
@@ -2121,7 +2121,7 @@ function setMeta(title,desc,ld){document.title=title;($('meta[name="description"
   ($('#ld-page')||{}).textContent=ld?JSON.stringify(ld):''}
 const NAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451']];
 $('#nav-links').innerHTML=NAV.map(([r,l,c])=>`<li><a href="#/${r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
-$('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a><a href="#/newsletter">The Weekly File<span>→</span></a>`;
+$('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a>`;
 $('#f-desks').innerHTML=ACCOUNTS.map(d=>`<a href="${xUrl(d.handle)}" target="_blank" rel="noopener" style="--dc:${d.hex}"><b>@${d.handle}</b><span>${d.blurb}</span></a>`).join('');
 $('#yr').textContent=new Date().getFullYear();
 $('#tk-track').innerHTML=tickerHTML();$('#tk-src').textContent=Feed.name;
@@ -2600,6 +2600,7 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   else if(k==='blog'){html=pageBlog();after=wireBlog}
   else if(k==='library'&&seg[1]){html=pageLibrary(seg[1]);after=()=>afterLibrary(seg[1])}
   else if(k==='library'){html=pageLibraryIndex();after=wireLibIndex}
+  else if(k==='newsletter'){history.replaceState(null,'','/');return route()}
   else if(k==='futures'){html=pageFutures();after=()=>{wireTabs();wireTerminal();cleanup.push(mountBgGlobe())}}
   else if(HUBS[k]){html=pageHub(k);after=()=>{wireTabs();wireTerminal();wireGames();cleanup.push(mountBgGlobe())}}
   else if(k==='markets'){setMeta('Markets — Market Files','Markets news, live prices and charts.');html=frontHTML('markets')+stripPH(pageMarkets());after=()=>{wireTabs();wireTerminal();refreshClocks();startHeadlines();wireFront('markets')}}
@@ -2610,7 +2611,6 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   else if(SECTIONS[k]){html=pageSection(k);if(k==='history'){html+=`<div class="wrap"><div class="sec">${secHead('The Files','Time Machine, Library, Crash Lab and the archive.','')}${filesTabs()}</div></div>`;after=afterFiles}}
   else if(k==='tools'){html=pageTools();after=wireTools}
   else if(k==='dashboard'){html=pageDashboard();after=wireDashboard}
-  else if(k==='newsletter'){html=pageInfo('newsletter');after=wireNL}
   else if(k==='page'){html=pageInfo(seg[1])}
   else html=notFound();
   const main=$('#main');main.innerHTML=html;after&&after();attachHolo();hydrateWiki(main);
