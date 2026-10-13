@@ -81,12 +81,13 @@ img,svg{display:block;max-width:100%}
 .logo-t{display:flex;flex-direction:column;line-height:1}
 .logo-t b{font:700 19px/1 var(--sans);font-stretch:88%;letter-spacing:-.01em}
 .logo-t small{font:500 9.5px/1 var(--mono);color:var(--tx3);margin-top:5px;letter-spacing:.06em}
-.nav-in>nav{flex:1;display:flex;justify-content:center;min-width:0}
-.nav-links{display:flex;gap:4px;margin:0 auto;padding:0;list-style:none}
+.nav-in>nav{flex:1;min-width:0;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 22px,#000 calc(100% - 28px),transparent 100%)}
+.nav-links{display:flex;gap:4px;margin:0;padding:0 24px;list-style:none;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+.nav-links::-webkit-scrollbar{display:none}.nav-links li{flex:none;scroll-snap-align:start}
 .nav-links a{display:block;padding:8px clamp(7px,1.1vw,14px);font-size:14.5px;white-space:nowrap;font-weight:500;color:var(--tx2);position:relative;letter-spacing:.005em}
 .nav-links a:hover{color:var(--tx)}
 .nav-links a[aria-current="page"]{color:var(--tx)}
-.nav-links a[aria-current="page"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-11px;height:2px;background:var(--dc,var(--tx));box-shadow:0 0 12px var(--dc,transparent)}
+.nav-links a[aria-current="page"]::after{content:"";position:absolute;left:10px;right:10px;bottom:2px;height:2px;background:var(--dc,var(--tx));box-shadow:0 0 12px var(--dc,transparent)}
 .nav-r{display:flex;align-items:center;gap:8px;flex:none}
 .live{display:flex;align-items:center;gap:7px;font:500 11px var(--mono);color:var(--tx3);padding:0 10px;border-right:1px solid var(--line);margin-right:4px;white-space:nowrap}
 .live i{width:7px;height:7px;border-radius:50%;background:var(--tx3)}
@@ -102,7 +103,7 @@ img,svg{display:block;max-width:100%}
 .drawer{display:none;border-top:1px solid var(--line);background:var(--bg2)}
 .drawer.open{display:block}
 .drawer a{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);font-weight:500}
-@media (max-width:1540px){.live span{display:none}.live{padding:0 6px}}@media (max-width:900px){.nav-links{display:none}.nav-r{margin-left:auto}}
+@media (max-width:1540px){.live span{display:none}.live{padding:0 6px}}@media (max-width:760px){.nav-in>nav{display:none}.nav-r{margin-left:auto}}
 @media (max-width:640px){.live span,.hide-s,.logo-t small{display:none}.live{border:0;padding:0 2px;margin:0}.nav-in{gap:10px}.nav-r{gap:4px}.nav-r .btn-p{padding:0 10px;font-size:12.5px}.logo-t b{font-size:17px}}
 
 /* ---------- sections ---------- */
@@ -3559,7 +3560,9 @@ function setMeta(title,desc,ld){document.title=title;$('meta[name="description"]
   ['og:description','twitter:description'].forEach(k=>{const m=$(`meta[property="${k}"],meta[name="${k}"]`);if(m&&desc)m.content=desc});
   $('#ld-page').textContent=ld?JSON.stringify(ld):''}
 const NAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451']];
-$('#nav-links').innerHTML=NAV.filter(n=>['markets','crypto','companies','dashboard','learn'].includes(n[0])).map(([r,l,c])=>`<li><a href="#/${r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
+const TOPNAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['futures','Futures','#F5C451'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451'],['crypto-guide','Crypto guide','#F2A03D'],['metals','Gold &amp; Silver','#E8B84A'],['stocks-guide','Stocks guide','#2FBF77'],['world','Global politics','#4C8DFF'],['watchlist','My Watchlist','#F5C451','#/dashboard?tab=watchlist'],['blog','Blog','#C5CEDA']];
+$('#nav-links').innerHTML=TOPNAV.map(([r,l,c,h])=>`<li><a href="${h||'#/'+r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
+{const nl=$('#nav-links');nl.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&nl.scrollWidth>nl.clientWidth){nl.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false})}
 $('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/dashboard?tab=watchlist">My Watchlist<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a>`;
 $('#f-desks').innerHTML=ACCOUNTS.map(d=>`<a href="${xUrl(d.handle)}" target="_blank" rel="noopener" style="--dc:${d.hex}"><b>@${d.handle}</b><span>${d.blurb}</span></a>`).join('');
 $('#yr').textContent=new Date().getFullYear();
@@ -4109,7 +4112,7 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   else html=notFound();
   const main=$('#main');main.innerHTML=html;after&&after();attachHolo();hydrateWiki(main);
   const active=k==='file'?(BY[seg[1]]?DESKS[BY[seg[1]].desk].route:''):k==='timeline'||k==='on-this-date'||k==='day'?'archive':(HUBNAV[k]||k);
-  $$('#nav-links a').forEach(a=>{if(a.dataset.r===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $$('#nav-links a').forEach(a=>{if(a.dataset.r===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});{const on=$('#nav-links a[aria-current]');if(on&&on.scrollIntoView)try{const l=on.closest('ul');l.scrollTo({left:Math.max(0,on.offsetLeft-60),behavior:'smooth'})}catch(e){}}
   $('#drawer').classList.remove('open');{const xm=$('#x-m');if(xm&&!xm.hidden){xm.hidden=true;$('#x-b').setAttribute('aria-expanded','false')}}$$('#tabbar [data-t]').forEach(a=>a.classList.toggle('on',a.dataset.t===(k==='day'?'on-this-date':k)));$('#menu-b').setAttribute('aria-expanded','false');
   if(!routeKeep){window.scrollTo(0,0);main.focus({preventScroll:true})}routeKeep=false}
 let routeKeep=false;
