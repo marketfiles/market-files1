@@ -374,6 +374,20 @@ a.tag:hover{border-color:var(--tx3);color:var(--tx)}
 .ph{padding:48px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;position:relative}
 .ph::after{content:"";position:absolute;left:0;bottom:-1px;width:96px;height:2px;background:var(--dc,var(--tx))}
 .ph h1{font:750 clamp(40px,6vw,76px)/.95 var(--sans);font-stretch:74%;text-transform:uppercase;letter-spacing:-.005em}
+html.has-bgg::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:linear-gradient(rgba(130,165,230,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(130,165,230,.055) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 80% 70% at 72% 45%,#000 0,transparent 78%);mask-image:radial-gradient(ellipse 80% 70% at 72% 45%,#000 0,transparent 78%)}
+.has-bgg .pnl,.has-bgg .hub-c{background-color:rgba(9,13,21,.58);-webkit-backdrop-filter:blur(14px) saturate(1.25);backdrop-filter:blur(14px) saturate(1.25);border:1px solid rgba(245,196,81,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px -28px rgba(0,0,0,.9)}
+.has-bgg .ph{border-bottom:0;padding-bottom:34px}
+.has-bgg .ph::after{width:100%;height:1px;background:linear-gradient(90deg,var(--dc,#F5C451) 0,rgba(245,196,81,.35) 18%,rgba(245,196,81,.06) 60%,transparent 100%)}
+.has-bgg .ph::before{content:"";position:absolute;left:-14px;top:30px;width:16px;height:16px;border-left:1px solid #F5C451;border-top:1px solid #F5C451;opacity:.8}
+.has-bgg .tabs-bar{border-bottom-color:rgba(245,196,81,.2)}
+.has-bgg .tab[aria-selected="true"]{text-shadow:0 0 14px rgba(245,196,81,.5)}
+.ph .hud-eb{max-width:none;margin:0 0 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hud-eb .hud-sep{display:inline-block;width:46px;height:1px;background:linear-gradient(90deg,rgba(245,196,81,.7),transparent)}
+.hud-live{display:inline-flex;align-items:center;gap:7px;color:#7DE0A8;letter-spacing:.16em}
+.hud-live b{width:6px;height:6px;border-radius:50%;background:#2FBF77;box-shadow:0 0 0 0 rgba(47,191,119,.7);animation:hudp 1.8s ease-out infinite}
+.hud-clk{color:var(--tx3);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+@keyframes hudp{to{box-shadow:0 0 0 9px rgba(47,191,119,0)}}
+@media(max-width:760px){.bg-globe{opacity:.5}}
 .bg-globe{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
 .has-bgg body{background:transparent}
 .has-bgg #main{position:relative;z-index:1}
@@ -3191,7 +3205,7 @@ function futuresChartHTML(){return hubCards([
 function futuresHistoryHTML(){return `<section>${secHead('How the futures market was built','From Chicago grain trading to bitcoin futures.','')}${futHistoryHTML()}</section>`+hubSrc([['CME Group timeline of product launches','https://www.cmegroup.com/stories/_files/longdesc/timeline.html'],['CME Group: history of futures exchanges','https://www.cmegroup.com/education/courses/introduction-to-futures/midwest-grain-trade-history-of-futures-exchanges.html']])}
 function pageFutures(){setMeta('Futures — Market Files','The futures hub: live front-month prices, a heat map, how futures work, how to trade them, where to trade and beginner charting tutorials.');
   const tabs=tabsHTML('fh',[['px','Prices &amp; heat map',futuresPricesHTML()],['ln','Learn the basics',futuresLearnHTML()],['tr','How to trade',futuresTradeHTML()],['wh','Where to trade',futuresWhereHTML()],['ch','Charting basics',futuresChartHTML()],['hs','History',futuresHistoryHTML()]],'tabs-main');
-  return `<div class="wrap page-in" style="--dc:#C9A55C"><header class="ph serif"><p class="mono dim">MARKET FILES GUIDE</p><h1 class="holo holo-gold">Futures</h1><p>The futures market is one of the largest and most important in the world: equity indexes, Treasuries, energy, metals, agriculture, currencies, crypto and volatility, trading nearly around the clock. Prices, a heat map, and everything you need to understand it.</p><div class="sec-a">${sessHTML('fu')}<span class="mono dim">CME Globex: Sunday–Friday, 6:00 p.m.–5:00 p.m. ET with a daily one-hour break</span></div></header>
+  return `<div class="wrap page-in" style="--dc:#C9A55C"><header class="ph serif">${hudEyebrow('MARKET FILES GUIDE')}<h1 class="holo holo-gold">Futures</h1><p>The futures market is one of the largest and most important in the world: equity indexes, Treasuries, energy, metals, agriculture, currencies, crypto and volatility, trading nearly around the clock. Prices, a heat map, and everything you need to understand it.</p><div class="sec-a">${sessHTML('fu')}<span class="mono dim">CME Globex: Sunday–Friday, 6:00 p.m.–5:00 p.m. ET with a daily one-hour break</span></div></header>
   ${tabs}
   <div class="split" style="margin-top:40px"><section>${secHead('Ask Market Files AI','How futures work, explained.','')}<div class="deep" style="grid-template-columns:1fr">${['How do futures contracts work?','What are contango and backwardation?','Why do S&P 500 futures trade overnight?','How did the 1982 launch of S&P 500 futures change markets?'].map(q=>`<a href="${aiHref(q)}" data-holo><span class="n">✦ MARKET FILES AI</span><h3>${esc(q)}</h3></a>`).join('')}</div></section>
   <section>${secHead('Related','Keep exploring.','')}<div class="deep" style="grid-template-columns:1fr"><a href="#/dashboard" data-holo><span class="n">LIVE DASHBOARD</span><h3>Every market on one screen</h3></a><a href="#/crypto" data-holo><span class="n">CRYPTO</span><h3>Bitcoin and crypto prices</h3></a></div></section></div></div>`}
@@ -3264,7 +3278,7 @@ const HUBS={
 };
 function pageHub(k){const H0=HUBS[k];setMeta(H0.t+' — Market Files',H0.p.replace(/&amp;/g,'&'));
   const tabs=tabsHTML('hub-'+k,H0.tabs(),'tabs-main');
-  return `<div class="wrap page-in" style="--dc:${H0.c}"><header class="ph serif"><p class="mono dim">${H0.h==='Learn'?'MARKET FILES LEARN':'MARKET FILES GUIDE'}</p><h1 class="holo holo-gold">${H0.h}</h1><p>${H0.p}</p></header>${tabs}
+  return `<div class="wrap page-in" style="--dc:${H0.c}"><header class="ph serif">${hudEyebrow(H0.h==='Learn'?'MARKET FILES LEARN':'MARKET FILES GUIDE')}<h1 class="holo holo-gold">${H0.h}</h1><p>${H0.p}</p></header>${tabs}
   <div class="split" style="margin-top:40px"><section>${secHead('Ask Market Files AI','Explained simply.','')}<div class="deep" style="grid-template-columns:1fr">${H0.ai.map(q=>`<a href="${aiHref(q)}" data-holo><span class="n">✦ MARKET FILES AI</span><h3>${esc(q)}</h3></a>`).join('')}</div></section>
   <section>${secHead('Related','Keep exploring.','')}<div class="deep" style="grid-template-columns:1fr">${H0.rel.map(([h,n,t])=>`<a href="${h}" data-holo><span class="n">${n}</span><h3>${esc(t)}</h3></a>`).join('')}</div></section></div></div>`}
 const HUBNAV={'crypto-guide':'crypto','metals':'markets','stocks-guide':'companies','world':'global-finance'};
@@ -3936,25 +3950,52 @@ function wireDashboard(){dashTick();if(typeof Feed.want==='function')Feed.want('
   if(window.MF_TV&&typeof mountTV==='function'){const c=$('#tv-cal');if(c)mountTV('events',c,{width:'100%',height:'100%',importanceFilter:'0,1',countryFilter:'us,eu,gb,jp,cn,ca'});const t=$('#tv-tot');if(t)mountTV('symbol-overview',t,{symbols:[['Total crypto market cap','CRYPTOCAP:TOTAL|1D']],chartOnly:false,width:'100%',height:'100%',autosize:true,chartType:'area',lineWidth:2,dateRanges:['1d|1','1m|30','3m|60','12m|1D','60m|1W','all|1M']})}
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('.sb[data-id]');if(b)openInst(b.dataset.id)})}
 
-/* Slowly spinning globe behind the guide pages. Drawn from the same built-in landmasses as the home globe; no network needed. */
+/* High-tech globe behind the guide pages: dot-matrix landmasses, glowing atmosphere, orbit ring, pulsing financial-center nodes and
+   live data arcs. Drawn on one canvas from the built-in landmasses; no network needed. */
+let BGDOTS=null;
+function bgDots(){if(BGDOTS)return BGDOTS;const out=[],rad=Math.PI/180,L=land(),st=2.3;for(let la=-78;la<=83;la+=st){const dl=st/Math.max(.22,Math.cos(la*rad));for(let lo=-180;lo<180;lo+=dl){if(hitFeat(L,lo,la)){const c=Math.cos(la*rad);out.push(c*Math.cos(lo*rad),c*Math.sin(lo*rad),Math.sin(la*rad))}}}return BGDOTS=new Float32Array(out)}
+function hudEyebrow(label){return `<p class="mono dim hud-eb"><span>${label}</span><i class="hud-sep"></i><span class="hud-live"><b></b>FEED ONLINE</span><span class="hud-clk" id="hud-clk">--:--:-- UTC</span></p>`}
 function mountBgGlobe(){const cv=document.createElement('canvas');cv.className='bg-globe';cv.setAttribute('aria-hidden','true');document.body.insertBefore(cv,document.body.firstChild);document.documentElement.classList.add('has-bgg');
-  const ctx=cv.getContext('2d'),rad=Math.PI/180;let W,H,cx,cy,R,lon=-25,raf=0,last=performance.now(),dead=false;const tilt=20*rad;
-  const size=()=>{const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);const nar=W<760;R=Math.min(W,H)*(nar?.5:.48);cx=nar?W*.62:W*.78;cy=nar?H*.34:H*.5;if(RM)draw()};
-  const pr=(x0,y0,z0)=>{const L=-lon*rad,x=x0*Math.cos(L)-y0*Math.sin(L),y=x0*Math.sin(L)+y0*Math.cos(L),dz=x*Math.cos(tilt)+z0*Math.sin(tilt),vz=-x*Math.sin(tilt)+z0*Math.cos(tilt);return[cx+y*R,cy-vz*R,dz]};
-  const limb=p=>{if(p[2]>=0)return p;const dx=p[0]-cx,dy=p[1]-cy,l=Math.hypot(dx,dy)||1;return[cx+dx/l*R,cy+dy/l*R,p[2]]};
-  function draw(){ctx.clearRect(0,0,W,H);
-    const g=ctx.createRadialGradient(cx-R*.35,cy-R*.4,R*.05,cx,cy,R);g.addColorStop(0,'rgba(64,112,205,.24)');g.addColorStop(1,'rgba(8,16,38,.10)');
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
-    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
-    ctx.lineWidth=.6;ctx.strokeStyle='rgba(130,168,235,.18)';
-    for(let la=-60;la<=60;la+=30){ctx.beginPath();let pen=false;const c=Math.cos(la*rad),z=Math.sin(la*rad);for(let lo=0;lo<=360;lo+=6){const p=pr(c*Math.cos(lo*rad),c*Math.sin(lo*rad),z);if(p[2]>0){pen?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);pen=true}else pen=false}ctx.stroke()}
-    for(let lo=0;lo<360;lo+=30){ctx.beginPath();let pen=false;for(let la=-90;la<=90;la+=6){const c=Math.cos(la*rad),p=pr(c*Math.cos(lo*rad),c*Math.sin(lo*rad),Math.sin(la*rad));if(p[2]>0){pen?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);pen=true}else pen=false}ctx.stroke()}
-    ctx.fillStyle='rgba(245,196,81,.13)';ctx.strokeStyle='rgba(255,226,140,.38)';ctx.lineWidth=.9;
-    land().forEach(f=>f.rings.forEach(r=>{if(r.hole)return;const v=r.v,n=v.length/3;let any=false;ctx.beginPath();for(let i=0;i<n;i++){const p=limb(pr(v[i*3],v[i*3+1],v[i*3+2]));if(p[2]>0)any=true;i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])}if(any){ctx.fill();ctx.stroke()}}));
-    ctx.restore();ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.lineWidth=1.4;ctx.strokeStyle='rgba(245,196,81,.4)';ctx.stroke()}
-  const tick=t=>{if(dead)return;if(!document.hidden){lon+=(t-last)/1000*3.2;draw()}last=t;raf=requestAnimationFrame(tick)};
-  size();draw();addEventListener('resize',size);if(!RM)raf=requestAnimationFrame(tick);
-  return()=>{dead=true;cancelAnimationFrame(raf);removeEventListener('resize',size);cv.remove();document.documentElement.classList.remove('has-bgg')}}
+  const ctx=cv.getContext('2d'),rad=Math.PI/180,TAU=Math.PI*2;let W,H,cx,cy,R,lon=-35,raf=0,last=performance.now(),dead=false;const tilt=22*rad,dots=bgDots();
+  const vec=(la,lo)=>{const c=Math.cos(la*rad);return[c*Math.cos(lo*rad),c*Math.sin(lo*rad),Math.sin(la*rad)]};
+  const find=n=>CITIES.find(c=>c.name===n);
+  const nodes=CITIES.map(c=>({v:vec(c.lat,c.lon),big:/^(New York|London|Tokyo|Hong Kong|Frankfurt|Shanghai|Singapore|Chicago|Sydney|Dubai|Mumbai|São Paulo|Sao Paulo|Zurich)$/.test(c.name)}));
+  const pairs=[['New York','London'],['London','Frankfurt'],['Frankfurt','Dubai'],['Dubai','Mumbai'],['Mumbai','Singapore'],['Singapore','Tokyo'],['Hong Kong','Tokyo'],['Tokyo','Sydney'],['New York','Chicago'],['New York','São Paulo'],['London','Hong Kong'],['Chicago','Tokyo']].map(([a,b])=>[find(a),find(b)]).filter(x=>x[0]&&x[1]).map(([a,b],k)=>({a:vec(a.lat,a.lon),b:vec(b.lat,b.lon),ph:k*.173}));
+  const size=()=>{const dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);const nar=W<760;R=Math.min(W,H)*(nar?.42:.37);cx=nar?W*.66:W*.79;cy=nar?H*.3:H*.46;if(RM)draw(0)};
+  const pr=(x0,y0,z0,k=1)=>{const L=-lon*rad,x=x0*Math.cos(L)-y0*Math.sin(L),y=x0*Math.sin(L)+y0*Math.cos(L),dz=x*Math.cos(tilt)+z0*Math.sin(tilt),vz=-x*Math.sin(tilt)+z0*Math.cos(tilt);return[cx+y*R*k,cy-vz*R*k,dz]};
+  function draw(t){ctx.clearRect(0,0,W,H);
+    /* atmosphere */
+    const at=ctx.createRadialGradient(cx,cy,R*.9,cx,cy,R*1.32);at.addColorStop(0,'rgba(245,196,81,.20)');at.addColorStop(.35,'rgba(76,141,255,.10)');at.addColorStop(1,'rgba(76,141,255,0)');ctx.fillStyle=at;ctx.beginPath();ctx.arc(cx,cy,R*1.32,0,TAU);ctx.fill();
+    /* ocean */
+    const g=ctx.createRadialGradient(cx-R*.4,cy-R*.45,R*.05,cx,cy,R);g.addColorStop(0,'rgba(34,72,150,.46)');g.addColorStop(.7,'rgba(10,22,52,.55)');g.addColorStop(1,'rgba(4,9,22,.7)');ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.fillStyle=g;ctx.fill();
+    /* orbit ring (back half) */
+    const ring=(front)=>{ctx.save();ctx.translate(cx,cy);ctx.rotate(-.38);ctx.beginPath();ctx.ellipse(0,0,R*1.34,R*.36,0,front?0:Math.PI,front?Math.PI:TAU);ctx.setLineDash([2,7]);ctx.lineWidth=1;ctx.strokeStyle=front?'rgba(245,196,81,.5)':'rgba(245,196,81,.2)';ctx.stroke();ctx.restore()};ring(false);
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.clip();
+    ctx.lineWidth=.6;ctx.strokeStyle='rgba(120,170,255,.15)';
+    for(let la=-60;la<=60;la+=30){ctx.beginPath();let pen=false;const c=Math.cos(la*rad),z=Math.sin(la*rad);for(let lo=0;lo<=360;lo+=5){const p=pr(c*Math.cos(lo*rad),c*Math.sin(lo*rad),z);if(p[2]>0){pen?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);pen=true}else pen=false}ctx.stroke()}
+    for(let lo=0;lo<360;lo+=30){ctx.beginPath();let pen=false;for(let la=-90;la<=90;la+=5){const c=Math.cos(la*rad),p=pr(c*Math.cos(lo*rad),c*Math.sin(lo*rad),Math.sin(la*rad));if(p[2]>0){pen?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);pen=true}else pen=false}ctx.stroke()}
+    /* dot-matrix land */
+    for(let i=0;i<dots.length;i+=3){const p=pr(dots[i],dots[i+1],dots[i+2]);if(p[2]<=0)continue;const d=p[2];ctx.fillStyle=d>.55?'rgba(255,214,110,.92)':d>.25?'rgba(240,190,80,.62)':'rgba(220,170,70,.3)';const s=.9+d*1.1;ctx.fillRect(p[0]-s/2,p[1]-s/2,s,s)}
+    /* scan band */
+    const sy=cy-R+((t/6000)%1)*R*2,sg=ctx.createLinearGradient(0,sy-26,0,sy+26);sg.addColorStop(0,'rgba(120,190,255,0)');sg.addColorStop(.5,'rgba(120,190,255,.10)');sg.addColorStop(1,'rgba(120,190,255,0)');ctx.fillStyle=sg;ctx.fillRect(cx-R,sy-26,R*2,52);
+    ctx.restore();
+    /* data arcs with travelling pulses */
+    pairs.forEach(q=>{const [a,b]=[q.a,q.b],dot=Math.max(-1,Math.min(1,a[0]*b[0]+a[1]*b[1]+a[2]*b[2])),om=Math.acos(dot),so=Math.sin(om)||1,N=36,lift=.1+om*.12;let prev=null;const u=((t/5200)+q.ph)%1;
+      for(let k=0;k<=N;k++){const f=k/N,s1=Math.sin((1-f)*om)/so,s2=Math.sin(f*om)/so,x=a[0]*s1+b[0]*s2,y=a[1]*s1+b[1]*s2,z=a[2]*s1+b[2]*s2,e=1+lift*Math.sin(Math.PI*f),p=pr(x,y,z,e);
+        if(prev&&p[2]>0&&prev[2]>0){ctx.beginPath();ctx.moveTo(prev[0],prev[1]);ctx.lineTo(p[0],p[1]);const near=Math.max(0,1-Math.abs(f-u)*6);ctx.strokeStyle=`rgba(255,${200+near*50|0},${110+near*120|0},${.16+near*.7})`;ctx.lineWidth=.8+near*1.4;ctx.stroke()}prev=p}
+      const f=u,s1=Math.sin((1-f)*om)/so,s2=Math.sin(f*om)/so,p=pr(a[0]*s1+b[0]*s2,a[1]*s1+b[1]*s2,a[2]*s1+b[2]*s2,1+lift*Math.sin(Math.PI*f));if(p[2]>0){ctx.beginPath();ctx.arc(p[0],p[1],2.2,0,TAU);ctx.fillStyle='#FFF4CC';ctx.shadowColor='#F5C451';ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0}});
+    /* financial-center nodes */
+    nodes.forEach((n,i)=>{const p=pr(n.v[0],n.v[1],n.v[2]);if(p[2]<=0)return;const ph=((t/1800)+i*.37)%1,r=n.big?3:1.8;ctx.beginPath();ctx.arc(p[0],p[1],r,0,TAU);ctx.fillStyle='#FFF1C2';ctx.shadowColor='#F5C451';ctx.shadowBlur=n.big?14:6;ctx.fill();ctx.shadowBlur=0;
+      if(n.big){ctx.beginPath();ctx.arc(p[0],p[1],r+ph*11,0,TAU);ctx.lineWidth=1;ctx.strokeStyle=`rgba(245,196,81,${.55*(1-ph)})`;ctx.stroke()}});
+    /* rim light */
+    const rim=ctx.createRadialGradient(cx,cy,R*.93,cx,cy,R*1.01);rim.addColorStop(0,'rgba(245,196,81,0)');rim.addColorStop(.85,'rgba(245,196,81,.28)');rim.addColorStop(1,'rgba(255,236,170,.75)');ctx.beginPath();ctx.arc(cx,cy,R*1.005,0,TAU);ctx.lineWidth=R*.014;ctx.strokeStyle=rim;ctx.stroke();
+    ring(true);
+    /* satellite on orbit */
+    const a=(t/9000)%1*TAU,sx=Math.cos(a)*R*1.34,sy2=Math.sin(a)*R*.36,co=Math.cos(-.38),si=Math.sin(-.38);ctx.beginPath();ctx.arc(cx+sx*co-sy2*si,cy+sx*si+sy2*co,2.6,0,TAU);ctx.fillStyle='#FFF4CC';ctx.shadowColor='#F5C451';ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0}
+  const clk=()=>{const e=document.getElementById('hud-clk');if(e){const d=new Date(),z=n=>String(n).padStart(2,'0');e.textContent=`${z(d.getUTCHours())}:${z(d.getUTCMinutes())}:${z(d.getUTCSeconds())} UTC`}};clk();const ci=setInterval(clk,1000);
+  const tick=t=>{if(dead)return;if(!document.hidden){lon+=(t-last)/1000*3.4;draw(t)}last=t;raf=requestAnimationFrame(tick)};
+  size();draw(0);addEventListener('resize',size);if(!RM)raf=requestAnimationFrame(tick);
+  return()=>{dead=true;cancelAnimationFrame(raf);clearInterval(ci);removeEventListener('resize',size);cv.remove();document.documentElement.classList.remove('has-bgg')}}
 function route(){cleanup.forEach(f=>f());cleanup=[];
   {const m=location.hash.startsWith('#/')?hashToPath(location.hash):null;if(m)history.replaceState(null,'',m)}LASTNAV=urlKey();
   const raw=curRaw();const [path,qs]=raw.split('?');const params=new URLSearchParams(qs||'');const seg=path.split('/').filter(Boolean);const k=seg[0]||'';
