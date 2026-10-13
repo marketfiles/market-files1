@@ -81,8 +81,9 @@ img,svg{display:block;max-width:100%}
 .logo-t{display:flex;flex-direction:column;line-height:1}
 .logo-t b{font:700 19px/1 var(--sans);font-stretch:88%;letter-spacing:-.01em}
 .logo-t small{font:500 9.5px/1 var(--mono);color:var(--tx3);margin-top:5px;letter-spacing:.06em}
-.nav-links{display:flex;gap:2px;margin:0 auto;list-style:none}
-.nav-links a{display:block;padding:8px 8px;font-size:13.5px;white-space:nowrap;font-weight:500;color:var(--tx2);position:relative;letter-spacing:.005em}
+.nav-in>nav{flex:1;display:flex;justify-content:center;min-width:0}
+.nav-links{display:flex;gap:4px;margin:0 auto;padding:0;list-style:none}
+.nav-links a{display:block;padding:8px clamp(7px,1.1vw,14px);font-size:14.5px;white-space:nowrap;font-weight:500;color:var(--tx2);position:relative;letter-spacing:.005em}
 .nav-links a:hover{color:var(--tx)}
 .nav-links a[aria-current="page"]{color:var(--tx)}
 .nav-links a[aria-current="page"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-11px;height:2px;background:var(--dc,var(--tx));box-shadow:0 0 12px var(--dc,transparent)}
@@ -97,11 +98,11 @@ img,svg{display:block;max-width:100%}
 .btn:hover{border-color:var(--tx3)}
 .btn-p{background:var(--tx);color:var(--bg);border-color:var(--tx)}
 .btn-p:hover{opacity:.88}
-.menu-b{display:none}
+.menu-b{display:grid}
 .drawer{display:none;border-top:1px solid var(--line);background:var(--bg2)}
 .drawer.open{display:block}
 .drawer a{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line);font-weight:500}
-@media (max-width:1540px){.live span{display:none}.live{padding:0 6px}}@media (max-width:1320px){.nav-links{display:none}.menu-b{display:grid}.nav-r{margin-left:auto}}
+@media (max-width:1540px){.live span{display:none}.live{padding:0 6px}}@media (max-width:900px){.nav-links{display:none}.nav-r{margin-left:auto}}
 @media (max-width:640px){.live span,.hide-s,.logo-t small{display:none}.live{border:0;padding:0 2px;margin:0}.nav-in{gap:10px}.nav-r{gap:4px}.nav-r .btn-p{padding:0 10px;font-size:12.5px}.logo-t b{font-size:17px}}
 
 /* ---------- sections ---------- */
@@ -3558,7 +3559,7 @@ function setMeta(title,desc,ld){document.title=title;$('meta[name="description"]
   ['og:description','twitter:description'].forEach(k=>{const m=$(`meta[property="${k}"],meta[name="${k}"]`);if(m&&desc)m.content=desc});
   $('#ld-page').textContent=ld?JSON.stringify(ld):''}
 const NAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451']];
-$('#nav-links').innerHTML=NAV.map(([r,l,c])=>`<li><a href="#/${r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
+$('#nav-links').innerHTML=NAV.filter(n=>['markets','crypto','companies','dashboard','learn'].includes(n[0])).map(([r,l,c])=>`<li><a href="#/${r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
 $('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/dashboard?tab=watchlist">My Watchlist<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a>`;
 $('#f-desks').innerHTML=ACCOUNTS.map(d=>`<a href="${xUrl(d.handle)}" target="_blank" rel="noopener" style="--dc:${d.hex}"><b>@${d.handle}</b><span>${d.blurb}</span></a>`).join('');
 $('#yr').textContent=new Date().getFullYear();

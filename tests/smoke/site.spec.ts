@@ -26,7 +26,7 @@ test('homepage loads with navigation, globe and biggest-stories band', async ({ 
   await page.goto('/');
   await expect(page).toHaveTitle(/Market Files/);
   await expect(page.locator('#nav-links a')).not.toHaveCount(0);
-  for (const label of ['Markets', 'Global', 'Crypto', 'Companies', 'History']) {
+  for (const label of ['Markets', 'Crypto', 'Companies', 'Dashboard', 'Learn']) {
     await expect(page.locator('#nav-links a', { hasText: label }).first()).toBeAttached();
   }
   await expect(page.locator('canvas#globe')).toBeVisible();
