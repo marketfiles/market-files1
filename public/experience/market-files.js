@@ -2421,7 +2421,19 @@ function wireHeatShow(){const s=$('#j-heat');if(!s)return;hxRender(false);hxProg
 Feed.subscribe(()=>{if($('#hx-map'))hxRender(false);if($('#dash'))dashTick()});
 
 /* ---------- Logos + company profile helpers ---------- */
+const EMB_BAR=(c1,c2)=>`<svg viewBox="0 0 48 48"><path d="M6 34l7-10h22l7 10z" fill="${c1}"/><path d="M13 24l5-9h12l5 9z" fill="${c2}"/><path d="M8 34h32v4H8z" fill="${c1}" opacity=".7"/></svg>`;
+const EMB={
+ gold:EMB_BAR('#E8B84A','#F7D774'),silver:EMB_BAR('#9AA7B5','#D4DCE5'),copper:EMB_BAR('#C26A3B','#E39A6C'),
+ oil:`<svg viewBox="0 0 48 48"><path d="M24 7c7 9 12 15 12 22a12 12 0 0 1-24 0c0-7 5-13 12-22z" fill="#2B3342" stroke="#F5C451" stroke-width="2"/><path d="M18 30a6 6 0 0 0 6 6" fill="none" stroke="#F5C451" stroke-width="2" stroke-linecap="round"/></svg>`,
+ gas:`<svg viewBox="0 0 48 48"><path d="M24 6c2 7 11 11 11 22a11 11 0 0 1-22 0c0-5 3-8 5-10 0 4 2 6 4 6 0-6-2-10 2-18z" fill="#4C8DFF"/></svg>`,
+ up:`<svg viewBox="0 0 48 48"><path d="M7 35l10-11 8 6 16-18" fill="none" stroke="#2FBF77" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 12h10v10" fill="none" stroke="#2FBF77" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+ usd:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="16" fill="none" stroke="#2FBF77" stroke-width="2.5"/><text x="24" y="31" text-anchor="middle" font-size="22" font-weight="700" fill="#2FBF77" font-family="Georgia,serif">$</text></svg>`,
+ globe:`<svg viewBox="0 0 48 48"><g fill="none" stroke="#7CC4FF" stroke-width="2.2"><circle cx="24" cy="24" r="16"/><ellipse cx="24" cy="24" rx="7" ry="16"/><path d="M8 24h32M10 16h28M10 32h28"/></g></svg>`,
+ bond:`<svg viewBox="0 0 48 48"><rect x="9" y="12" width="30" height="24" rx="3" fill="none" stroke="#F5C451" stroke-width="2.4"/><circle cx="24" cy="24" r="6" fill="none" stroke="#F5C451" stroke-width="2.4"/></svg>`};
+const EMB_MAP={XAU:'gold',GC1:'gold',XAG:'silver',SI1:'silver',PL1:'silver',HG:'copper',HG1:'copper',CL:'oil',CL1:'oil',BZ1:'oil',RB1:'oil',NG1:'gas',DXY:'usd',US2Y:'bond',US5Y:'bond',US10Y:'bond',US30Y:'bond',ZT1:'bond',ZN1:'bond',ZB1:'bond',SPX:'up',ES1:'up',COMP:'up',NQ1:'up',INDU:'up',YM1:'up',RUT:'up',RTY1:'up',UKX:'globe',DAX:'globe',CAC:'globe',SX5E:'globe',NKY:'globe',HSI:'globe',SHCOMP:'globe',SENSEX:'globe',AS51:'globe',TSX:'globe',IBOV:'globe'};
+const EMB_TAG={SPX:'S&P 500',ES1:'S&P 500',COMP:'NASDAQ',NQ1:'NASDAQ 100',INDU:'DOW',YM1:'DOW',RUT:'RUSSELL',RTY1:'RUSSELL'};
 function logoHTML(q,cls){const m=esc(String(q.id||'?').replace(/[^A-Z0-9]/g,'').slice(0,4));let u='';
+  const em=EMB_MAP[q.id];if(em&&q.g!=='co'&&q.g!=='cr')return `<span class="lg lg-e ${cls||''}" aria-hidden="true">${EMB[em]}${EMB_TAG[q.id]&&/lg-(l|b)/.test(cls||'')?`<i>${esc(EMB_TAG[q.id])}</i>`:''}</span>`;
   if(q.g==='co')u=`https://financialmodelingprep.com/image-stock/${encodeURIComponent(q.id)}.png`;
   else if(q.g==='cr')u=`https://assets.coincap.io/assets/icons/${encodeURIComponent(String(q.id).toLowerCase())}@2x.png`;
   return `<span class="lg ${cls||''}" aria-hidden="true"><b>${m}</b>${u?`<img src="${u}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span>`}
