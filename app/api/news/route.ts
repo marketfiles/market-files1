@@ -125,14 +125,21 @@ async function about(name: string, ticker: string, kind: string): Promise<Item[]
   if (hit && Date.now() - hit.at < 600_000) return hit.items;
   const extra = kind === 'crypto' ? 'crypto OR price' : 'stock OR shares OR earnings';
   const qs = [`"${name}" (${extra}) when:7d`, ticker && ticker !== name.toUpperCase() ? `"${ticker}" ${kind === 'crypto' ? 'crypto' : 'stock'} when:7d` : ''].filter(Boolean);
-  const lists = await Promise.all(qs.map((q) => gnews(q).catch(() => [] as Item[])));
+  // Ticker feeds link straight to the publisher (so a photo can be found); Google News links are redirects with no photo.
+  const tk = /^[A-Z.\-]{1,6}$/.test(ticker) && kind !== 'crypto' ? encodeURIComponent(ticker) : '';
+  const direct = tk ? [
+    rss(`https://feeds.finance.yahoo.com/rss/2.0/headline?s=${tk}&region=US&lang=en-US`, 'Yahoo Finance').catch(() => [] as Item[]),
+    rss(`https://www.nasdaq.com/feed/rssoutbound?symbol=${tk}`, 'Nasdaq').catch(() => [] as Item[]),
+  ] : [];
+  const lists = await Promise.all([...direct, ...qs.map((q) => gnews(q).catch(() => [] as Item[]))]);
   const seen = new Set<string>(); const items: Item[] = [];
   const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().slice(0, 80);
   for (let i = 0; items.length < 16 && i < 30; i++) for (const l of lists) {
     const it = l[i]; if (!it || !onTopic(it)) continue; const k = norm(it.title); if (seen.has(k)) continue; seen.add(k);
-    items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when });
+    items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when, image: it.image, summary: it.summary });
   }
   items.sort((x, y) => +new Date(y.when) - +new Date(x.when));
+  await Promise.all(items.slice(0, 10).filter((i) => !i.image && !/news\.google\.com/.test(i.link)).map(async (i) => { i.image = await ogImage(i.link); }));
   if (items.length) { cache.set(ck, { at: Date.now(), items }); if (cache.size > 400) cache.clear(); }
   return items.length ? items : hit?.items ?? [];
 }

@@ -1333,6 +1333,21 @@ html.dos-open,html.hello-open{overflow:hidden}
 .rs-nl{list-style:none;margin:0;padding:0}.rs-nl li{border-bottom:1px solid var(--line)}.rs-nl a{display:grid;gap:4px;padding:14px 0;color:var(--tx)}.rs-nl b{font:500 19px/1.3 var(--serif)}.rs-nl a:hover b{text-decoration:underline;text-decoration-color:rgba(245,196,81,.6);text-underline-offset:4px}.rs-nl span{font-size:11px;color:var(--tx3)}
 .rs-fl{display:grid;gap:0}.rs-fl a{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--tx);font:500 17px/1.3 var(--serif)}.rs-fl a span{font:500 12px var(--mono);color:#F5C451;padding-top:4px}
 .rs-note{font-size:11px;margin-top:22px}
+.rs-id{display:flex;align-items:center;gap:18px}
+.lg{position:relative;display:inline-grid;place-items:center;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#1c2433,#0d121b);border:1px solid rgba(245,196,81,.35);color:#F5C451;flex:none}
+.lg b{font:700 .34em var(--mono);letter-spacing:.04em}.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:8%}
+.lg-l{width:76px;height:76px;font-size:56px}.lg-b{width:56px;height:56px;font-size:40px;border-radius:12px}
+.rs-about{margin-top:22px;border:1px solid var(--line);background:var(--bg2);padding:18px 20px}.rs-about h2{font-size:11px;letter-spacing:.18em;color:#F5C451;border-bottom:1px solid rgba(245,196,81,.3);padding-bottom:8px;margin-bottom:12px}
+.rs-ab{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px}.rs-ab p{margin:0;font:400 17px/1.55 var(--serif)}.rs-src{font:500 11px var(--mono);color:#F5C451;white-space:nowrap}
+.rs-facts{margin:0;display:grid;gap:0}.rs-facts div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line)}.rs-facts dt{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--tx3)}.rs-facts dd{margin:0;font-weight:600}
+.nc-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:14px}
+.nc{display:grid;grid-template-rows:auto 1fr;border:1px solid var(--line);background:var(--bg2);color:var(--tx);overflow:hidden;transition:border-color .2s,transform .2s}.nc:hover{border-color:rgba(245,196,81,.6);transform:translateY(-2px)}
+.nc-i{position:relative;display:grid;place-items:center;aspect-ratio:16/9;background:radial-gradient(120% 120% at 20% 0,#25324a,#0b0f17);overflow:hidden}
+.nc-i>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.nc-i .lg-b{opacity:.9}.nc-i>img~.lg{display:none}
+.nc-t{display:grid;gap:8px;padding:14px 16px 16px;align-content:start}.nc-s{font-size:11px;letter-spacing:.08em;color:#F5C451}.nc-t b{font:500 18px/1.3 var(--serif)}.nc:hover .nc-t b{text-decoration:underline;text-decoration-color:rgba(245,196,81,.6);text-underline-offset:4px}.nc-d{font-size:14px;line-height:1.5;color:var(--tx2,var(--tx3))}
+.nc-lead{grid-column:1/-1;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);grid-template-rows:none}.nc-lead .nc-i{aspect-ratio:auto;min-height:260px}.nc-lead .nc-t b{font-size:26px}.nc-lead .nc-t{align-content:center;padding:22px}
+.sk-c{display:block;aspect-ratio:16/10;background:var(--bg2);border:1px solid var(--line)}
+@media(max-width:860px){.rs-ab{grid-template-columns:1fr}.nc-lead{grid-template-columns:1fr}.nc-lead .nc-i{min-height:0;aspect-ratio:16/9}.rs-id{gap:12px}.lg-l{width:56px;height:56px;font-size:42px}}
 @media(max-width:860px){.rs-g{grid-template-columns:1fr}.tvw.rs-tv{height:340px}.rs-q{justify-items:start}.rs-q [data-f="v"]{font-size:26px}}
 @media(max-width:900px){.hx-body{grid-template-columns:1fr}.hx-map{height:420px;min-height:0}.hx-side{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.hx{padding:30px 0 24px}.hx-map{height:380px}.hx-side{grid-template-columns:1fr}.hx-ctl .ib{width:36px;height:36px}}
@@ -3832,6 +3847,17 @@ function wireHeatShow(){const s=$('#j-heat');if(!s)return;hxRender(false);hxProg
   cleanup.push(()=>{clearInterval(HX.t);HX.t=null;ro.disconnect()})}
 Feed.subscribe(()=>{if($('#hx-map'))hxRender(false);if($('#dash'))dashTick()});
 
+/* ---------- Logos + company profile helpers ---------- */
+function logoHTML(q,cls){const m=esc(String(q.id||'?').replace(/[^A-Z0-9]/g,'').slice(0,4));let u='';
+  if(q.g==='co')u=`https://financialmodelingprep.com/image-stock/${encodeURIComponent(q.id)}.png`;
+  else if(q.g==='cr')u=`https://assets.coincap.io/assets/icons/${encodeURIComponent(String(q.id).toLowerCase())}@2x.png`;
+  return `<span class="lg ${cls||''}" aria-hidden="true"><b>${m}</b>${u?`<img src="${u}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span>`}
+document.addEventListener('error',e=>{const t=e.target;if(t&&t.tagName==='IMG'&&t.closest&&t.closest('.lg,.nc-i'))t.remove()},true);
+const WIKI_OK=/company|corporation|multinational|manufacturer|bank|holding|retailer|provider|conglomerate|cryptocurrency|blockchain|stock|brand|producer|firm|business|network|exchange|technology/i;
+async function wikiAbout(name,kind){try{const sr=await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name+(kind==='crypto'?' cryptocurrency':' company'))}&srlimit=1&format=json&origin=*`);const sj=await sr.json();const t=sj&&sj.query&&sj.query.search&&sj.query.search[0];if(!t)return null;
+  const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.title.replace(/ /g,'_'))}`);if(!r.ok)return null;const j=await r.json();
+  if(j.type!=='standard'||!j.extract||!WIKI_OK.test(j.extract.slice(0,400)))return null;
+  return{title:j.title,text:j.extract,url:(j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page)||''}}catch(e){return null}}
 /* ---------- Research page: #/research/{TICKER} for any company, stock, crypto or market ---------- */
 const rsId=raw=>decodeURIComponent(raw||'').toUpperCase().replace(/[^A-Z0-9.\-]/g,'').slice(0,12);
 function rsInst(id){return INSTR.find(x=>x.id===id)||{id,name:id,g:'co',na:true,dp:2,series:[],prev:0,v:0,ext:true}}
@@ -3841,21 +3867,25 @@ function pageResearch(raw){const id=rsId(raw);if(!id)return notFound();const q=r
   const rel=kws.length?A.filter(a=>{const h=[a.head,a.deck,...a.assets,...a.countries].join(' ').toLowerCase();return kws.some(k=>h.includes(k))}).slice(0,4):[];
   const links=[[tvUrl(id),'Chart on TradingView'],co&&!q.ext||co?[`https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${encodeURIComponent(id.replace('.','-'))}&type=10-K&dateb=&owner=include&count=10`,'SEC filings']:null,CMC[id]?[cmcUrl(id),'CoinMarketCap']:null,[gq(`${q.name} ${cr?'crypto':'stock'} news`),'More on Google']].filter(Boolean);
   return `<div class="wrap page-in rs">
-  <header class="rs-h"><div><p class="mono rs-k">${cr?'CRYPTO':co?'COMPANY':'MARKET'} · RESEARCH</p><h1>${esc(q.name)}</h1><p class="mono dim">${esc(id)}${q.ex?' · '+esc(q.ex):''}${q.sec?' · '+esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1]):''}</p></div>
+  <header class="rs-h"><div class="rs-id">${logoHTML(q,'lg-l')}<div><p class="mono rs-k">${cr?'CRYPTO':co?'COMPANY':'MARKET'} · INVESTOR HOME</p><h1>${esc(q.name)}</h1><p class="mono dim">${esc(id)}${q.ex?' · '+esc(q.ex):''}${q.sec?' · '+esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1]):''}</p></div></div>
    <div class="rs-q" data-id="${id}"><span class="mono" data-f="v">${q.na?'—':fmtV(q)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div></header>
+  ${(co||cr)?`<section class="rs-about" id="rs-about"><h2 class="mono">ABOUT ${esc(q.name.toUpperCase())}</h2><div class="rs-ab"><p id="rs-abt" class="dim">Loading the company profile…</p><dl class="rs-facts">${co&&q.ex?`<div><dt>Listed on</dt><dd>${esc(q.ex)}</dd></div>`:''}${q.sec?`<div><dt>Sector</dt><dd>${esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1])}</dd></div>`:''}<div><dt>Ticker</dt><dd>${esc(id)}</dd></div>${q.mc&&isFinite(q.mc)?`<div><dt>Market cap</dt><dd data-f="mc">${fmtCap(q.mc)}</dd></div>`:''}</dl></div></section>`:''}
   <div class="rs-g"><section class="rs-chart" data-holo><div class="tvw rs-tv" id="rs-tv"></div></section>
    <aside class="rs-side"><h3 class="mono">RESEARCH</h3>${links.map(([u,l])=>`<a class="rs-l" href="${u}" target="_blank" rel="noopener">${esc(l)} <span aria-hidden="true">↗</span></a>`).join('')}<a class="rs-l" href="#/search?q=${encodeURIComponent(q.name)}">Search the Market Files <span aria-hidden="true">→</span></a></aside></div>
-  <section class="rs-news"><h2 class="mono">LATEST NEWS · ${esc(q.name.toUpperCase())}</h2><div id="rs-news" aria-live="polite"><span class="sk-l"></span><span class="sk-l"></span><span class="sk-l s"></span></div></section>
+  <section class="rs-news"><h2 class="mono">LATEST NEWS · ${esc(q.name.toUpperCase())}</h2><div id="rs-news" aria-live="polite"><div class="nc-g"><span class="sk-c"></span><span class="sk-c"></span><span class="sk-c"></span></div></div></section>
   ${rel.length?`<section class="rs-files"><h2 class="mono">FROM THE MARKET FILES</h2><div class="rs-fl">${rel.map(a=>`<a href="#/file/${a.slug}"><span class="mono">${a.type==='hist'?a.y:'NOW'}</span>${esc(a.head)}</a>`).join('')}</div></section>`:''}
   <p class="mono dim rs-note">Prices are delayed; “—” means no data right now. Headlines link to the original publishers.</p></div>`}
 async function afterResearch(raw){const id=rsId(raw);if(!id)return;const q=rsInst(id);
   if(q.g==='co'&&typeof Feed.want==='function')Feed.want('companies');
   const tv=$('#rs-tv');if(tv&&typeof mountTVSymbol==='function')mountTVSymbol(tv,q);
+  if($('#rs-abt')){if(!LIVE_SITE)$('#rs-abt').textContent='';else wikiAbout(q.name,q.g==='cr'?'crypto':'stock').then(w=>{const el=$('#rs-abt');if(!el||!el.isConnected)return;
+    if(w)el.outerHTML=`<p id="rs-abt">${esc(w.text)} <a class="rs-src" href="${esc(w.url)}" target="_blank" rel="noopener">Source: Wikipedia ↗</a></p>`;else{el.textContent=`${q.name} (${q.id}) is tracked here with a live price, chart and the latest news.`}})}
   const box=$('#rs-news');if(!box)return;
   if(!LIVE_SITE){box.innerHTML='<p class="dim">Latest headlines load on the live site.</p>';return}
   try{const r=await fetch(`/api/news?q=${encodeURIComponent(q.name)}&t=${encodeURIComponent(id)}&k=${q.g==='cr'?'crypto':'stock'}`);const j=r.ok?await r.json():{items:[]};if(!box.isConnected)return;
     const it=(j.items||[]).slice(0,14);
-    box.innerHTML=it.length?`<ol class="rs-nl">${it.map(n=>`<li><a href="${esc(n.link)}" target="_blank" rel="noopener"><b>${esc(n.title)}</b><span class="mono">${esc(n.source||'')}${n.when?' · '+ago(n.when):''}</span></a></li>`).join('')}</ol>`:`<p class="dim">No recent headlines found for ${esc(q.name)}. <a href="${gq(q.name+' news')}" target="_blank" rel="noopener">Search Google News ↗</a></p>`}
+    const card=(n,i)=>`<a class="nc ${i===0?'nc-lead':''}" href="${esc(n.link)}" target="_blank" rel="noopener"><span class="nc-i">${logoHTML(q,'lg-b')}${n.image?`<img src="${esc(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:''}</span><span class="nc-t"><span class="mono nc-s">${esc(n.source||'')}${n.when?' · '+ago(n.when):''}</span><b>${esc(n.title)}</b>${i===0&&n.summary?`<span class="nc-d">${esc(n.summary)}</span>`:''}</span></a>`;
+    box.innerHTML=it.length?`<div class="nc-g">${it.map(card).join('')}</div>`:`<p class="dim">No recent headlines found for ${esc(q.name)}. <a href="${gq(q.name+' news')}" target="_blank" rel="noopener">Search Google News ↗</a></p>`}
   catch(e){if(box.isConnected)box.innerHTML=`<p class="dim">Headlines are unavailable right now. <a href="${gq(q.name+' news')}" target="_blank" rel="noopener">Search Google News ↗</a></p>`}}
 
 /* ---------- Tools: calculators ---------- */
