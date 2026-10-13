@@ -2315,7 +2315,7 @@ function openDossier(p){if(!p||p.type==='Continent')return;const tok=++DOS_TOKEN
     e.innerHTML=r&&r.extract?`${esc(r.extract)} <a class="dos-more" href="${r.url}" target="_blank" rel="noopener">Learn more</a>`:`<span class="dim">${LIVE_SITE?'Economic overview unavailable right now.':'Economic overview loads on the live site.'}</span> <a class="dos-more" href="${gq(ecoName+' economy')}" target="_blank" rel="noopener">Learn more</a>`})();
   gal.forEach(async(g,i)=>{const r=await wikiSearch(g[2],1);if(tok!==DOS_TOKEN||!r||!r.img)return;const box=$('#dos-g'+i+' .dos-gim');if(!box)return;const im=new Image();im.referrerPolicy='no-referrer';im.alt=r.title;im.onload=()=>{box.innerHTML='';box.appendChild(im);im.classList.add('ok')};im.src=r.img;
     const fc=$('#dos-g'+i+' figcaption');if(fc)fc.insertAdjacentHTML('beforeend',`<a class="mono" href="${r.url}" target="_blank" rel="noopener">${esc(r.title)} ↗</a>`)});
-  if(iso&&p.type!=='U.S. state')(async()=>{try{const r=await fetch('/api/country?iso='+iso);if(!r.ok)throw 0;const j=await r.json();if(tok!==DOS_TOKEN)return;
+  if(iso&&p.type!=='U.S. state')(async()=>{try{const r=await fetch('/api/country?iso='+iso);if(!r.ok)throw 0;const j=await r.json();if(tok!==DOS_TOKEN)return;if(!j.stats||!Object.keys(j.stats).length)throw 0;
       STAT_KEYS.forEach(([k,,u])=>{const s=j.stats&&j.stats[k];const el=$(`[data-st="${k}"]`,d);if(!el||!s)return;$('b',el).textContent=fmtBig(s.value,u);$('em',el).textContent=s.year||''})}
     catch(e){const s=$('#dos-stsrc');if(s&&tok===DOS_TOKEN)s.textContent=LIVE_SITE?'World Bank data unavailable right now':'World Bank figures load on the live site'}})()}
 function pfSceneInto(el,f){if(el)pfScene(f,el)}
