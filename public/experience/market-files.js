@@ -2120,7 +2120,9 @@ function setMeta(title,desc,ld){document.title=title;($('meta[name="description"
   ['og:description','twitter:description'].forEach(k=>{const m=$(`meta[property="${k}"],meta[name="${k}"]`);if(m&&desc)m.content=desc});
   ($('#ld-page')||{}).textContent=ld?JSON.stringify(ld):''}
 const NAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451']];
-$('#nav-links').innerHTML=NAV.filter(n=>['markets','crypto','companies','dashboard','learn'].includes(n[0])).map(([r,l,c])=>`<li><a href="#/${r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
+const TOPNAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DFF'],['crypto','Crypto','#F2A03D'],['futures','Futures','#F5C451'],['companies','Companies','#E8B84A'],['history','History','#C5CEDA'],['dashboard','Dashboard','#F5C451'],['learn','Learn','#7CC4FF'],['tools','Tools','#F5C451'],['crypto-guide','Crypto guide','#F2A03D'],['metals','Gold &amp; Silver','#E8B84A'],['stocks-guide','Stocks guide','#2FBF77'],['world','Global politics','#4C8DFF'],['watchlist','My Watchlist','#F5C451','#/dashboard?tab=watchlist'],['blog','Blog','#C5CEDA']];
+$('#nav-links').innerHTML=TOPNAV.map(([r,l,c,h])=>`<li><a href="${h||'#/'+r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
+{const nl=$('#nav-links');nl.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&nl.scrollWidth>nl.clientWidth){nl.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false})}
 $('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/dashboard?tab=watchlist">My Watchlist<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a>`;
 $('#f-desks').innerHTML=ACCOUNTS.map(d=>`<a href="${xUrl(d.handle)}" target="_blank" rel="noopener" style="--dc:${d.hex}"><b>@${d.handle}</b><span>${d.blurb}</span></a>`).join('');
 $('#yr').textContent=new Date().getFullYear();
@@ -2670,7 +2672,7 @@ function route(){cleanup.forEach(f=>f());cleanup=[];
   else html=notFound();
   const main=$('#main');main.innerHTML=html;after&&after();attachHolo();hydrateWiki(main);
   const active=k==='file'?(BY[seg[1]]?DESKS[BY[seg[1]].desk].route:''):k==='timeline'||k==='on-this-date'||k==='day'?'archive':(HUBNAV[k]||k);
-  $$('#nav-links a').forEach(a=>{if(a.dataset.r===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $$('#nav-links a').forEach(a=>{if(a.dataset.r===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});{const on=$('#nav-links a[aria-current]');if(on&&on.scrollIntoView)try{const l=on.closest('ul');l.scrollTo({left:Math.max(0,on.offsetLeft-60),behavior:'smooth'})}catch(e){}}
   $('#drawer').classList.remove('open');{const xm=$('#x-m');if(xm&&!xm.hidden){xm.hidden=true;$('#x-b').setAttribute('aria-expanded','false')}}$$('#tabbar [data-t]').forEach(a=>a.classList.toggle('on',a.dataset.t===(k==='day'?'on-this-date':k)));$('#menu-b').setAttribute('aria-expanded','false');
   if(!routeKeep){window.scrollTo(0,0);main.focus({preventScroll:true})}routeKeep=false}
 let routeKeep=false;
