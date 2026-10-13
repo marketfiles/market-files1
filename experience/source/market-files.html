@@ -374,6 +374,7 @@ a.tag:hover{border-color:var(--tx3);color:var(--tx)}
 .ph{padding:48px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;position:relative}
 .ph::after{content:"";position:absolute;left:0;bottom:-1px;width:96px;height:2px;background:var(--dc,var(--tx))}
 .ph h1{font:750 clamp(40px,6vw,76px)/.95 var(--sans);font-stretch:74%;text-transform:uppercase;letter-spacing:-.005em}
+.ph.serif>p.mono.dim{margin:0 0 12px;font-size:12px;letter-spacing:.16em;color:var(--gold)}
 .ph.serif h1{font:500 clamp(40px,5.6vw,72px)/1 var(--serif);text-transform:none;letter-spacing:-.02em;font-stretch:100%}
 .ph p{color:var(--tx2);max-width:62ch;margin-top:14px;font-size:17px}
 .ph .sec-a{margin-top:16px}
@@ -3186,7 +3187,7 @@ function futuresChartHTML(){return hubCards([
 function futuresHistoryHTML(){return `<section>${secHead('How the futures market was built','From Chicago grain trading to bitcoin futures.','')}${futHistoryHTML()}</section>`+hubSrc([['CME Group timeline of product launches','https://www.cmegroup.com/stories/_files/longdesc/timeline.html'],['CME Group: history of futures exchanges','https://www.cmegroup.com/education/courses/introduction-to-futures/midwest-grain-trade-history-of-futures-exchanges.html']])}
 function pageFutures(){setMeta('Futures — Market Files','The futures hub: live front-month prices, a heat map, how futures work, how to trade them, where to trade and beginner charting tutorials.');
   const tabs=tabsHTML('fh',[['px','Prices &amp; heat map',futuresPricesHTML()],['ln','Learn the basics',futuresLearnHTML()],['tr','How to trade',futuresTradeHTML()],['wh','Where to trade',futuresWhereHTML()],['ch','Charting basics',futuresChartHTML()],['hs','History',futuresHistoryHTML()]],'tabs-main');
-  return `<div class="wrap page-in" style="--dc:#C9A55C"><header class="ph"><h1>Futures</h1><p>The futures market is one of the largest and most important in the world: equity indexes, Treasuries, energy, metals, agriculture, currencies, crypto and volatility, trading nearly around the clock. Prices, a heat map, and everything you need to understand it.</p><div class="sec-a">${sessHTML('fu')}<span class="mono dim">CME Globex: Sunday–Friday, 6:00 p.m.–5:00 p.m. ET with a daily one-hour break</span></div></header>
+  return `<div class="wrap page-in" style="--dc:#C9A55C"><header class="ph serif"><p class="mono dim">MARKET FILES GUIDE</p><h1 class="holo">Futures</h1><p>The futures market is one of the largest and most important in the world: equity indexes, Treasuries, energy, metals, agriculture, currencies, crypto and volatility, trading nearly around the clock. Prices, a heat map, and everything you need to understand it.</p><div class="sec-a">${sessHTML('fu')}<span class="mono dim">CME Globex: Sunday–Friday, 6:00 p.m.–5:00 p.m. ET with a daily one-hour break</span></div></header>
   ${tabs}
   <div class="split" style="margin-top:40px"><section>${secHead('Ask Market Files AI','How futures work, explained.','')}<div class="deep" style="grid-template-columns:1fr">${['How do futures contracts work?','What are contango and backwardation?','Why do S&P 500 futures trade overnight?','How did the 1982 launch of S&P 500 futures change markets?'].map(q=>`<a href="${aiHref(q)}" data-holo><span class="n">✦ MARKET FILES AI</span><h3>${esc(q)}</h3></a>`).join('')}</div></section>
   <section>${secHead('Related','Keep exploring.','')}<div class="deep" style="grid-template-columns:1fr"><a href="#/dashboard" data-holo><span class="n">LIVE DASHBOARD</span><h3>Every market on one screen</h3></a><a href="#/crypto" data-holo><span class="n">CRYPTO</span><h3>Bitcoin and crypto prices</h3></a></div></section></div></div>`}
@@ -3259,7 +3260,7 @@ const HUBS={
 };
 function pageHub(k){const H0=HUBS[k];setMeta(H0.t+' — Market Files',H0.p.replace(/&amp;/g,'&'));
   const tabs=tabsHTML('hub-'+k,H0.tabs(),'tabs-main');
-  return `<div class="wrap page-in" style="--dc:${H0.c}"><header class="ph"><h1>${H0.h}</h1><p>${H0.p}</p></header>${tabs}
+  return `<div class="wrap page-in" style="--dc:${H0.c}"><header class="ph serif"><p class="mono dim">${H0.h==='Learn'?'MARKET FILES LEARN':'MARKET FILES GUIDE'}</p><h1 class="holo">${H0.h}</h1><p>${H0.p}</p></header>${tabs}
   <div class="split" style="margin-top:40px"><section>${secHead('Ask Market Files AI','Explained simply.','')}<div class="deep" style="grid-template-columns:1fr">${H0.ai.map(q=>`<a href="${aiHref(q)}" data-holo><span class="n">✦ MARKET FILES AI</span><h3>${esc(q)}</h3></a>`).join('')}</div></section>
   <section>${secHead('Related','Keep exploring.','')}<div class="deep" style="grid-template-columns:1fr">${H0.rel.map(([h,n,t])=>`<a href="${h}" data-holo><span class="n">${n}</span><h3>${esc(t)}</h3></a>`).join('')}</div></section></div></div>`}
 const HUBNAV={'crypto-guide':'crypto','metals':'markets','stocks-guide':'companies','world':'global-finance'};

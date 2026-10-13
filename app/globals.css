@@ -344,6 +344,7 @@ a.tag:hover{border-color:var(--tx3);color:var(--tx)}
 .ph{padding:48px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;position:relative}
 .ph::after{content:"";position:absolute;left:0;bottom:-1px;width:96px;height:2px;background:var(--dc,var(--tx))}
 .ph h1{font:750 clamp(40px,6vw,76px)/.95 var(--sans);font-stretch:74%;text-transform:uppercase;letter-spacing:-.005em}
+.ph.serif>p.mono.dim{margin:0 0 12px;font-size:12px;letter-spacing:.16em;color:var(--gold)}
 .ph.serif h1{font:500 clamp(40px,5.6vw,72px)/1 var(--serif);text-transform:none;letter-spacing:-.02em;font-stretch:100%}
 .ph p{color:var(--tx2);max-width:62ch;margin-top:14px;font-size:17px}
 .ph .sec-a{margin-top:16px}
