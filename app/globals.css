@@ -344,6 +344,20 @@ a.tag:hover{border-color:var(--tx3);color:var(--tx)}
 .ph{padding:48px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;position:relative}
 .ph::after{content:"";position:absolute;left:0;bottom:-1px;width:96px;height:2px;background:var(--dc,var(--tx))}
 .ph h1{font:750 clamp(40px,6vw,76px)/.95 var(--sans);font-stretch:74%;text-transform:uppercase;letter-spacing:-.005em}
+html.has-bgg::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;background-image:linear-gradient(rgba(130,165,230,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(130,165,230,.055) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 80% 70% at 72% 45%,#000 0,transparent 78%);mask-image:radial-gradient(ellipse 80% 70% at 72% 45%,#000 0,transparent 78%)}
+.has-bgg .pnl,.has-bgg .hub-c{background-color:rgba(9,13,21,.58);-webkit-backdrop-filter:blur(14px) saturate(1.25);backdrop-filter:blur(14px) saturate(1.25);border:1px solid rgba(245,196,81,.13);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 18px 50px -28px rgba(0,0,0,.9)}
+.has-bgg .ph{border-bottom:0;padding-bottom:34px}
+.has-bgg .ph::after{width:100%;height:1px;background:linear-gradient(90deg,var(--dc,#F5C451) 0,rgba(245,196,81,.35) 18%,rgba(245,196,81,.06) 60%,transparent 100%)}
+.has-bgg .ph::before{content:"";position:absolute;left:-14px;top:30px;width:16px;height:16px;border-left:1px solid #F5C451;border-top:1px solid #F5C451;opacity:.8}
+.has-bgg .tabs-bar{border-bottom-color:rgba(245,196,81,.2)}
+.has-bgg .tab[aria-selected="true"]{text-shadow:0 0 14px rgba(245,196,81,.5)}
+.ph .hud-eb{max-width:none;margin:0 0 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hud-eb .hud-sep{display:inline-block;width:46px;height:1px;background:linear-gradient(90deg,rgba(245,196,81,.7),transparent)}
+.hud-live{display:inline-flex;align-items:center;gap:7px;color:#7DE0A8;letter-spacing:.16em}
+.hud-live b{width:6px;height:6px;border-radius:50%;background:#2FBF77;box-shadow:0 0 0 0 rgba(47,191,119,.7);animation:hudp 1.8s ease-out infinite}
+.hud-clk{color:var(--tx3);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+@keyframes hudp{to{box-shadow:0 0 0 9px rgba(47,191,119,0)}}
+@media(max-width:760px){.bg-globe{opacity:.5}}
 .bg-globe{position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:-1;pointer-events:none}
 .has-bgg body{background:transparent}
 .has-bgg #main{position:relative;z-index:1}
