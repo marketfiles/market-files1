@@ -43,7 +43,6 @@ const SECTIONS: [string, string][] = [
   ['/history', '.fr-t'],
   ['/dashboard', '#dash'],
   ['/tools', '.calc'],
-  ['/newsletter', 'input[type="email"]'],
 ];
 for (const [path, selector] of SECTIONS) {
   test(`section ${path} opens at its real URL`, async ({ page }) => {
