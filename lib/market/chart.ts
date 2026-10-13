@@ -85,13 +85,43 @@ async function cnbc(id: string, range: Range): Promise<Chart | null> {
   return null;
 }
 
+/* ---------- Crypto price history (key-free) ----------
+   CNBC has no history for most coins and Yahoo turns away cloud servers, so XRP, BNB, DOGE, ADA, LINK and SOL
+   draw from CryptoCompare, with CoinGecko as a second source. */
+const CRYPTO_SYM = ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'ADA', 'LINK'];
+const CG_ID: Record<string, string> = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', XRP: 'ripple', BNB: 'binancecoin', DOGE: 'dogecoin', ADA: 'cardano', LINK: 'chainlink' };
+const CC: Record<Range, [string, number, number]> = { '1d': ['histominute', 288, 5], '5d': ['histohour', 120, 1], '1mo': ['histohour', 720, 1], '6mo': ['histoday', 180, 1], '1y': ['histoday', 365, 1], '5y': ['histoday', 260, 7] };
+async function cryptoCompare(id: string, range: Range): Promise<Chart | null> {
+  if (!CRYPTO_SYM.includes(id)) return null;
+  const [fn, limit, agg] = CC[range];
+  try {
+    const r = await fetch(`https://min-api.cryptocompare.com/data/v2/${fn}?fsym=${id}&tsym=USD&limit=${limit}&aggregate=${agg}`, { headers: H, cache: 'no-store', signal: AbortSignal.timeout(9000) });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const rows: { time: number; close: number }[] = j?.Data?.Data || [];
+    const points = rows.filter((x) => x.close > 0 && x.time > 0).map((x) => [x.time, x.close] as [number, number]);
+    return points.length >= 2 ? { id, range, prev: null, points, source: `CryptoCompare · ${id}/USD · delayed` } : null;
+  } catch { return null; }
+}
+async function coinGecko(id: string, range: Range): Promise<Chart | null> {
+  const cg = CG_ID[id]; if (!cg || range === '5y') return null;
+  const days = { '1d': 1, '5d': 5, '1mo': 30, '6mo': 180, '1y': 365 }[range];
+  try {
+    const r = await fetch(`https://api.coingecko.com/api/v3/coins/${cg}/market_chart?vs_currency=usd&days=${days}`, { headers: H, cache: 'no-store', signal: AbortSignal.timeout(9000) });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const points = ((j?.prices || []) as [number, number][]).filter((p) => p[1] > 0).map((p) => [Math.round(p[0] / 1000), p[1]] as [number, number]);
+    return points.length >= 2 ? { id, range, prev: null, points, source: `CoinGecko · ${id}/USD · delayed` } : null;
+  } catch { return null; }
+}
+
 const cache = new Map<string, { at: number; c: Chart | null }>();
 const MISS_TTL = 20_000; // a failed lookup is retried after 20 seconds, never remembered for long
 export async function getChart(id: string, range: Range): Promise<Chart | null> {
   const k = `${id}|${range}`, ttl = range === '1d' || range === '5d' ? 60_000 : 30 * 60_000, hit = cache.get(k);
   if (hit && Date.now() - hit.at < (hit.c ? ttl : MISS_TTL)) return hit.c;
   // CNBC occasionally drops a request: try it twice before falling back to Yahoo.
-  const c = (await cnbc(id, range)) || (await cnbc(id, range)) || (await yahoo(id, range));
+  const c = (await cnbc(id, range)) || (await cnbc(id, range)) || (await yahoo(id, range)) || (await cryptoCompare(id, range)) || (await coinGecko(id, range));
   if (c) cache.set(k, { at: Date.now(), c });
   else if (!hit?.c) cache.set(k, { at: Date.now(), c: null });
   if (cache.size > 1500) cache.clear();
