@@ -1334,6 +1334,15 @@ html.dos-open,html.hello-open{overflow:hidden}
 .rs-fl{display:grid;gap:0}.rs-fl a{display:grid;grid-template-columns:64px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);color:var(--tx);font:500 17px/1.3 var(--serif)}.rs-fl a span{font:500 12px var(--mono);color:#F5C451;padding-top:4px}
 .rs-note{font-size:11px;margin-top:22px}
 .rs-id{display:flex;align-items:center;gap:18px}
+.wl-star{justify-self:end;font:600 12px var(--mono);letter-spacing:.08em;color:#F5C451;background:none;border:1px solid rgba(245,196,81,.45);padding:6px 12px;cursor:pointer;margin-bottom:6px}.wl-star:hover,.wl-star[aria-pressed=true]{background:rgba(245,196,81,.14)}
+.lg-s{width:40px;height:40px;font-size:28px;border-radius:10px}
+.wl{margin-top:4px}.wl-add{position:relative;display:flex;gap:10px;margin:6px 0 14px}.wl-add input{flex:1;min-width:0;background:var(--bg);color:var(--tx);border:1px solid var(--line2);padding:12px 14px;font:inherit}.wl-add input:focus{outline:2px solid rgba(245,196,81,.6);outline-offset:0}
+.wl-sg{position:absolute;left:0;right:90px;top:100%;z-index:5;margin:2px 0 0;padding:0;list-style:none;background:var(--bg2);border:1px solid var(--line2);box-shadow:0 12px 30px rgba(0,0,0,.45)}.wl-sg[hidden]{display:none}.wl-sg button{display:flex;gap:12px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:var(--tx);padding:10px 14px;cursor:pointer;font:inherit}.wl-sg button:hover{background:rgba(245,196,81,.1)}.wl-sg b{font-family:var(--mono);min-width:64px;color:#F5C451}.wl-sg span{color:var(--tx3);font-size:13px}
+.wl-l{list-style:none;margin:0;padding:0}.wl-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto 34px;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.wl-n{display:flex;align-items:center;gap:12px;color:var(--tx);min-width:0}.wl-n span{display:grid;gap:2px;min-width:0}.wl-n b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wl-n:hover b{color:#F5C451}
+.wl-v{font-size:16px;text-align:right}.wl-c{font-size:14px;min-width:84px;text-align:right}.wl-x{background:none;border:1px solid var(--line2);color:var(--tx3);width:30px;height:30px;font-size:18px;cursor:pointer}.wl-x:hover{color:#E5534B;border-color:#E5534B}
+.wl-e{padding:22px 0}.wl-n2{font-size:11px;margin-top:14px}
+@media(max-width:560px){.wl-r{grid-template-columns:minmax(0,1fr) auto 30px;gap:10px}.wl-c{grid-column:2;grid-row:2;min-width:0}.wl-v{grid-column:2}.wl-x{grid-row:1/3;grid-column:3}.wl-sg{right:0}}
 .lg{position:relative;display:inline-grid;place-items:center;overflow:hidden;border-radius:14px;background:linear-gradient(135deg,#1c2433,#0d121b);border:1px solid rgba(245,196,81,.35);color:#F5C451;flex:none}
 .lg b{font:700 .34em var(--mono);letter-spacing:.04em}.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:8%}
 .lg-l{width:76px;height:76px;font-size:56px}.lg-b{width:56px;height:56px;font-size:40px;border-radius:12px}
@@ -3868,7 +3877,7 @@ function pageResearch(raw){const id=rsId(raw);if(!id)return notFound();const q=r
   const links=[[tvUrl(id),'Chart on TradingView'],co&&!q.ext||co?[`https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${encodeURIComponent(id.replace('.','-'))}&type=10-K&dateb=&owner=include&count=10`,'SEC filings']:null,CMC[id]?[cmcUrl(id),'CoinMarketCap']:null,[gq(`${q.name} ${cr?'crypto':'stock'} news`),'More on Google']].filter(Boolean);
   return `<div class="wrap page-in rs">
   <header class="rs-h"><div class="rs-id">${logoHTML(q,'lg-l')}<div><p class="mono rs-k">${cr?'CRYPTO':co?'COMPANY':'MARKET'} · INVESTOR HOME</p><h1>${esc(q.name)}</h1><p class="mono dim">${esc(id)}${q.ex?' · '+esc(q.ex):''}${q.sec?' · '+esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1]):''}</p></div></div>
-   <div class="rs-q" data-id="${id}"><span class="mono" data-f="v">${q.na?'—':fmtV(q)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div></header>
+   <div class="rs-q" data-id="${id}"><button class="wl-star" id="wl-star" type="button" aria-pressed="${wlHas(id)}" title="Add to your watchlist">${wlHas(id)?'★ Watching':'☆ Watch'}</button><span class="mono" data-f="v">${q.na?'—':fmtV(q)}</span><span class="mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span></div></header>
   ${(co||cr)?`<section class="rs-about" id="rs-about"><h2 class="mono">ABOUT ${esc(q.name.toUpperCase())}</h2><div class="rs-ab"><p id="rs-abt" class="dim">Loading the company profile…</p><dl class="rs-facts">${co&&q.ex?`<div><dt>Listed on</dt><dd>${esc(q.ex)}</dd></div>`:''}${q.sec?`<div><dt>Sector</dt><dd>${esc((CO_SECT.find(x=>x[0]===q.sec)||[,q.sec])[1])}</dd></div>`:''}<div><dt>Ticker</dt><dd>${esc(id)}</dd></div>${q.mc&&isFinite(q.mc)?`<div><dt>Market cap</dt><dd data-f="mc">${fmtCap(q.mc)}</dd></div>`:''}</dl></div></section>`:''}
   <div class="rs-g"><section class="rs-chart" data-holo><div class="tvw rs-tv" id="rs-tv"></div></section>
    <aside class="rs-side"><h3 class="mono">RESEARCH</h3>${links.map(([u,l])=>`<a class="rs-l" href="${u}" target="_blank" rel="noopener">${esc(l)} <span aria-hidden="true">↗</span></a>`).join('')}<a class="rs-l" href="#/search?q=${encodeURIComponent(q.name)}">Search the Market Files <span aria-hidden="true">→</span></a></aside></div>
@@ -3878,6 +3887,7 @@ function pageResearch(raw){const id=rsId(raw);if(!id)return notFound();const q=r
 async function afterResearch(raw){const id=rsId(raw);if(!id)return;const q=rsInst(id);
   if(q.g==='co'&&typeof Feed.want==='function')Feed.want('companies');
   const tv=$('#rs-tv');if(tv&&typeof mountTVSymbol==='function')mountTVSymbol(tv,q);
+  const st=$('#wl-star');if(st)st.onclick=()=>{const on=wlToggle(id);st.setAttribute('aria-pressed',on);st.textContent=on?'★ Watching':'☆ Watch'};
   if($('#rs-abt')){if(!LIVE_SITE)$('#rs-abt').textContent='';else wikiAbout(q.name,q.g==='cr'?'crypto':'stock').then(w=>{const el=$('#rs-abt');if(!el||!el.isConnected)return;
     if(w)el.outerHTML=`<p id="rs-abt">${esc(w.text)} <a class="rs-src" href="${esc(w.url)}" target="_blank" rel="noopener">Source: Wikipedia ↗</a></p>`;else{el.textContent=`${q.name} (${q.id}) is tracked here with a live price, chart and the latest news.`}})}
   const box=$('#rs-news');if(!box)return;
@@ -3969,15 +3979,42 @@ function dashHighlights(){const g=id=>INSTR.find(q=>q.id===id);const L=[];const 
 function dashPanel(t,ids){const qsx=ids.map(id=>INSTR.find(q=>q.id===id)).filter(Boolean);return `<section class="pnl dash-p" data-holo><div class="pnl-h"><h3>${t}</h3>${t==='Futures'?'<a class="mono dim" href="#/futures">Futures hub →</a>':''}</div>${qsx.map(quoteRow).join('')}</section>`}
 function secBars(){const rows=CO_SECT.map(([k,l])=>({k,l,p:pctOf(INSTR.find(q=>q.id===SECT_ETF[k]))}));const mx=Math.max(1,...rows.map(r=>Math.abs(r.p||0)));
   return rows.sort((a,b)=>(b.p??-99)-(a.p??-99)).map(r=>`<div class="sb" data-id="${SECT_ETF[r.k]}"><span>${esc(r.l)}</span><div class="sb-t"><i class="${r.p==null?'':r.p>=0?'up':'dn'}" style="width:${r.p==null?0:Math.abs(r.p)/mx*50}%;${r.p!=null&&r.p<0?'right:50%':'left:50%'}"></i></div><b class="mono ${r.p==null?'flat':r.p>=0?'up':'dn'}">${r.p==null?'—':(r.p>=0?'+':'')+r.p.toFixed(2)+'%'}</b></div>`).join('')}
+/* ---------- Watchlist: any stock, crypto, future, index or currency; saved in this browser ---------- */
+const WL_KEY='mf_watchlist';
+function wlGet(){try{const a=JSON.parse(localStorage.getItem(WL_KEY)||'null');if(Array.isArray(a))return a.filter(x=>typeof x==='string').slice(0,100)}catch(e){}return null}
+function wlSet(a){try{localStorage.setItem(WL_KEY,JSON.stringify(a.slice(0,100)))}catch(e){}WL_MEM=a.slice(0,100)}
+let WL_MEM=null;
+const wlList=()=>WL_MEM||(WL_MEM=wlGet()||['SPX','BTC','XAU','NVDA']);
+const wlHas=id=>wlList().includes(id);
+function wlToggle(id){const a=wlList();wlSet(a.includes(id)?a.filter(x=>x!==id):[...a,id]);return wlHas(id)}
+function wlRow(id){const q=rsInst(id);const c=q.na?{cls:'flat',arrow:'',txt:'—'}:chg(q);
+  return `<li class="wl-r" data-id="${esc(id)}"><a class="wl-n" href="#/research/${encodeURIComponent(id)}">${logoHTML(q,'lg-s')}<span><b>${esc(q.name)}</b><span class="mono dim">${esc(id)}</span></span></a><span class="wl-v mono" data-f="v">${q.na?'—':fmtV(q)}</span><span class="wl-c mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span><button class="wl-x" data-rm="${esc(id)}" aria-label="Remove ${esc(q.name)} from watchlist" title="Remove">×</button></li>`}
+function watchHTML(){return `<section class="pnl wl" data-holo id="wl"><div class="pnl-h"><h3>My watchlist</h3><span class="sess mono">Saved in this browser</span></div>
+  <form class="wl-add" id="wl-form" autocomplete="off"><input id="wl-in" type="text" placeholder="Add a stock, crypto, future or index — try NVDA, Bitcoin, gold, Nasdaq" aria-label="Add to watchlist" maxlength="40"><button class="btn btn-p" type="submit">Add</button><ul class="wl-sg" id="wl-sg" hidden></ul></form>
+  <ul class="wl-l" id="wl-l">${wlList().map(wlRow).join('')}</ul><p class="dim wl-e" id="wl-e" ${wlList().length?'hidden':''}>Your watchlist is empty. Add anything above, or press ☆ on any company page.</p>
+  <p class="mono dim wl-n2">Prices are delayed. Your list stays on this device and is never sent to us.</p></section>`}
+function wlSuggest(t){const s=t.trim().toLowerCase();if(!s)return[];const have=new Set(wlList());const out=INSTR.filter(x=>!have.has(x.id)&&(x.id.toLowerCase().startsWith(s)||x.name.toLowerCase().includes(s))).slice(0,6).map(x=>[x.id,x.name]);
+  const tk=t.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,'');if(tk&&tk.length<=8&&!have.has(tk)&&!out.some(o=>o[0]===tk))out.push([tk,'Add ticker '+tk]);return out}
+function wlRefresh(){const l=$('#wl-l');if(!l)return;wlList().forEach(id=>{const r=l.querySelector(`[data-id="${CSS.escape(id)}"]`);if(!r)return;const q=rsInst(id);if(q.na)return;const c=chg(q);const v=r.querySelector('[data-f=v]'),ch=r.querySelector('[data-f=c]');if(v)v.textContent=fmtV(q);if(ch){ch.textContent=`${c.arrow} ${c.txt}`;ch.className='wl-c mono c '+c.cls}})}
+function wlRender(){const l=$('#wl-l');if(!l)return;l.innerHTML=wlList().map(wlRow).join('');const e=$('#wl-e');if(e)e.hidden=wlList().length>0}
+Feed.subscribe(()=>wlRefresh());
+function wireWatch(){const f=$('#wl-form');if(!f)return;const inp=$('#wl-in'),sg=$('#wl-sg');
+  const add=id=>{if(!id)return;if(!wlHas(id))wlSet([...wlList(),id]);inp.value='';sg.hidden=true;wlRender()};
+  inp.addEventListener('input',()=>{const L=wlSuggest(inp.value);sg.innerHTML=L.map(([id,n])=>`<li><button type="button" data-add="${esc(id)}"><b>${esc(id)}</b><span>${esc(n)}</span></button></li>`).join('');sg.hidden=!L.length});
+  sg.addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(b)add(b.dataset.add)});
+  f.addEventListener('submit',e=>{e.preventDefault();const L=wlSuggest(inp.value);if(L.length)add(L[0][0])});
+  $('#wl-l').addEventListener('click',e=>{const b=e.target.closest('[data-rm]');if(b){wlSet(wlList().filter(x=>x!==b.dataset.rm));wlRender()}});
+  if(typeof Feed.want==='function')Feed.want('companies');
+  if(/[?&]tab=watchlist/.test(location.href)){const t=$('#dash-t');if(t)showTab(t,'wl')}}
 function pageDashboard(){setMeta('Live Market Dashboard — Market Files','Indices, commodities, crypto, rates, currencies, sectors and the economic calendar in one view.');
   return `<div class="wrap page-in" id="dash">${heroHead('dashboard',`<span>${longDate()}</span><span class="sess ${session('eq').c}"><i></i>${session('eq').t}</span><span class="fr-ed">DELAYED PRICES</span>`,'Live Dashboard','Every market that matters on one screen — with today’s highlights.')}
-  <section class="dash-hi" data-holo><h2 class="mono">TODAY’S HIGHLIGHTS</h2><ul id="dash-hl"></ul></section>
+  ${tabsHTML('dash-t',[['mk','Markets',`<section class="dash-hi" data-holo><h2 class="mono">TODAY’S HIGHLIGHTS</h2><ul id="dash-hl"></ul></section>
   <div class="dash-g">${DASH.map(([t,ids])=>dashPanel(t,ids)).join('')}<section class="pnl dash-p" data-holo style="grid-column:1/-1"><div class="pnl-h"><h3>S&amp;P 500 sectors</h3></div><div class="sbs" id="dash-sec">${secBars()}</div></section></div>
   <div class="dash-2"><section class="pnl" data-holo><div class="pnl-h"><h3>Economic calendar</h3><span class="sess mono">This week · by TradingView</span></div><div class="tvw dash-tv" id="tv-cal">${window.MF_TV?'':'<p class="dim dash-ph">The economic calendar (Fed decisions, jobs reports, inflation data) loads on the live site.</p>'}</div></section>
-   <section class="pnl" data-holo><div class="pnl-h"><h3>Total crypto market value</h3><span class="sess mono">CRYPTOCAP:TOTAL · by TradingView</span></div><div class="tvw dash-tv" id="tv-tot">${window.MF_TV?'':'<p class="dim dash-ph">The total crypto market cap chart loads on the live site.</p>'}</div></section></div>
+   <section class="pnl" data-holo><div class="pnl-h"><h3>Total crypto market value</h3><span class="sess mono">CRYPTOCAP:TOTAL · by TradingView</span></div><div class="tvw dash-tv" id="tv-tot">${window.MF_TV?'':'<p class="dim dash-ph">The total crypto market cap chart loads on the live site.</p>'}</div></section></div>`],['wl','My watchlist',watchHTML()]],'tabs-sub')}
   <p class="fr-note mono">Prices are delayed and come from public market-data feeds; a dash means no live price yet. Nothing here is financial advice.</p></div>`}
 function dashTick(){const hl=$('#dash-hl');if(hl){const L=dashHighlights();hl.innerHTML=L.length?L.map(x=>`<li>${x}</li>`).join(''):'<li class="dim">Waiting for live prices…</li>'}const s=$('#dash-sec');if(s)s.innerHTML=secBars()}
-function wireDashboard(){dashTick();if(typeof Feed.want==='function')Feed.want('companies');
+function wireDashboard(){wireTabs();dashTick();wireWatch();if(typeof Feed.want==='function')Feed.want('companies');
   if(window.MF_TV&&typeof mountTV==='function'){const c=$('#tv-cal');if(c)mountTV('events',c,{width:'100%',height:'100%',importanceFilter:'0,1',countryFilter:'us,eu,gb,jp,cn,ca'});const t=$('#tv-tot');if(t)mountTV('symbol-overview',t,{symbols:[['Total crypto market cap','CRYPTOCAP:TOTAL|1D']],chartOnly:false,width:'100%',height:'100%',autosize:true,chartType:'area',lineWidth:2,dateRanges:['1d|1','1m|30','3m|60','12m|1D','60m|1W','all|1M']})}
   $('#dash').addEventListener('click',e=>{const b=e.target.closest('.sb[data-id]');if(b)openInst(b.dataset.id)})}
 
