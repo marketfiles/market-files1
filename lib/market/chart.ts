@@ -24,6 +24,9 @@ const CNBC: Record<string, string> = {
   SPX: '.SPX', COMP: '.IXIC', INDU: '.DJI', RUT: '.RUT', VIX: '.VIX', DXY: '.DXY',
   XAU: '@GC.1', XAG: '@SI.1', CL: '@CL.1', HG: '@HG.1', GC1: '@GC.1', SI1: '@SI.1', HG1: '@HG.1', CL1: '@CL.1', BZ1: '@LCO.1', NG1: '@NG.1', PL1: '@PL.1',
   ES1: '@SP.1', NQ1: '@ND.1', YM1: '@DJ.1', RTY1: '@TFS.1', ZC1: '@C.1', ZS1: '@S.1', ZW1: '@W.1',
+  // Remaining front-month futures (same CNBC symbols the quote feed already uses) so every heat-map tile can draw a chart.
+  ZT1: '@TU.1', ZN1: '@TY.1', ZB1: '@US.1', RB1: '@RB.1', LE1: '@LC.1', KC1: '@KC.1', SB1: '@SB.1',
+  '6E1': '@EC.1', '6J1': '@JY.1', '6B1': '@BP.1', BTC1: '@BTC.1', ETH1: '@ETH.1', VX1: '@VX.1',
   US2Y: 'US2Y', US5Y: 'US5Y', US10Y: 'US10Y', US30Y: 'US30Y', DE10Y: 'DE10Y-DE', GB10Y: 'GB10Y-GB', JP10Y: 'JP10Y-JP', FR10Y: 'FR10Y-FR', IT10Y: 'IT10Y-IT',
   EURUSD: 'EUR=', USDJPY: 'JPY=', GBPUSD: 'GBP=', USDCNY: 'CNY=', USDCHF: 'CHF=', AUDUSD: 'AUD=',
   BTC: 'BTC.CM=', ETH: 'ETH.CM=',
