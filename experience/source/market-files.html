@@ -15,13 +15,11 @@
 <meta property="og:description" content="Real-time market intelligence and the history behind it.">
 <meta property="og:url" content="https://www.themarketfiles.com/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@TheMarketFiles">
 <meta name="twitter:title" content="Market Files — Markets • Money • History">
 <meta name="twitter:description" content="Real-time market intelligence and the history behind it.">
 <script type="application/ld+json" id="ld-org">
 {"@context":"https://schema.org","@graph":[
-{"@type":"NewsMediaOrganization","@id":"https://www.themarketfiles.com/#org","name":"Market Files","slogan":"Markets • Money • History","url":"https://www.themarketfiles.com/",
-"sameAs":["https://x.com/TheMarketFiles","https://x.com/MarketFilesThen"]},
+{"@type":"NewsMediaOrganization","@id":"https://www.themarketfiles.com/#org","name":"Market Files","slogan":"Markets • Money • History","url":"https://www.themarketfiles.com/"},
 {"@type":"WebSite","@id":"https://www.themarketfiles.com/#site","url":"https://www.themarketfiles.com/","name":"Market Files","publisher":{"@id":"https://www.themarketfiles.com/#org"},
 "potentialAction":{"@type":"SearchAction","target":"https://www.themarketfiles.com/search?q={query}","query-input":"required name=query"}}]}
 </script>
@@ -1446,7 +1444,7 @@ html.dos-open,html.hello-open{overflow:hidden}
     <nav aria-label="Primary"><ul class="nav-links" id="nav-links"></ul></nav>
     <div class="nav-r">
       <span class="live" id="live"><i></i><span>—</span></span>
-      <a class="btn hide-s nav-blog" href="#/blog">Blog</a><div class="xw"><button class="ib x-b" id="x-b" aria-haspopup="menu" aria-expanded="false" aria-controls="x-m" aria-label="Market Files accounts on X"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg></button><div class="xm" id="x-m" role="menu" hidden></div></div><button class="btn ed-b" id="editor-b" hidden><span class="holo">✦</span> Editor</button><button class="kbtn" id="cmdk-b" aria-label="Open command palette"><span class="mono">⌘K</span></button><button class="ib" id="theme-b" aria-label="Switch to light theme"></button><a class="ib" href="#/search" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></a>
+      <a class="btn hide-s nav-blog" href="#/blog">Blog</a><button class="btn ed-b" id="editor-b" hidden><span class="holo">✦</span> Editor</button><button class="kbtn" id="cmdk-b" aria-label="Open command palette"><span class="mono">⌘K</span></button><button class="ib" id="theme-b" aria-label="Switch to light theme"></button><a class="ib" href="#/search" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></a>
       <button class="ib menu-b" id="menu-b" aria-expanded="false" aria-controls="drawer" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button>
     </div>
   </div>
@@ -1467,11 +1465,7 @@ html.dos-open,html.hello-open{overflow:hidden}
 <li><a href="#/dashboard?tab=watchlist">My Watchlist</a></li><li><a href="#/crypto-guide">Crypto guide</a></li><li><a href="#/metals">Gold &amp; Silver</a></li><li><a href="#/stocks-guide">Stocks guide</a></li><li><a href="#/world">Global politics &amp; markets</a></li><li><a href="#/learn">Learn</a></li><li><a href="#/companies">Companies</a></li><li><a href="#/history">History</a></li><li><a href="#/library">Library</a></li><li><a href="#/archive">Archive</a></li><li><a href="#/blog">Blog</a></li></ul></div>
       <div><h4>Company</h4><ul>
         <li><a href="#/page/about">About</a></li><li><a href="#/page/contact">Contact</a></li><li><a href="#/page/standards">Editorial Standards</a></li><li><a href="#/page/corrections">Corrections</a></li><li><a href="#/page/privacy">Privacy</a></li><li><a href="#/page/terms">Terms</a></li></ul></div>
-      <div><h4>Social</h4><ul>
-        <li><a href="https://x.com/TheMarketFiles" target="_blank" rel="noopener">X · @TheMarketFiles</a></li>
-        <li><a href="https://x.com/MarketFilesThen" target="_blank" rel="noopener">X · @MarketFilesThen</a></li></ul></div>
     </div>
-    <div class="desks" id="f-desks"></div>
     <div class="f-bot">
       <span class="disc">Market Files is a news and media company reporting on historical and live events. Everything here is strictly educational. Nothing on this site is financial advice.</span>
       <span>© <span id="yr"></span> Market Files · Market data may be delayed</span>
@@ -1521,7 +1515,7 @@ const DESKS={
 /* Two X accounts: Market Files (present) and Market Files Then (past). Topics above are categories, not accounts. */
 const ACCOUNTS=[DESKS.hub,DESKS.then];
 const xUrl=h=>`https://x.com/${h}`;
-const handleLink=d=>`<a class="handle" style="--dc:${d.hex}" href="${xUrl(d.handle)}" target="_blank" rel="noopener">@${d.handle}</a>`;
+const handleLink=d=>`<span class="handle" style="--dc:${d.hex}">${d.name}</span>`;
 
 const ERAS=[
   {id:'1600',label:'1600–1799',from:1600,to:1799},{id:'1800',label:'1800–1899',from:1800,to:1899},
@@ -2756,7 +2750,7 @@ function wireGP(){const gp=$('#gp');if(!gp)return;renderGP();
   gp.addEventListener('submit',e=>{if(e.target.id==='gp-f'){e.preventDefault();const v=$('#gp-i').value.trim();if(v)gpAsk(null,v)}})}
 function globeHero(){return `<section class="gh" id="j-globe"><p class="gh-line mono">Market Files — <b>The #1 source for financial content</b> — past &amp; present</p><div class="wrap gh-in">
   <div class="gh-side"><div class="gh-copy"><div class="gh-brand"><img src="${LOGO240}" alt="Market Files logo" width="64" height="64"><span class="mono">MARKETS • MONEY • HISTORY</span></div>
-    <h1 class="holo">Every market on Earth — and the history behind it.</h1><p>Live markets, centuries of financial history. Spin the globe and click any country, capital, state or gold financial center.</p><div class="gh-cta"><a class="btn btn-p" href="https://x.com/TheMarketFiles" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Follow @TheMarketFiles</a><a class="btn" href="#/library">Open the Library</a></div></div>
+    <h1 class="holo">Every market on Earth — and the history behind it.</h1><p>Live markets, centuries of financial history. Spin the globe and click any country, capital, state or gold financial center.</p><div class="gh-cta"><a class="btn btn-p" href="#/library">Open the Library</a></div></div>
     <aside class="gp" id="gp" data-holo aria-live="polite"></aside></div>
   <div class="gh-stage"><canvas id="globe" role="img" aria-label="Interactive globe of world markets. Use the place list to explore by keyboard."></canvas><div class="gtip" id="gtip" hidden></div>
     <div class="gh-ctl"><button class="ib" data-gz="1" aria-label="Zoom in">+</button><button class="ib" data-gz="-1" aria-label="Zoom out">−</button><button class="ib" data-gz="0" aria-label="Reset globe">⟲</button><button class="ib gz-cap on" data-caps aria-pressed="true" aria-label="Show capitals" title="Capitals">★</button></div>
@@ -2816,7 +2810,7 @@ function newsstand(){return `<section class="sec wrap" id="newsstand">${secHead(
   
   <div class="press">${PRESS.map(([g,list])=>`<div class="press-g"><h3 class="mono">${g.toUpperCase()}</h3>${list.map(([n,t,u])=>`<a href="${u}" target="_blank" rel="noopener" data-holo><b>${n}</b><span>${t}</span><i aria-hidden="true">↗</i></a>`).join('')}</div>`).join('')}</div></section>
   <section class="sec wrap" id="pulse">${secHead('Social Pulse','What traders are saying right now. Each topic opens a live search.','')}
-  <div class="pulse">${PULSE.map(([l,q,st])=>`<div class="pl" data-holo><b>${l}</b><div class="pl-a"><a href="https://x.com/search?q=${encodeURIComponent(q)}&f=live" target="_blank" rel="noopener">X ↗</a><a href="https://www.reddit.com/search/?q=${encodeURIComponent(l)}&sort=new" target="_blank" rel="noopener">Reddit ↗</a><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(l+' market today')}" target="_blank" rel="noopener">YouTube ↗</a>${st?`<a href="https://stocktwits.com/symbol/${st}" target="_blank" rel="noopener">StockTwits ↗</a>`:''}</div></div>`).join('')}</div>
+  <div class="pulse">${PULSE.map(([l,q,st])=>`<div class="pl" data-holo><b>${l}</b><div class="pl-a"><a href="https://www.reddit.com/search/?q=${encodeURIComponent(l)}&sort=new" target="_blank" rel="noopener">Reddit ↗</a><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(l+' market today')}" target="_blank" rel="noopener">YouTube ↗</a>${st?`<a href="https://stocktwits.com/symbol/${st}" target="_blank" rel="noopener">StockTwits ↗</a>`:''}</div></div>`).join('')}</div>
   <p class="pv">Live headline and trend feeds from these outlets and X connect in the production build. Links open the sources directly.</p></section>`}
 function wireNewsstand(){const i=$('#ps-i'),g=$('#ps-go');if(!i)return;const s=()=>{g.href=WEB.press.u(i.value.trim()||'markets today')};i.oninput=s;$('#ps-f').onsubmit=e=>{e.preventDefault();s();g.click()}}
 
@@ -2858,8 +2852,8 @@ const DESK_INST={futures:['ES1','NQ1','ZN1','CL1','GC1','BTC1'],latest:['SPX','C
 function stripTiles(ids){return ids.length?`<div class="kts kts-${Math.min(ids.length,6)}">${qs(ids).map(q=>{const c=chg(q);return `<div class="kt" data-id="${q.id}" ${rowAttr(q)} data-holo><span class="kt-n">${esc(q.name)}${q.fut?' · futures':''}</span><span class="kt-v mono" data-f="v">${fmtV(q)}</span><span class="kt-c mono c ${c.cls}" data-f="c">${c.arrow} ${c.txt}</span>${spark(q)}</div>`}).join('')}</div>`:''}
 
 /* ---------- article extras ---------- */
-function shareRow(a){const url=`${SITE_URL}/files/${a.slug}`,d=deskOf(a);const txt=`${a.head} — via @${d.handle}`;
-  return `<div class="share"><a class="btn" href="https://x.com/intent/post?text=${encodeURIComponent(txt)}&url=${encodeURIComponent(url)}" target="_blank" rel="noopener">Share on X ↗</a><a class="btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">LinkedIn ↗</a><button class="btn" data-copy="${url}">Copy link</button></div>`}
+function shareRow(a){const url=`${SITE_URL}/files/${a.slug}`,d=deskOf(a);const txt=`${a.head} — via Market Files`;
+  return `<div class="share"><a class="btn" href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener">LinkedIn ↗</a><button class="btn" data-copy="${url}">Copy link</button></div>`}
 function wireArticle(){const bar=$('#rprog');if(bar){const f=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.transform=`scaleX(${max>0?Math.min(1,scrollY/max):0})`};addEventListener('scroll',f,{passive:true});cleanup.push(()=>removeEventListener('scroll',f));f()}
   $$('[data-copy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='Link copied'}catch(e){b.textContent=b.dataset.copy}setTimeout(()=>b.textContent='Copy link',2500)})}
 
@@ -3000,7 +2994,7 @@ const sessBar=(label,k)=>`<div class="tp-bar"><span class="mono dim">${label}</s
 function termNow(){const t=new Date(),tm=t.getMonth()+1,td=t.getDate();const todays=HIST.filter(a=>a.m===tm&&a.d===td&&a.prec!=='y');const feat=todays[0]||BY['nyse-reopens-1873'];
   return `<div class="wrapbox" data-holo><span class="mono wb-l">MARKET WRAP</span><p id="wrapline">${wrapLine()}</p><span class="mono wb-r">Auto-generated from the board · ${Feed.live?'delayed market data':'simulated data'}</span></div>
   ${keyTiles()}
-  <div class="mn-grid">${headlinesHTML()}<a class="pnl mn-then" data-holo href="#/file/${feat.slug}" style="--dc:${DESKS.then.hex}"><div class="pnl-h"><h3>${todays.length?'Today in market history':'From the archive'}</h3><span class="mono dim">@MarketFilesThen</span></div><div class="mn-t"><span class="mono dim">${esc(dateline(feat))}</span><h3>${esc(feat.head)}</h3><p>${esc(feat.deck)}</p><span class="readfile">Read file <span aria-hidden="true">→</span></span></div></a></div>
+  <div class="mn-grid">${headlinesHTML()}<a class="pnl mn-then" data-holo href="#/file/${feat.slug}" style="--dc:${DESKS.then.hex}"><div class="pnl-h"><h3>${todays.length?'Today in market history':'From the archive'}</h3><span class="mono dim">Market Files Then</span></div><div class="mn-t"><span class="mono dim">${esc(dateline(feat))}</span><h3>${esc(feat.head)}</h3><p>${esc(feat.deck)}</p><span class="readfile">Read file <span aria-hidden="true">→</span></span></div></a></div>
   <div class="sysl"><span class="mono" id="sys" aria-live="off"></span><span class="lt mono">LAST TICK <b id="lt">—</b></span></div>`}
 function termGlobal(){const P=(t,ids,r)=>pnl(t,qs(ids).map(idxRow).join(''),r||'');
   return tabsHTML('gm',[
@@ -3061,7 +3055,7 @@ function pageHome(){
     ${keyTiles()}
     <div class="hl-links">${HOME_LINKS.map(([r,l,d,c])=>`<a class="hl-l" data-holo href="#/${r}" style="--dc:${c}"><b>${l}</b><span>${d}</span><i aria-hidden="true">→</i></a>`).join('')}</div>
     <div class="sysl"><span class="mono" id="sys" aria-live="off"></span><span class="lt mono">LAST TICK <b id="lt">—</b></span></div>
-    <p class="home-fine mono">${Feed.live?'Prices are delayed; “—” means no data right now.':'Preview data is simulated.'} Charts by Market Files · crypto by CoinMarketCap · <a href="https://x.com/TheMarketFiles" target="_blank" rel="noopener">@TheMarketFiles</a> · <a href="https://x.com/MarketFilesThen" target="_blank" rel="noopener">@MarketFilesThen</a></p>
+    <p class="home-fine mono">${Feed.live?'Prices are delayed; “—” means no data right now.':'Preview data is simulated.'} Charts by Market Files · crypto by CoinMarketCap</p>
     ${hubsStrip()}
     ${btcBottom()}
   </div></section>`;
@@ -3115,7 +3109,7 @@ function pageFile(slug){const a=BY[slug];if(!a)return notFound();const d=deskOf(
     <div class="hero-k"><a class="chip solid" href="#/${d.route}">${esc(a.cat)}</a><span class="chip">FILE ${a.file}</span>${stamp(a.status)}${a.type==='live'?`<span class="flag ${a.flag==='LIVE'?'live':''}">${a.flag}</span>`:''}</div>
     <p class="dateline">${dateline(a)}</p>
     <h1>${esc(a.head)}</h1><p class="deck">${esc(a.deck)}</p>
-    <div class="byline"><span>By <b>Market Files</b></span><span>Desk <a class="handle" href="${xUrl(d.handle)}" target="_blank" rel="noopener">@${d.handle}</a></span><span>Published <b>${a.when?fmtTime(a.when):'Sep 30, 2026'}</b></span><span>Updated <b>${a.when?fmtTime(a.when):'Sep 30, 2026'}</b></span>${q?`<span data-id="${q.id}">${q.id} <b data-f="v">${fmtV(q)}</b> <span data-f="c" class="c ${chg(q).cls}">${chg(q).arrow} ${chg(q).txt}</span></span>`:''}</div>
+    <div class="byline"><span>By <b>Market Files</b></span><span>Desk <b>${d.name}</b></span><span>Published <b>${a.when?fmtTime(a.when):'Sep 30, 2026'}</b></span><span>Updated <b>${a.when?fmtTime(a.when):'Sep 30, 2026'}</b></span>${q?`<span data-id="${q.id}">${q.id} <b data-f="v">${fmtV(q)}</b> <span data-f="c" class="c ${chg(q).cls}">${chg(q).arrow} ${chg(q).txt}</span></span>`:''}</div>
   ${shareRow(a)}</header>
   <figure class="art-fig" data-wcr><div class="box">${P(a,{big:true})}</div><figcaption><span>${esc(a.alt)}</span><span class="mono">IMAGE STATUS · ${esc(a.img.status).toUpperCase()}</span></figcaption><p class="wcredit mono" hidden></p></figure>
   <div class="art-grid">
@@ -3130,7 +3124,7 @@ function pageFile(slug){const a=BY[slug];if(!a)return notFound();const d=deskOf(
       ${[['Institutions',a.inst,'inst'],['People',a.people,'person'],['Markets',a.assets,'asset']].filter(x=>x[1].length).map(([t,l,k])=>`<div class="rbox"><h3>${t}</h3><div class="tags">${l.map(v=>`<a class="tag" href="#/search?${k}=${encodeURIComponent(v)}">${esc(v)}</a>`).join('')}</div></div>`).join('')}
       <div class="rbox"><h3>Image status</h3><div class="imgstat"><b>${esc(a.img.status)}</b>${esc(a.img.note)}</div></div>
       ${rel.length?`<div class="rbox"><h3>Related files</h3><ul>${rel.map(r=>`<li><span class="d">${r.y}</span><a href="#/file/${r.slug}">${esc(r.head)}</a></li>`).join('')}</ul></div>`:''}
-      <div class="rbox"><h3>Filed by</h3><div class="imgstat">${d.name} desk · ${handleLink(d)}</div></div>
+      <div class="rbox"><h3>Filed by</h3><div class="imgstat">${handleLink(d)} desk</div></div>
     </aside>
   </div></article>`}
 
@@ -3540,10 +3534,10 @@ function afterSearch(){const i=$('#sf-q'),box=$('#sf-sug');i.focus();i.setSelect
 
 /* info pages */
 const INFO={
- about:['About Market Files',`<p>Market Files is a financial library and media company: live markets and futures, a searchable archive of market history, free financial tools and calculators, and research on any financial topic. We are also a newsroom that investigates and visually reconstructs the events that changed markets — from Wall Street crashes and banking crises to central-bank decisions, Bitcoin, blockchain and today’s financial markets.</p><p>We present financial history the way we report the news: what happened, why it mattered, and the financial mechanism that actually moved. The same standard applies to live coverage, so every current story can be filed into the archive tomorrow.</p><h2>Our two accounts</h2><ul><li><a href="${xUrl('TheMarketFiles')}" target="_blank" rel="noopener">@TheMarketFiles</a> — <strong>the present.</strong> Markets, money and the news of the day, live: Wall Street and U.S. markets, global finance and central banks, companies, and Bitcoin and crypto.</li><li><a href="${xUrl('MarketFilesThen')}" target="_blank" rel="noopener">@MarketFilesThen</a> — <strong>the past.</strong> Financial history told as it happened: crashes, panics, central-bank turning points and the origins of crypto.</li></ul><p>Every story is published once, on the account it belongs to.</p>`],
+ about:['About Market Files',`<p>Market Files is a financial library and media company: live markets and futures, a searchable archive of market history, free financial tools and calculators, and research on any financial topic. We are also a newsroom that investigates and visually reconstructs the events that changed markets — from Wall Street crashes and banking crises to central-bank decisions, Bitcoin, blockchain and today’s financial markets.</p><p>We present financial history the way we report the news: what happened, why it mattered, and the financial mechanism that actually moved. The same standard applies to live coverage, so every current story can be filed into the archive tomorrow.</p>`],
  standards:['Editorial Standards',`<p>Important claims are verified before publication, preferably against primary or authoritative sources. We check dates, figures, quotations, historical distinctions, image provenance and usage rights.</p><h2>Source Record</h2><p>Files carry a Source Record listing each key claim, its source, the document, date, the type of evidence, our confidence and the rights status of any asset used.</p><h2>Image Status</h2><p>Every image is labeled. <strong>Archival photograph</strong>: a period image of the event itself, with provenance recorded. <strong>Illustrative historical reconstruction</strong>: an original visual built from the record, labeled as such. <strong>Illustrative placeholder</strong>: a stand-in used only until an event-specific image clears review. Images must correspond to the exact event described and are never reused across stories.</p><h2>Statuses</h2><p><strong>Verified</strong> — all key claims confirmed. <strong>In review</strong> — drafted, sources listed, confirmation under way. <strong>Pending</strong> — a claim or date is unresolved and the file is not published.</p>`],
  corrections:['Corrections',`<p>When we get something wrong, we correct it on the file, note what changed and when, and update the Source Record. Send corrections with the file number (for example MF-1873-0930) and your source.</p><p>No corrections have been logged yet.</p>`],
- contact:['Contact',`<p>Editorial and corrections: include the file number in your message.</p><p>On X: <a href="${xUrl('TheMarketFiles')}" target="_blank" rel="noopener">@TheMarketFiles</a> (markets today) and <a href="${xUrl('MarketFilesThen')}" target="_blank" rel="noopener">@MarketFilesThen</a> (market history).</p>`],
+ contact:['Contact',`<p>Editorial and corrections: include the file number in your message.</p>`],
  privacy:['Privacy',`<p>Market Files does not ask you to create an account, and we do not sell personal data.</p><h2>What stays on your device</h2><p>Your watchlist and display preferences (such as light or dark mode) are saved in your own browser. They are not sent to us. Clearing your browser data removes them.</p><h2>Third-party services</h2><p>To show live charts, logos, photos, encyclopedia summaries, headlines and search results, pages load content from other providers, including TradingView, Google, Wikipedia, news publishers and image hosts. When your browser loads their content, those providers receive standard technical information such as your IP address and device type, and their own privacy policies apply. Headlines and search results link out to the original sources.</p><h2>Server logs</h2><p>Our hosting provider keeps routine technical logs (for example, requests and errors) to keep the site secure and working.</p><h2>Questions</h2><p>Reach us through the accounts on the <a href="#/page/contact">Contact</a> page.</p>`],
  terms:['Terms',`<p>Content is for educational purposes only. Nothing published by Market Files constitutes financial advice. Market data may be delayed or unavailable and is provided for information only. Market Files is a news and media company reporting on historical and live events; nothing here is financial advice.</p>`],
  newsletter:['The Weekly File','']
@@ -3564,7 +3558,7 @@ const TOPNAV=[['markets','Markets','#2FBF77'],['global-finance','Global','#4C8DF
 $('#nav-links').innerHTML=TOPNAV.map(([r,l,c,h])=>`<li><a href="${h||'#/'+r}" data-r="${r}" style="--dc:${c||'#E9EDF2'}">${l}</a></li>`).join('');
 {const nl=$('#nav-links');nl.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)&&nl.scrollWidth>nl.clientWidth){nl.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false})}
 $('#drawer-in').innerHTML=NAV.map(([r,l])=>`<a href="#/${r}">${l}<span aria-hidden="true">→</span></a>`).join('')+`<a href="#/blog">Blog<span>→</span></a><a href="#/futures">Futures<span>→</span></a><a href="#/dashboard?tab=watchlist">My Watchlist<span>→</span></a><a href="#/crypto-guide">Crypto guide<span>→</span></a><a href="#/metals">Gold &amp; Silver<span>→</span></a><a href="#/stocks-guide">Stocks guide<span>→</span></a><a href="#/world">Global politics &amp; markets<span>→</span></a><a href="#/library">Library<span>→</span></a><a href="#/archive">Archive<span>→</span></a><a href="#/on-this-date">Time Machine<span>→</span></a>`;
-$('#f-desks').innerHTML=ACCOUNTS.map(d=>`<a href="${xUrl(d.handle)}" target="_blank" rel="noopener" style="--dc:${d.hex}"><b>@${d.handle}</b><span>${d.blurb}</span></a>`).join('');
+
 $('#yr').textContent=new Date().getFullYear();
 $('#tk-track').innerHTML=tickerHTML();$('#tk-src').textContent=Feed.name;
 
@@ -3662,7 +3656,7 @@ async function wireTop(){const g=$('#tb-g');if(!g)return;let data=TOPS&&Date.now
   if(!data){try{const r=await fetch('/api/top');if(r.ok){const j=await r.json();if(j&&(j.day||j.week||j.month))data=TOPS={...j,at:Date.now()}}}catch(e){}}
   const g2=$('#tb-g');if(!g2)return;g2.innerHTML=['day','week','month'].map(k=>tbCard(k,data&&data[k],false)).join('');tbUpgrade()}
 function frontHead(sec){const f=FRONTS[sec];const s=session('eq');
-  return heroHead(sec,`<span>${longDate()}</span><span class="sess ${s.c}"><i></i>${s.t}</span><span class="fr-ed">${sec==='history'?'@MarketFilesThen':'@TheMarketFiles'}</span>`,f.t,f.d)}
+  return heroHead(sec,`<span>${longDate()}</span><span class="sess ${s.c}"><i></i>${s.t}</span><span class="fr-ed">${sec==='history'?'Market Files Then':'Market Files'}</span>`,f.t,f.d)}
 function frontHTML(sec){const f=FRONTS[sec];const ids=f.tiles.filter(id=>INSTR.some(q=>q.id===id));if(ids.length>4&&ids.length%2)ids.pop();
   return `<div class="wrap page-in fr" data-front="${sec}">${frontHead(sec)}${ids.length?stripTiles(ids):''}<div class="fr-body" id="fr-body">${frontSkeleton()}</div></div>`}
 function frontSkeleton(){return `<div class="fr-g"><div class="fr-lead sk"><div class="sk-img"></div><div class="sk-l"></div><div class="sk-l s"></div></div><div class="fr-side"><div class="sk sk-img sm"></div><div class="sk sk-img sm"></div></div><div class="fr-river"><div class="sk-l"></div><div class="sk-l"></div><div class="sk-l s"></div></div></div>`}

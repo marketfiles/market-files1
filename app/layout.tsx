@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Live markets, an archive of the events that changed them, and free research on anything financial — markets, global finance, crypto, companies and history.',
   applicationName: 'Market Files',
   openGraph: { type: 'website', siteName: 'Market Files', title: 'Market Files — Markets • Money • History', description: 'Real-time market intelligence and the history behind it.' },
-  twitter: { card: 'summary_large_image', site: '@TheMarketFiles', creator: '@TheMarketFiles' },
+  twitter: { card: 'summary_large_image' },
   alternates: { canonical: '/' },
 };
 export const viewport: Viewport = { themeColor: '#080B10', width: 'device-width', initialScale: 1, viewportFit: 'cover' };
@@ -16,8 +16,7 @@ export const viewport: Viewport = { themeColor: '#080B10', width: 'device-width'
 const ORG = {
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'NewsMediaOrganization', '@id': `${siteUrl()}/#org`, name: 'Market Files', slogan: 'Markets • Money • History', url: siteUrl(), logo: `${siteUrl()}/logo-512.png`,
-      sameAs: ['TheMarketFiles', 'MarketFilesThen'].map((h) => `https://x.com/${h}`) },
+    { '@type': 'NewsMediaOrganization', '@id': `${siteUrl()}/#org`, name: 'Market Files', slogan: 'Markets • Money • History', url: siteUrl(), logo: `${siteUrl()}/logo-512.png` },
     { '@type': 'WebSite', '@id': `${siteUrl()}/#site`, url: siteUrl(), name: 'Market Files', publisher: { '@id': `${siteUrl()}/#org` },
       potentialAction: { '@type': 'SearchAction', target: `${siteUrl()}/search?q={query}`, 'query-input': 'required name=query' } },
   ],

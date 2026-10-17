@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   return {
     title: a.head, description: a.deck, alternates: { canonical: `/files/${a.slug}` },
     openGraph: { type: 'article', title: a.head, description: a.deck, url: `/files/${a.slug}`, section: DESKS[a.desk].name },
-    twitter: { card: 'summary_large_image', title: a.head, description: a.deck, site: `@${DESKS[a.desk].handle}` },
+    twitter: { card: 'summary_large_image', title: a.head, description: a.deck },
   };
 }
 
@@ -38,7 +38,7 @@ export default async function FilePage({ params }: P) {
             <p className="dateline">{a.loc.toUpperCase()} — {fmtDate(a.date, a.prec).toUpperCase()}</p>
             <h1>{a.head}</h1>
             <p className="deck">{a.deck}</p>
-            <div className="byline"><span>By <b>Market Files</b></span><span>Desk <a className="handle" href={`https://x.com/${d.handle}`}>@{d.handle}</a></span></div>
+            <div className="byline"><span>By <b>Market Files</b></span><span>Desk <b>{d.name}</b></span></div>
             <div className="share"><a className="btn btn-p" href={`/#/file/${a.slug}`}>Open the interactive file →</a><a className="btn" href={`/#/search?q=${encodeURIComponent(a.head)}&ai=1`}>✦ Research this</a></div>
           </header>
           <div className="art-grid">
