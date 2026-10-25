@@ -25,7 +25,9 @@ export const MONTHS = ['January','February','March','April','May','June','July',
 export const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 export const articleBySlug = (slug: string) => ARTICLES.find((a) => a.slug === slug);
-export const siteUrl = () => (process.env.SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
+// SITE_URL wins. Without it, a Vercel deployment falls back to its production domain so the sitemap,
+// canonical links and schema.org data never point at localhost; localhost is only for local development.
+export const siteUrl = () => (process.env.SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'http://localhost:3000')).replace(/\/$/, '');
 
 export function parseISO(iso: string) {
   const m = /^(\d{1,4})-(\d{2})-(\d{2})$/.exec(iso);

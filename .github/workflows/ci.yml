@@ -34,6 +34,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Unit tests (news filters, rate limiter)
+        run: npm run test:unit
 
   build:
     name: Build

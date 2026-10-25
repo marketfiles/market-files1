@@ -1,4 +1,5 @@
 import { isEnglishItem } from '@/lib/english';
+import { isOpinionOrPromo } from '@/lib/newsfilter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,7 +25,7 @@ async function gnews(q: string): Promise<Item[]> {
     const x = m[1]; const source = tag(x, 'source');
     let title = tag(x, 'title'); if (source && title.endsWith(' - ' + source)) title = title.slice(0, -(source.length + 3));
     return { title, source: source || 'Google News', link: tag(x, 'link'), when: new Date(tag(x, 'pubDate') || Date.now()).toISOString() };
-  }).filter((i) => i.title && i.link && isEnglishItem(i)); // English-language outlets only
+  }).filter((i) => i.title && i.link && isEnglishItem(i) && !isOpinionOrPromo(i.title)); // English-language news only, no opinion or promos
 }
 
 const STOP = new Set('that this with from have will after amid over into than what when where which while about their there they them more most just been were your says said could would should still today week month year years stock stocks market markets shares news live update updates latest report reports expected amid ahead could first last back down rise rises fall falls higher lower record set sets make makes take takes here know need what’s how why new big top time'.split(' '));

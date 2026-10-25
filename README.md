@@ -19,7 +19,7 @@ Everything below is free. You get a live site at `https://<project-name>.vercel.
 | Code | GitHub free |
 | Research box | **Google Programmable Search** (free, shows Google ads) — or plain Google links with no setup |
 | Futures | **TradingView widgets** — prices, line charts and a link to the full TradingView chart for every contract; TradingView handles the data licensing |
-| Stocks, yields, FX, crypto | Finnhub, FRED, Frankfurter, CoinGecko free tiers |
+| Stocks, yields, FX, crypto | Yahoo Finance and CNBC public quote feeds and the U.S. Treasury (no key); optional Finnhub and FRED free keys; Frankfurter and CoinGecko free tiers |
 | Database | Supabase free tier (optional — the site runs on built-in content without it) |
 | Newsletter | Beehiiv free tier (optional) |
 
@@ -42,7 +42,6 @@ Everything below is free. You get a live site at `https://<project-name>.vercel.
 | **Homepage experience** (`/`) | The approved design: globe hero, Markets Now terminal, futures, crypto, desks, archive, Time Machine, Crash Lab, newsstand, search. Served from `public/experience/market-files.js`, generated from the approved preview by `tools/build_experience.py`. |
 | **Market Files Library** | `/#/library` — long-run history pages for any topic (gold, the Dow, bitcoin, oil, Treasury yields, the fed funds rate, inflation, or anything typed in), with benchmark milestones, the latest board value, every related Market Files record, and Deep Research prompts. With `FRED_API_KEY`, rates and inflation pages draw real annual data from `/api/series`. |
 | **Blog** | `/blog` (indexable) and `/#/blog` (interactive, filter by desk). |
-| **X accounts menu** | The X button in the top bar lists all six accounts. Put each profile photo in `public/pfp/` named by handle (e.g. `NowOnBTC.jpg`) and it appears automatically. |
 | **Indexable pages** | Server-rendered for Google: `/files` (archive), `/files/[slug]` (every article, with Article schema), `/day/[date]` (every day file), plus `sitemap.xml` and `robots.txt`. |
 | **Live market data** (`/api/quotes`) | Server-side providers, cached and shared by all visitors. API keys never reach the browser. |
 | **Market Files AI** (`/api/ai`) | Claude via the Anthropic API, streaming, with **Quick** and **Deep research** modes (Deep uses `ANTHROPIC_MODEL_DEEP` and more web searches). Tools: Market Files archive search, date lookup, live board quotes, optional web search for current events. Rate-limited per visitor. |
@@ -54,8 +53,8 @@ Everything below is free. You get a live site at `https://<project-name>.vercel.
 
 | Board section | Default source | Notes |
 |---|---|---|
-| U.S. indexes, sectors, world markets, commodities, dollar | **Finnhub** (free key) | Real-time index levels need paid index licenses, so tiles track the matching ETF and say so on the tile, e.g. "S&P 500 · SPY". Change any mapping in `lib/market/symbols.ts`. |
-| Treasury yields | **FRED** (free key) | Daily. Foreign 10-year yields from FRED are monthly and labeled that way. |
+| U.S. indexes, sectors, world markets, commodities, dollar | **Yahoo Finance**, with **CNBC's public quote feed** filling anything Yahoo does not answer; optional **Finnhub** key adds ETF proxies for remaining gaps | Real-time index levels need paid index licenses, so tiles track the matching ETF and say so on the tile, e.g. "S&P 500 · SPY". Change any mapping in `lib/market/symbols.ts`. |
+| Treasury yields | **U.S. Treasury** daily par yield curve (no key) | Daily. Non-U.S. 10-year yields come from **FRED** (free key) and are monthly, labeled that way. |
 | Currencies | **Frankfurter** (ECB reference rates, free) | Daily reference rates. |
 | Crypto | **CoinGecko** (free; optional demo key) | Price, 24-hour change and market cap. |
 | **Futures** (CME, CBOT, NYMEX, COMEX, ICE, Cboe) | **TradingView widgets** (free) | Tabs by sector with prices, % change and line charts; click any contract for its own chart; "Open in TradingView" links everywhere. Optional: your own licensed feed via `FUTURES_FEED_URL`. |
@@ -117,16 +116,18 @@ database and newsletter). Commit and push; Vercel redeploys.
 - Have a lawyer review the privacy policy, terms and financial disclaimer; add data-provider attributions they require.
 
 ## Notes
-- Multi-instance hosting: the AI rate limiter is per server instance; for strict limits use a shared store (e.g. Upstash Redis) in `lib/ratelimit.ts`.
+- Multi-instance hosting: the AI rate limiter is per server instance (deep research counts as 3 requests); for strict limits use a shared store (e.g. Upstash Redis) in `lib/ratelimit.ts`.
 - The Claude model names live in environment variables, so upgrading models needs no code change.
-- This build was prepared without network access, so it has not been through `npm install`/`next build` yet.
-  Run `npm run build` once locally or on Vercel; if TypeScript flags anything, it will be small and local.
+- CI (`.github/workflows/ci.yml`) typechecks, runs the unit tests (`npm run test:unit`), builds, and runs the Playwright
+  smoke tests on every pull request. News filters (English-only sources, no opinion/promo pieces) live in `lib/english.ts`
+  and `lib/newsfilter.ts`.
+- If `SITE_URL` is not set, a Vercel deployment falls back to its production domain; set `SITE_URL` to your real domain anyway.
 
 
 ## Live data sources (no keys needed)
 | Data | Source |
 |---|---|
-| Indices, sector funds, futures, commodities, dollar index, stocks | Yahoo Finance chart data (unofficial; fine for launch — move to a licensed feed before heavy commercial use) |
+| Indices, sector funds, futures, commodities, dollar index, stocks | Yahoo Finance chart data (unofficial), with CNBC's public quote feed as fallback; fine for launch — move to a licensed feed before heavy commercial use |
 | U.S. Treasury yields | U.S. Treasury daily par yield curve |
 | Currencies | Yahoo, with ECB reference rates (Frankfurter) as backup |
 | Crypto | CoinGecko |
