@@ -2209,7 +2209,11 @@ const TB_TOPICS=[
 ];
 function tbPhoto(it,k){const t=it.title||'',seed={day:0,week:1,month:2}[k]||0;const hit=TB_TOPICS.find(r=>r[0].test(t));
   const [pool,idx]=hit&&hit[1]?hit[1]:['markets',seed];const wq=hit&&hit[2]?hit[2]:'';
-  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${pimg(pool,idx,k==='day'?1100:640,false)}</figure>`}
+  const w=k==='day'?1100:640,L=PHOTOS[pool]||PHOTOS.markets,[f,c]=L[idx%L.length];
+  /* A generated plate sits underneath so the card is never blank; if a photo fails to load, the next ones in the pool are tried. */
+  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${plate('tape',{seed:hash(t)||seed+1,accent:'#F5C451'})}<img class="pimg" src="${cUrl(f,w)}" alt="${esc(c)}" title="${esc(c)} — Wikimedia Commons" data-pool="${esc(pool)}" data-i="${idx}" data-w="${w}" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="tbRetry(this)"></figure>`}
+function tbRetry(im){const n=(+im.dataset.n||0)+1,L=PHOTOS[im.dataset.pool]||PHOTOS.markets;if(n>=Math.min(4,L.length)){im.remove();return}
+  im.dataset.n=n;const [f,c]=L[((+im.dataset.i)+n)%L.length];im.alt=c;im.title=c+' — Wikimedia Commons';im.src=cUrl(f,+im.dataset.w)}
 async function tbUpgrade(){const figs=$$('.tb-ph[data-tbw]:not([data-tbd])');if(!figs.length||!LIVE_SITE)return;
   figs.forEach(f=>f.dataset.tbd=1);
   await Promise.all(figs.map(async f=>{const r=await wikiSearch(f.dataset.tbw,1);if(!r||!r.img||!f.isConnected)return;
