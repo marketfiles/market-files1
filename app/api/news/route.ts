@@ -1,3 +1,5 @@
+import { isEnglishItem } from '@/lib/english';
+
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -43,7 +45,7 @@ async function rss(url: string, source?: string): Promise<Item[]> {
     const when = new Date(tag(x, 'pubDate') || tag(x, 'dc:date') || Date.now());
     const summary = clip(strip(tag(x, 'description')));
     return { title, source: src, link, when: isNaN(+when) ? new Date().toISOString() : when.toISOString(), image: imageOf(x), summary: summary && summary !== title ? summary : '' };
-  }).filter((i) => i.title && /^https?:\/\//.test(i.link));
+  }).filter((i) => i.title && /^https?:\/\//.test(i.link) && isEnglishItem(i)); // English-language outlets only
 }
 const gnews = (q: string) => rss(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`, '');
 
