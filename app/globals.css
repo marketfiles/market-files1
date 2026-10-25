@@ -1249,7 +1249,7 @@ html.dos-open,html.hello-open{overflow:hidden}
 .tb-c a:hover h2{text-decoration:underline;text-decoration-color:rgba(245,196,81,.6);text-underline-offset:4px;text-decoration-thickness:1px}
 .tb-meta{font-size:10.5px;color:var(--tx3);margin-top:7px;letter-spacing:.03em}
 .tb-ph{margin:0 0 12px;position:relative;height:170px;overflow:hidden;border:1px solid rgba(245,196,81,.28);background:radial-gradient(90% 90% at 50% 100%,rgba(245,196,81,.14),#08090d 70%)}
-.tb-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s,transform .7s}.tb-ph img.ok{opacity:1}
+.tb-ph .plate{position:absolute;inset:0}.tb-ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s,transform .7s}.tb-ph img.ok{opacity:1}
 .tb-ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.4));pointer-events:none}
 .tb-c a:hover .tb-ph img{transform:scale(1.04)}
 .tb-day .tb-ph{height:210px}
