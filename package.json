@@ -15,8 +15,9 @@
     "experience:check": "python3 tools/build_experience.py --check",
     "db:migrate": "node scripts/migrate.mjs",
     "db:seed": "node scripts/seed.mjs",
+    "test:unit": "node --experimental-strip-types --no-warnings --test tests/unit/filters.test.mjs",
     "test:smoke": "playwright test",
-    "test": "npm run test:smoke"
+    "test": "npm run test:unit && npm run test:smoke"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.133.0",

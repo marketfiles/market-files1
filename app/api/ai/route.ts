@@ -22,6 +22,8 @@ export async function POST(req: Request) {
 
   const json = body.mode === 'json';
   const deep = body.tier === 'complex';
+  // The first request above already charged 1; deep research uses the priciest model, so charge 2 more (3 in total).
+  if (deep && !rateLimit(`ai:${clientIp(req.headers)}`, limit, 10 * 60_000, 2)) return new Response('Too many requests', { status: 429 });
   const model = body.tier === 'quick' ? process.env.ANTHROPIC_MODEL_QUICK || 'claude-haiku-4-5-20251001' : deep ? process.env.ANTHROPIC_MODEL_DEEP || 'claude-opus-5-5' : process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
   const system = AI_SYSTEM + (json ? '\n\nThis request is for structured data: reply with only the JSON requested — no prose, no code fences.' : '');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

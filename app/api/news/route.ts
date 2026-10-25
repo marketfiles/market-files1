@@ -1,4 +1,5 @@
 import { isEnglishItem } from '@/lib/english';
+import { isOpinionOrPromo } from '@/lib/newsfilter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -73,7 +74,7 @@ const OFF_TOPIC = [
   /\b(i|i'm|i’m|i've|i’ve|we're|we’re|should i|can i|do i|am i)\b.*\?\s*$/i,
   /\b(best (credit cards?|savings|cd rates|mortgage rates|personal loans?)|coupon|promo code|deal of the day|horoscope|recipe)\b/i,
 ];
-const onTopic = (i: Item) => !OFF_TOPIC.some((re) => re.test(i.title));
+const onTopic = (i: Item) => !OFF_TOPIC.some((re) => re.test(i.title)) && !isOpinionOrPromo(i.title);
 
 const OG = new Map<string, string>();
 async function ogImage(link: string): Promise<string> {
