@@ -3050,7 +3050,7 @@ const HOME_LINKS=[['markets','Markets','Indices, futures, yields, heatmaps and h
 function btcBottom(){return `<div class="btc-b"><div class="btc-h"><span class="mono btc-k">BITCOIN · LIVE</span><a class="mono btc-go" href="#/crypto">Explore crypto →</a></div>${stripTiles(['BTC'])}</div>`}
 function pageHome(){
   return `
-  ${topBand()}${globeHero()}${heatShow()}
+  ${globeHero()}${topBand()}${heatShow()}
   <section class="term-top home-strip" id="j-mk"><div class="wrap">
     ${keyTiles()}
     <div class="hl-links">${HOME_LINKS.map(([r,l,d,c])=>`<a class="hl-l" data-holo href="#/${r}" style="--dc:${c}"><b>${l}</b><span>${d}</span><i aria-hidden="true">→</i></a>`).join('')}</div>
