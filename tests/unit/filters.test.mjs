@@ -41,7 +41,7 @@ test('Real news headlines are not filtered', () => {
 });
 
 test('Front-page lead filter drops Trump headlines only', () => {
-  for (const t of ['Trump lifts 50% tariffs on some Canadian goods', "Trump's tariff plan rattles Wall Street", 'Stocks slide as TRUMP threatens China']) assert.equal(isTrumpHeadline(t), true, t);
+  for (const t of ['Trump lifts 50% tariffs on some Canadian goods', "Trump's tariff plan rattles Wall Street", 'Stocks slide as TRUMP threatens China', 'Trumps tariffs hit markets', 'Trump-backed plan lifts bank stocks', 'Donald J. Trump signs order']) assert.equal(isTrumpHeadline(t), true, t);
   for (const t of ['Stocks fall as Treasury yields jump', 'Fed holds rates steady', 'Trumpf earnings beat estimates', '']) assert.equal(isTrumpHeadline(t), false, t);
 });
 

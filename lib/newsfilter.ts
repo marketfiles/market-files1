@@ -34,4 +34,4 @@ export const isOpinionOrPromo = (title: string | undefined | null): boolean => {
  * Headlines that name Trump never lead the home page. They still appear in the section pages
  * (Markets, Global, ...) where tariff and policy news that moves markets belongs.
  */
-export const isTrumpHeadline = (title: string | undefined | null): boolean => /\btrump(?:['’]s)?\b/i.test(title || '');
+export const isTrumpHeadline = (title: string | undefined | null): boolean => /\btrump(?:s|['’]s?)?\b/i.test(title || '');
