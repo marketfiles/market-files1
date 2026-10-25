@@ -1,5 +1,5 @@
 import { isEnglishItem } from '@/lib/english';
-import { isOpinionOrPromo } from '@/lib/newsfilter';
+import { isOpinionOrPromo, isTrumpHeadline } from '@/lib/newsfilter';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -169,7 +169,7 @@ export async function GET(req: Request) {
   try {
     const lists = await Promise.all(['stock market when:1d', 'economy OR "central bank" OR inflation when:1d', 'bitcoin OR crypto when:1d'].map((q) => gnews(q).catch(() => [] as Item[])));
     const seen = new Set<string>(); const items: Item[] = [];
-    for (let i = 0; items.length < 12 && i < 12; i++) for (const l of lists) { const it = l[i]; if (it && onTopic(it) && !seen.has(it.title)) { seen.add(it.title); items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when }); } }
+    for (let i = 0; items.length < 12 && i < 12; i++) for (const l of lists) { const it = l[i]; if (it && onTopic(it) && !isTrumpHeadline(it.title) && !seen.has(it.title)) { seen.add(it.title); items.push({ title: it.title, source: it.source || 'Google News', link: it.link, when: it.when }); } }
     if (items.length) cache.set('top', { at: Date.now(), items });
     return json(items.length ? items : hit?.items ?? []);
   } catch { return json(hit?.items ?? []); }

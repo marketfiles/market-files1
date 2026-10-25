@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isEnglishText, isEnglishItem } from '../../lib/english.ts';
-import { isOpinionOrPromo } from '../../lib/newsfilter.ts';
+import { isOpinionOrPromo, isTrumpHeadline } from '../../lib/newsfilter.ts';
 import { rateLimit } from '../../lib/ratelimit.ts';
 
 test('English filter drops non-Latin outlets and headlines', () => {
@@ -38,6 +38,11 @@ test('Real news headlines are not filtered', () => {
     'Annual Inflation Rate Rose To 3.7% In September',
     'Nvidia earnings beat estimates, shares rise after hours',
   ]) assert.equal(isOpinionOrPromo(t), false, t);
+});
+
+test('Front-page lead filter drops Trump headlines only', () => {
+  for (const t of ['Trump lifts 50% tariffs on some Canadian goods', "Trump's tariff plan rattles Wall Street", 'Stocks slide as TRUMP threatens China']) assert.equal(isTrumpHeadline(t), true, t);
+  for (const t of ['Stocks fall as Treasury yields jump', 'Fed holds rates steady', 'Trumpf earnings beat estimates', '']) assert.equal(isTrumpHeadline(t), false, t);
 });
 
 test('Rate limiter allows up to the limit then blocks', () => {
