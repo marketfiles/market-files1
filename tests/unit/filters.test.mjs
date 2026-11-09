@@ -94,3 +94,19 @@ test('Biggest stories: the identical link or headline is never reused, even if n
   assert.equal(b, null);
   assert.equal(topicOf('Treasury yields slide'), 'bonds');
 });
+
+import { matches, assignPhotos } from '../../lib/topstories.ts';
+
+test('Biggest stories: photos come from articles about the same story', () => {
+  const m = matches('Fed cuts interest rates by quarter point', [it('Apple unveils iPhone', 'X'), it('Federal Reserve cuts interest rates', 'Y'), it('Fed cuts interest rates by a quarter point, signals pause', 'Z')]);
+  assert.deepEqual(m.map((x) => x.source), ['Z', 'Y']);
+});
+
+test('Biggest stories: no two cards get the same photo, even at different sizes', () => {
+  const out = assignPhotos([
+    ['https://img.cnbc.com/a.jpg?w=1200', 'https://img.cnbc.com/b.jpg'],
+    ['https://img.cnbc.com/a.jpg?w=640', 'https://img.cnbc.com/b.jpg'],
+    ['https://img.cnbc.com/a.jpg', 'https://img.cnbc.com/b.jpg'],
+  ]);
+  assert.deepEqual(out, ['https://img.cnbc.com/a.jpg?w=1200', 'https://img.cnbc.com/b.jpg', '']);
+});

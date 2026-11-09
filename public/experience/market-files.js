@@ -2214,14 +2214,16 @@ function tbFree(pool,idx,used){for(const [p,start] of [[pool,idx],['markets',0],
     for(let n=0;n<L.length;n++){const i=(start+n)%L.length;if(!used.f.has(L[i][0]))return [p,i]}}return [pool,idx]}
 function tbPhoto(it,k,used){used=used||{f:new Set,w:new Set};const t=it.title||'',seed={day:0,week:1,month:2}[k]||0;const hit=TB_TOPICS.find(r=>r[0].test(t));
   let [pool,idx]=hit&&hit[1]?hit[1]:['markets',seed];let wq=hit&&hit[2]?hit[2]:'';
+  const own=it.image&&!used.f.has(it.image)?it.image:'';if(own){used.f.add(own);wq=''}
   if(wq&&used.w.has(wq))wq='';if(wq)used.w.add(wq);
   [pool,idx]=tbFree(pool,idx,used);
   const w=k==='day'?1100:640,[f,c]=tbFile(pool,idx);used.f.add(f);
-  /* A generated plate sits underneath so the card is never blank; if a photo fails to load, the next free ones are tried. */
-  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${plate('tape',{seed:hash(t)||seed+1,accent:'#F5C451'})}<img class="pimg" src="${cUrl(f,w)}" alt="${esc(c)}" title="${esc(c)} — Wikimedia Commons" data-f="${esc(f)}" data-pool="${esc(pool)}" data-i="${idx}" data-w="${w}" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="tbRetry(this)"></figure>`}
+  /* The story's own article photo comes first. A generated plate sits underneath so the card is never blank;
+     if a photo fails to load, the next free stock photos are tried. */
+  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${plate('tape',{seed:hash(t)||seed+1,accent:'#F5C451'})}<img class="pimg" src="${own?esc(own):cUrl(f,w)}" alt="${own?esc(t):esc(c)}" title="${own?esc(t):esc(c)+' — Wikimedia Commons'}" data-f="${esc(own||f)}"${own?' data-own="1"':''} data-pool="${esc(pool)}" data-i="${idx}" data-w="${w}" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="tbRetry(this)"></figure>`}
 /** Photos currently shown in the band, other than `except`. */
 const tbShown=except=>new Set($$('.tb-ph img').filter(x=>x!==except).map(x=>x.dataset.f||x.src));
-function tbRetry(im){const n=(+im.dataset.n||0)+1,L=PHOTOS[im.dataset.pool]||PHOTOS.markets;if(n>=Math.min(4,L.length)){im.remove();return}
+function tbRetry(im){const L=PHOTOS[im.dataset.pool]||PHOTOS.markets;if(im.dataset.own){delete im.dataset.own;im.dataset.n=-1}const n=(+im.dataset.n||0)+1;if(n>=Math.min(4,L.length)){im.remove();return}
   im.dataset.n=n;const shown=tbShown(im);let i=(+im.dataset.i)+n,tries=0;while(shown.has(L[i%L.length][0])&&tries++<L.length)i++;
   const [f,c]=L[i%L.length];if(shown.has(f)){im.remove();return}im.dataset.f=f;im.alt=c;im.title=c+' — Wikimedia Commons';im.src=cUrl(f,+im.dataset.w)}
 function tbCards(data,loading){const used={f:new Set,w:new Set};return ['day','week','month'].map(k=>tbCard(k,data&&data[k],loading,used)).join('')}

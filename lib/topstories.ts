@@ -8,7 +8,7 @@
  *   3. never the same link or headline text.
  * Only when no candidate passes rule 2 is it relaxed. Rules 1 and 3 are never relaxed.
  */
-export interface Item { title: string; source: string; link: string; when: string }
+export interface Item { title: string; source: string; link: string; when: string; image?: string }
 export interface Pick extends Item { count: number; sources: string[]; topic: string }
 
 const STOP = new Set('that this with from have will after amid over into than what when where which while about their there they them more most just been were your says said could would should still today week month year years stock stocks market markets shares news live update updates latest report reports expected ahead first last back down rise rises rising fall falls falling higher lower record set sets make makes take takes here know need whats how why new big top time investors investor trading traders global price prices amid'.split(' '));
@@ -66,4 +66,32 @@ export function biggest(items: Item[], taken: Taken[]): Pick | null {
   const topic = topicOf(it.title);
   taken.push({ toks: T[best.i], topic, link: it.link, title: norm(it.title) });
   return { ...it, topic, count: best.srcs.size, sources: [...best.srcs].filter((s) => s !== it.source).slice(0, 3) };
+}
+
+/**
+ * Card photos: every card shows the photo from its own story's article.
+ * Candidates are other articles about the same story (sharing at least two key words with the headline),
+ * best match first.
+ */
+export function matches<T extends { title: string }>(headline: string, items: T[], max = 5): T[] {
+  const want = toks(headline);
+  return items
+    .map((it, i) => ({ it, i, n: overlap(want, toks(it.title)) }))
+    .filter((x) => x.n >= 2)
+    .sort((a, b) => b.n - a.n || a.i - b.i)
+    .slice(0, max)
+    .map((x) => x.it);
+}
+
+/** Same photo = same file, whatever size or cache parameters are on the URL. */
+export const photoKey = (u: string) => { try { const x = new URL(u); return (x.hostname + x.pathname).toLowerCase(); } catch { return u.toLowerCase(); } };
+
+/** Gives each pick, in order, the first candidate photo no earlier pick is using. */
+export function assignPhotos(cands: string[][]): string[] {
+  const used = new Set<string>();
+  return cands.map((list) => {
+    const img = list.find((u) => u && !used.has(photoKey(u))) || '';
+    if (img) used.add(photoKey(img));
+    return img;
+  });
 }
