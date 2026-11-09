@@ -60,3 +60,53 @@ test('Rate limiter cost: deep research counts as 3 requests', () => {
   assert.equal(rateLimit(k, 6, 60_000), false);           // full
   assert.equal(rateLimit(`t3:${Math.random()}`, 2, 60_000, 3), false); // a request costing more than the limit never passes
 });
+
+// "The biggest stories" band: day, week and month must never repeat a story, a headline or a photo topic.
+import { biggest, topicOf } from '../../lib/topstories.ts';
+const it = (title, source, link = title) => ({ title, source, link, when: new Date().toISOString() });
+
+test('Biggest stories: the same event worded differently is never picked twice', () => {
+  const taken = [];
+  const day = biggest([it('Fed cuts interest rates by quarter point', 'CNBC'), it('Federal Reserve cuts interest rates again', 'Reuters'), it('Apple unveils new chips', 'Bloomberg')], taken);
+  const week = biggest([it('Powell: Fed cuts interest rates, signals pause', 'WSJ'), it('Fed cuts interest rates by quarter point', 'AP'), it('Oil jumps as OPEC trims output', 'Reuters'), it('OPEC output cut lifts crude', 'FT')], taken);
+  assert.match(day.title, /Fed|Federal Reserve/);
+  assert.equal(week.topic, 'oil');
+  assert.notEqual(week.title, day.title);
+});
+
+test('Biggest stories: three picks have three different topics when candidates allow', () => {
+  const pool = [
+    it('Fed holds interest rates steady', 'CNBC'), it('Fed holds interest rates as expected', 'Reuters'), it('Powell says Fed in no rush on rates', 'AP'),
+    it('Bitcoin tops $150,000 for first time', 'CoinDesk'), it('Bitcoin hits fresh all-time high', 'Bloomberg'),
+    it('Nvidia earnings beat estimates', 'WSJ'),
+  ];
+  const taken = [];
+  const picks = [biggest(pool, taken), biggest(pool, taken), biggest(pool, taken)];
+  assert.equal(new Set(picks.map((p) => p.topic)).size, 3);
+  assert.equal(new Set(picks.map((p) => p.link)).size, 3);
+});
+
+test('Biggest stories: the identical link or headline is never reused, even if nothing else is left', () => {
+  const taken = [];
+  const a = biggest([it('Gold climbs to record high', 'Reuters')], taken);
+  const b = biggest([it('Gold climbs to record high', 'AP', 'other-link')], taken);
+  assert.ok(a);
+  assert.equal(b, null);
+  assert.equal(topicOf('Treasury yields slide'), 'bonds');
+});
+
+import { matches, assignPhotos } from '../../lib/topstories.ts';
+
+test('Biggest stories: photos come from articles about the same story', () => {
+  const m = matches('Fed cuts interest rates by quarter point', [it('Apple unveils iPhone', 'X'), it('Federal Reserve cuts interest rates', 'Y'), it('Fed cuts interest rates by a quarter point, signals pause', 'Z')]);
+  assert.deepEqual(m.map((x) => x.source), ['Z', 'Y']);
+});
+
+test('Biggest stories: no two cards get the same photo, even at different sizes', () => {
+  const out = assignPhotos([
+    ['https://img.cnbc.com/a.jpg?w=1200', 'https://img.cnbc.com/b.jpg'],
+    ['https://img.cnbc.com/a.jpg?w=640', 'https://img.cnbc.com/b.jpg'],
+    ['https://img.cnbc.com/a.jpg', 'https://img.cnbc.com/b.jpg'],
+  ]);
+  assert.deepEqual(out, ['https://img.cnbc.com/a.jpg?w=1200', 'https://img.cnbc.com/b.jpg', '']);
+});

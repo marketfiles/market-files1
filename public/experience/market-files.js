@@ -2188,7 +2188,7 @@ const longDate=()=>new Date().toLocaleDateString('en-US',{weekday:'long',month:'
 
 /* ---------- the biggest stories: today, this week, this month (most widely covered, via /api/top) ---------- */
 let TOPS=null;const TB_K={day:'TODAY’S BIGGEST STORY',week:'THIS WEEK',month:'THIS MONTH'};
-function topBand(){return `<section class="tb" id="tb" aria-label="The biggest stories"><div class="wrap"><div class="tb-m"><span class="mono tb-brand">THE BIGGEST STORIES</span><span class="mono tb-date">${longDate()}</span></div><div class="tb-g" id="tb-g">${['day','week','month'].map(k=>tbCard(k,TOPS&&TOPS[k],!TOPS)).join('')}</div></div></section>`}
+function topBand(){return `<section class="tb" id="tb" aria-label="The biggest stories"><div class="wrap"><div class="tb-m"><span class="mono tb-brand">THE BIGGEST STORIES</span><span class="mono tb-date">${longDate()}</span></div><div class="tb-g" id="tb-g">${tbCards(TOPS,!TOPS)}</div></div></section>`}
 /* Top stories: every card gets a photo matched to what the story is about. A known-good curated photo shows
    at once; topics without one are upgraded to the lead image of the matching reference article. */
 const TB_TOPICS=[
@@ -2207,24 +2207,38 @@ const TB_TOPICS=[
   [/\b(white house|trump|biden|president|congress|senate|election|shutdown|supreme court)\b/i,null,'United States Capitol'],
   [/\b(earnings|ipo|nasdaq|nvidia|apple|microsoft|tesla|amazon|alphabet|google|meta|chips?|semiconductors?|ai)\b/i,['companies',0]],
 ];
-function tbPhoto(it,k){const t=it.title||'',seed={day:0,week:1,month:2}[k]||0;const hit=TB_TOPICS.find(r=>r[0].test(t));
-  const [pool,idx]=hit&&hit[1]?hit[1]:['markets',seed];const wq=hit&&hit[2]?hit[2]:'';
-  const w=k==='day'?1100:640,L=PHOTOS[pool]||PHOTOS.markets,[f,c]=L[idx%L.length];
-  /* A generated plate sits underneath so the card is never blank; if a photo fails to load, the next ones in the pool are tried. */
-  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${plate('tape',{seed:hash(t)||seed+1,accent:'#F5C451'})}<img class="pimg" src="${cUrl(f,w)}" alt="${esc(c)}" title="${esc(c)} — Wikimedia Commons" data-pool="${esc(pool)}" data-i="${idx}" data-w="${w}" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="tbRetry(this)"></figure>`}
-function tbRetry(im){const n=(+im.dataset.n||0)+1,L=PHOTOS[im.dataset.pool]||PHOTOS.markets;if(n>=Math.min(4,L.length)){im.remove();return}
-  im.dataset.n=n;const [f,c]=L[((+im.dataset.i)+n)%L.length];im.alt=c;im.title=c+' — Wikimedia Commons';im.src=cUrl(f,+im.dataset.w)}
+/* Rule: the three cards never share a photo. `used` tracks every photo file and reference-article query already
+   placed in this band; a card whose topic photo is taken moves to the next free photo in its pool, then to other pools. */
+const tbFile=(pool,i)=>{const L=PHOTOS[pool]||PHOTOS.markets;return L[i%L.length]};
+function tbFree(pool,idx,used){for(const [p,start] of [[pool,idx],['markets',0],['history',0],['companies',0],['global',0]]){const L=PHOTOS[p]||[];
+    for(let n=0;n<L.length;n++){const i=(start+n)%L.length;if(!used.f.has(L[i][0]))return [p,i]}}return [pool,idx]}
+function tbPhoto(it,k,used){used=used||{f:new Set,w:new Set};const t=it.title||'',seed={day:0,week:1,month:2}[k]||0;const hit=TB_TOPICS.find(r=>r[0].test(t));
+  let [pool,idx]=hit&&hit[1]?hit[1]:['markets',seed];let wq=hit&&hit[2]?hit[2]:'';
+  const own=it.image&&!used.f.has(it.image)?it.image:'';if(own){used.f.add(own);wq=''}
+  if(wq&&used.w.has(wq))wq='';if(wq)used.w.add(wq);
+  [pool,idx]=tbFree(pool,idx,used);
+  const w=k==='day'?1100:640,[f,c]=tbFile(pool,idx);used.f.add(f);
+  /* The story's own article photo comes first. A generated plate sits underneath so the card is never blank;
+     if a photo fails to load, the next free stock photos are tried. */
+  return `<figure class="tb-ph"${wq?` data-tbw="${esc(wq)}"`:''}>${plate('tape',{seed:hash(t)||seed+1,accent:'#F5C451'})}<img class="pimg" src="${own?esc(own):cUrl(f,w)}" alt="${own?esc(t):esc(c)}" title="${own?esc(t):esc(c)+' — Wikimedia Commons'}" data-f="${esc(own||f)}"${own?' data-own="1"':''} data-pool="${esc(pool)}" data-i="${idx}" data-w="${w}" decoding="async" referrerpolicy="no-referrer" onload="this.classList.add('ok')" onerror="tbRetry(this)"></figure>`}
+/** Photos currently shown in the band, other than `except`. */
+const tbShown=except=>new Set($$('.tb-ph img').filter(x=>x!==except).map(x=>x.dataset.f||x.src));
+function tbRetry(im){const L=PHOTOS[im.dataset.pool]||PHOTOS.markets;if(im.dataset.own){delete im.dataset.own;im.dataset.n=-1}const n=(+im.dataset.n||0)+1;if(n>=Math.min(4,L.length)){im.remove();return}
+  im.dataset.n=n;const shown=tbShown(im);let i=(+im.dataset.i)+n,tries=0;while(shown.has(L[i%L.length][0])&&tries++<L.length)i++;
+  const [f,c]=L[i%L.length];if(shown.has(f)){im.remove();return}im.dataset.f=f;im.alt=c;im.title=c+' — Wikimedia Commons';im.src=cUrl(f,+im.dataset.w)}
+function tbCards(data,loading){const used={f:new Set,w:new Set};return ['day','week','month'].map(k=>tbCard(k,data&&data[k],loading,used)).join('')}
 async function tbUpgrade(){const figs=$$('.tb-ph[data-tbw]:not([data-tbd])');if(!figs.length||!LIVE_SITE)return;
   figs.forEach(f=>f.dataset.tbd=1);
   await Promise.all(figs.map(async f=>{const r=await wikiSearch(f.dataset.tbw,1);if(!r||!r.img||!f.isConnected)return;
     const im=new Image();im.className='pimg';im.referrerPolicy='no-referrer';im.decoding='async';im.alt=r.title;
-    im.onload=()=>{if(!f.isConnected)return;f.querySelectorAll('img').forEach(x=>x.remove());f.appendChild(im);requestAnimationFrame(()=>im.classList.add('ok'))};im.src=r.img}))}
-function tbCard(k,it,loading){if(!it)return `<article class="tb-c tb-${k}"><p class="tb-k mono">${TB_K[k]}</p>${loading?'<span class="sk-l"></span><span class="sk-l s"></span>':`<h2 class="tb-none">${LIVE_SITE?'Headline unavailable right now.':'The live headline appears here on the live site.'}</h2>`}</article>`;
+    if(tbShown().has(r.img))return;im.dataset.f=r.img;
+    im.onload=()=>{if(!f.isConnected||tbShown(im).has(r.img))return;f.querySelectorAll('img').forEach(x=>x.remove());f.appendChild(im);requestAnimationFrame(()=>im.classList.add('ok'))};im.src=r.img}))}
+function tbCard(k,it,loading,used){if(!it)return `<article class="tb-c tb-${k}"><p class="tb-k mono">${TB_K[k]}</p>${loading?'<span class="sk-l"></span><span class="sk-l s"></span>':`<h2 class="tb-none">${LIVE_SITE?'Headline unavailable right now.':'The live headline appears here on the live site.'}</h2>`}</article>`;
   const meta=it.count>1?`Covered by ${it.count} outlets${it.sources&&it.sources.length?' · '+it.sources.slice(0,3).map(esc).join(', '):''}`:esc(it.source||'');
-  return `<article class="tb-c tb-${k}"><a href="${esc(it.link)}" target="_blank" rel="noopener">${tbPhoto(it,k)}<div class="tb-tx"><p class="tb-k mono">${TB_K[k]}</p><h2>${esc(it.title)}</h2><p class="tb-meta mono">${meta}${it.when?` · ${ago(it.when)}`:''}</p></div></a></article>`}
+  return `<article class="tb-c tb-${k}"><a href="${esc(it.link)}" target="_blank" rel="noopener">${tbPhoto(it,k,used)}<div class="tb-tx"><p class="tb-k mono">${TB_K[k]}</p><h2>${esc(it.title)}</h2><p class="tb-meta mono">${meta}${it.when?` · ${ago(it.when)}`:''}</p></div></a></article>`}
 async function wireTop(){const g=$('#tb-g');if(!g)return;let data=TOPS&&Date.now()-TOPS.at<600000?TOPS:null;
   if(!data){try{const r=await fetch('/api/top');if(r.ok){const j=await r.json();if(j&&(j.day||j.week||j.month))data=TOPS={...j,at:Date.now()}}}catch(e){}}
-  const g2=$('#tb-g');if(!g2)return;g2.innerHTML=['day','week','month'].map(k=>tbCard(k,data&&data[k],false)).join('');tbUpgrade()}
+  const g2=$('#tb-g');if(!g2)return;g2.innerHTML=tbCards(data,false);tbUpgrade()}
 function frontHead(sec){const f=FRONTS[sec];const s=session('eq');
   return heroHead(sec,`<span>${longDate()}</span><span class="sess ${s.c}"><i></i>${s.t}</span><span class="fr-ed">${sec==='history'?'Market Files Then':'Market Files'}</span>`,f.t,f.d)}
 function frontHTML(sec){const f=FRONTS[sec];const ids=f.tiles.filter(id=>INSTR.some(q=>q.id===id));if(ids.length>4&&ids.length%2)ids.pop();
